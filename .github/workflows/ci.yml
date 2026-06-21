@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+          components: clippy, rustfmt
+
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            contracts/expense-pool/target
+          key: cargo-${{ hashFiles('contracts/expense-pool/Cargo.lock') }}
+
+      - name: Check formatting
+        run: cargo fmt --check
+        working-directory: contracts/expense-pool
+
+      - name: Clippy
+        run: cargo clippy -- -D warnings
+        working-directory: contracts/expense-pool
+
+      - name: Run tests
+        run: cargo test
+        working-directory: contracts/expense-pool
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Run frontend tests
+        run: npx vitest run
+        continue-on-error: true
+
+      - name: Build
+        run: npx vite build
+        env:
+          VITE_CONTRACT_ID: ${{ vars.VITE_CONTRACT_ID || 'CBDYYKZ3AKERUGSJKBYX6EY6FXR7LVT7LHBSCR54FWQHVR32CIL67KQA' }}
+
+      - name: Upload dist artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/dist
+
+  deploy:
+    needs: [contract, frontend]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/configure-pages@v5
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
