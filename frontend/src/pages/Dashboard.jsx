@@ -108,8 +108,12 @@ export default function Dashboard() {
       setPools((prev) => [pool, ...prev]);
       setNewPoolName('');
       setSelectedPool(pool);
-      db.logActivity(address, 'create_pool', { pool_id: pool.id, pool_name: newPoolName.trim() });
-      triggerToast('Pool created on ledger', 'success');
+      db.logActivity(address, 'create_pool', {
+        pool_id: pool.id,
+        pool_name: newPoolName.trim(),
+        tx_hash: pool.txHash,
+      });
+      triggerToast(`Pool created — tx: ${pool.txHash?.slice(0, 12)}...`, 'success');
     } catch (err) {
       console.error(err);
       triggerToast(err.message || 'Failed to create pool', 'error');

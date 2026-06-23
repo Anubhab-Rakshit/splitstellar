@@ -172,12 +172,22 @@ export default function Profile() {
               >
                 <div className="flex items-center gap-6">
                   <div className="hidden sm:block font-mono text-[10px] text-[#888]">{act.timestamp ? new Date(act.timestamp).toLocaleString() : ''}</div>
-                  <div>
-                    <div className="font-mono text-xs uppercase tracking-wider mb-1">{act.type}</div>
-                    <div className="font-mono text-[10px] text-[#888] flex items-center gap-1">
-                      {act.details} <ExternalLink className="w-2.5 h-2.5" />
+                    <div>
+                      <div className="font-mono text-xs uppercase tracking-wider mb-1">{act.type.replace('_', ' ')}</div>
+                      <div className="font-mono text-[10px] text-[#888] flex items-center gap-1">
+                        {act.details?.pool_name || act.details?.description || ''}
+                        {act.details?.tx_hash && (
+                          <a
+                            href={`https://stellar.expert/explorer/testnet/tx/${act.details.tx_hash}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-blue-500 hover:text-blue-400"
+                          >
+                            tx <ExternalLink className="w-2.5 h-2.5" />
+                          </a>
+                        )}
+                      </div>
                     </div>
-                  </div>
                 </div>
               </div>
             ))}

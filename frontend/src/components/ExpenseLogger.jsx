@@ -56,8 +56,13 @@ export default function ExpenseLogger({ poolId }) {
       setExpenses((prev) => [newExpense, ...prev]);
       setAmount('');
       setDescription('');
-      db.logActivity(address, 'log_expense', { pool_id: Number(poolId), description, amount: Math.round(parseFloat(amount) * 1e7) });
-      triggerToast('Expense logged on ledger', 'success');
+      db.logActivity(address, 'log_expense', {
+        pool_id: Number(poolId),
+        description,
+        amount: Math.round(parseFloat(amount) * 1e7),
+        tx_hash: newExpense.txHash,
+      });
+      triggerToast(`Expense logged — tx: ${newExpense.txHash?.slice(0, 12)}...`, 'success');
     } catch (err) {
       console.error(err);
       triggerToast(
@@ -165,6 +170,16 @@ export default function ExpenseLogger({ poolId }) {
                         ? `${exp.payer.substring(0, 8)}...`
                         : 'Unknown'}
                     </span>
+                    {exp.txHash && (
+                      <a
+                        href={`https://stellar.expert/explorer/testnet/tx/${exp.txHash}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-500 hover:text-blue-400"
+                      >
+                        tx
+                      </a>
+                    )}
                   </div>
                 </div>
                 <div className="mt-4 sm:mt-0 font-mono text-lg">

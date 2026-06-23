@@ -180,12 +180,16 @@ export async function buildAndSubmit(publicKey, kit, method, args) {
   const signedTx = TransactionBuilder.fromXDR(signedTxXdr, NETWORK_PASSPHRASE);
   const sendResult = await server.sendTransaction(signedTx);
 
+  const txHash = sendResult.hash;
+
   if (sendResult.status === 'PENDING') {
-    const pollResult = await pollTransaction(server, sendResult.hash);
+    const pollResult = await pollTransaction(server, txHash);
     if (pollResult.status === 'SUCCESS') {
-      return parseNative(method, scValToNative(simulation.result.retval));
+      const data = parseNative(method, scValToNative(simulation.result.retval));
+      if (data && typeof data === 'object') data.txHash = txHash;
+      return data;
     }
-    throw new Error('Transaction failed on network');
+    throw new Error(`Transaction failed on network (${txHash})`);
   }
   throw new Error(`Send failed: ${sendResult.status}`);
 }
