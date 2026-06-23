@@ -2,6 +2,18 @@
 
 Decentralized expense splitting on the Stellar network using Soroban smart contracts.
 
+Deployed link :- https://splitstellar.vercel.app/ 
+
+<img width="1510" height="762" alt="image" src="https://github.com/user-attachments/assets/06530e58-2bd3-4d43-8623-1b825ba32df2" />
+
+<img width="1354" height="758" alt="image" src="https://github.com/user-attachments/assets/9373f94d-094d-48ad-bd6c-b56ce270a199" />
+
+
+### Mobile View 
+
+<img width="300" height="661" alt="image" src="https://github.com/user-attachments/assets/7241b794-0b45-48b2-be29-573472bd54cf" />
+
+
 ## Architecture
 
 ```
