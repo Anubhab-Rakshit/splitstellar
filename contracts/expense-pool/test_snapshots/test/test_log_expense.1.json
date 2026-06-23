@@ -404,13 +404,7 @@
           "v0": {
             "topics": [
               {
-                "symbol": "EXPENSE"
-              },
-              {
-                "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
-              },
-              {
-                "u64": "1"
+                "symbol": "expense_logged_event"
               }
             ],
             "data": {

@@ -1,6 +1,6 @@
 #![no_std]
 use soroban_sdk::{
-    contract, contracterror, contractimpl, contracttype, symbol_short, Address, Env, IntoVal,
+    contract, contracterror, contractevent, contractimpl, contracttype, Address, Env, IntoVal,
     String, Symbol, Val, Vec,
 };
 
@@ -15,7 +15,7 @@ pub enum ContractError {
 }
 
 // ── Event Types ──────────────────────────────────────────
-#[contracttype]
+#[contractevent]
 #[derive(Clone)]
 pub struct PoolCreatedEvent {
     pub pool_id: u64,
@@ -23,7 +23,7 @@ pub struct PoolCreatedEvent {
     pub creator: Address,
 }
 
-#[contracttype]
+#[contractevent]
 #[derive(Clone)]
 pub struct ExpenseLoggedEvent {
     pub expense_id: u64,
@@ -106,14 +106,11 @@ impl ExpensePoolContract {
             .persistent()
             .set(&DataKey::PoolExpenses(count), &Vec::<Expense>::new(&env));
 
-        env.events().publish(
-            (symbol_short!("CREATE"), creator.clone()),
-            PoolCreatedEvent {
-                pool_id: count,
-                name,
-                creator,
-            },
-        );
+        env.events().publish_event(&PoolCreatedEvent {
+            pool_id: count,
+            name,
+            creator,
+        });
 
         pool
     }
@@ -172,16 +169,13 @@ impl ExpensePoolContract {
             .persistent()
             .set(&DataKey::Expense(expense_id), &expense);
 
-        env.events().publish(
-            (symbol_short!("EXPENSE"), payer.clone(), pool_id),
-            ExpenseLoggedEvent {
-                expense_id,
-                pool_id,
-                description,
-                amount,
-                payer,
-            },
-        );
+        env.events().publish_event(&ExpenseLoggedEvent {
+            expense_id,
+            pool_id,
+            description,
+            amount,
+            payer,
+        });
 
         Ok(expense)
     }
