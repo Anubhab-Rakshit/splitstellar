@@ -7,6 +7,8 @@ import {
   Networks,
   BASE_FEE,
   Account,
+  Operation,
+  Asset,
 } from '@stellar/stellar-sdk';
 
 const RPC_URL =
@@ -232,4 +234,40 @@ export function convertEventTopics(contractEvent) {
     value = null;
   }
   return { topics, value, ledger: contractEvent.ledger, id: contractEvent.id };
+}
+
+export async function sendPayment(publicKey, kit, destination, amountXlm) {
+  const server = getServer();
+  const account = await getAccount(publicKey);
+
+  const tx = new TransactionBuilder(account, {
+    fee: BASE_FEE,
+    networkPassphrase: NETWORK_PASSPHRASE,
+  })
+    .addOperation(
+      Operation.payment({
+        destination,
+        asset: Asset.native(),
+        amount: amountXlm.toFixed(7),
+      }),
+    )
+    .setTimeout(30)
+    .build();
+
+  const txXdr = tx.toEnvelope().toXDR('base64');
+  const { signedTxXdr, error } = await kit.signTransaction(txXdr, {
+    networkPassphrase: NETWORK_PASSPHRASE,
+  });
+
+  if (error) throw new Error(`Signing rejected: ${error}`);
+
+  const signedTx = TransactionBuilder.fromXDR(signedTxXdr, NETWORK_PASSPHRASE);
+  const sendResult = await server.sendTransaction(signedTx);
+
+  if (sendResult.status === 'PENDING') {
+    const pollResult = await pollTransaction(server, sendResult.hash);
+    if (pollResult.status === 'SUCCESS') return sendResult.hash;
+    throw new Error('Payment failed on network');
+  }
+  throw new Error(`Send failed: ${sendResult.status}`);
 }

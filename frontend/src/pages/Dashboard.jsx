@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { useSearchParams } from 'react-router-dom';
 import { useStellarStore } from '../hooks/useStellar';
 import ExpenseLogger from '../components/ExpenseLogger';
 import { simulateCall, buildAndSubmit, fetchEvents, convertEventTopics } from '../services/soroban';
 import { triggerToast } from '../services/toast';
 import { db } from '../services/db';
-import { Loader2, Plus, ArrowRight } from 'lucide-react';
+import { Loader2, Plus, ArrowRight, Link2, Copy, Check } from 'lucide-react';
 
 const POLL_MS = 10000;
 const STORAGE_KEY = 'splitstellar_known_pools';
@@ -28,11 +29,15 @@ function saveKnownPoolId(id) {
 
 export default function Dashboard() {
   const { address, kit } = useStellarStore();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [pools, setPools] = useState([]);
   const [newPoolName, setNewPoolName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [selectedPool, setSelectedPool] = useState(null);
   const [loadingPools, setLoadingPools] = useState(true);
+  const [joinPoolId, setJoinPoolId] = useState('');
+  const [isJoining, setIsJoining] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
   const eventCursorRef = useRef(null);
 
   const fetchPoolById = useCallback(async (poolId) => {
@@ -61,20 +66,21 @@ export default function Dashboard() {
 
   const syncPools = useCallback(async () => {
     const knownIds = loadKnownPoolIds();
+    let loaded;
     if (knownIds.length === 0) {
-      const scanned = await scanPools();
-      setPools(scanned);
-      setLoadingPools(false);
-      return;
+      loaded = await scanPools();
+      setPools(loaded);
+    } else {
+      const results = await Promise.allSettled(
+        knownIds.map((id) => fetchPoolById(id)),
+      );
+      loaded = results
+        .filter((r) => r.status === 'fulfilled' && r.value)
+        .map((r) => r.value);
+      setPools(loaded);
     }
-    const results = await Promise.allSettled(
-      knownIds.map((id) => fetchPoolById(id)),
-    );
-    const loaded = results
-      .filter((r) => r.status === 'fulfilled' && r.value)
-      .map((r) => r.value);
-    setPools(loaded);
     setLoadingPools(false);
+    return loaded;
   }, [fetchPoolById, scanPools]);
 
   const pollEvents = useCallback(async () => {
@@ -104,14 +110,80 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!address) return;
-    const tick = () => {
-      syncPools();
+    let cancelled = false;
+    const tick = async () => {
+      const poolsLoaded = await syncPools();
+      if (cancelled) return;
+      const poolParam = searchParams.get('pool');
+      if (poolParam && !selectedPool) {
+        const poolId = Number(poolParam);
+        if (!isNaN(poolId)) {
+          const existing = poolsLoaded.find((p) => p.id === poolId);
+          if (existing) {
+            setSelectedPool(existing);
+          } else {
+            fetchPoolById(poolId).then((pool) => {
+              if (pool && !cancelled) {
+                saveKnownPoolId(pool.id);
+                setPools((prev) => {
+                  if (prev.some((p) => p.id === pool.id)) return prev;
+                  return [pool, ...prev];
+                });
+                setSelectedPool(pool);
+              }
+            });
+          }
+        }
+      }
       pollEvents();
     };
     const id = setInterval(tick, POLL_MS);
     setTimeout(tick, 0);
-    return () => clearInterval(id);
-  }, [address, syncPools, pollEvents]);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [address, syncPools, pollEvents, searchParams, fetchPoolById, selectedPool]);
+
+  useEffect(() => {
+    if (selectedPool) {
+      setSearchParams({ pool: selectedPool.id }, { replace: true });
+    }
+  }, [selectedPool, setSearchParams]);
+
+  const handleJoinPool = async (e) => {
+    e.preventDefault();
+    const poolId = Number(joinPoolId);
+    if (!poolId || isNaN(poolId)) {
+      triggerToast('Enter a valid pool ID', 'error');
+      return;
+    }
+    setIsJoining(true);
+    try {
+      const pool = await fetchPoolById(poolId);
+      if (pool) {
+        saveKnownPoolId(pool.id);
+        setPools((prev) => {
+          if (prev.some((p) => p.id === pool.id)) return prev;
+          return [pool, ...prev];
+        });
+        setSelectedPool(pool);
+        setJoinPoolId('');
+        triggerToast(`Joined "${pool.name}"`, 'success');
+      } else {
+        triggerToast('Pool not found', 'error');
+      }
+    } catch {
+      triggerToast('Failed to find pool', 'error');
+    } finally {
+      setIsJoining(false);
+    }
+  };
+
+  const handleCopyLink = () => {
+    const url = `${window.location.origin}/dashboard?pool=${selectedPool.id}`;
+    navigator.clipboard.writeText(url);
+    setCopiedLink(true);
+    triggerToast('Share link copied', 'success');
+    setTimeout(() => setCopiedLink(false), 2000);
+  };
 
   const handleCreatePool = async (e) => {
     e.preventDefault();
@@ -184,7 +256,7 @@ export default function Dashboard() {
               </span>
             </div>
 
-            <form onSubmit={handleCreatePool} className="mb-8">
+            <form onSubmit={handleCreatePool} className="mb-4">
               <div className="flex items-center border border-[#E5E5E5] dark:border-[#333] transition-colors duration-500 bg-white dark:bg-black group">
                 <input
                   type="text"
@@ -203,6 +275,30 @@ export default function Dashboard() {
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     <Plus className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+            </form>
+
+            <form onSubmit={handleJoinPool} className="mb-8">
+              <div className="flex items-center border border-[#E5E5E5] dark:border-[#333] transition-colors duration-500 bg-white dark:bg-black group">
+                <input
+                  type="number"
+                  min="1"
+                  placeholder="JOIN BY PARTITION ID"
+                  value={joinPoolId}
+                  onChange={(e) => setJoinPoolId(e.target.value)}
+                  className="flex-1 bg-transparent border-none outline-none p-4 font-mono text-xs text-black dark:text-white uppercase placeholder:text-[#888]"
+                />
+                <button
+                  type="submit"
+                  disabled={isJoining || !kit}
+                  className="p-4 border-l border-[#E5E5E5] dark:border-[#333] hover:bg-[#F7F7F7] dark:hover:bg-[#111] transition-colors text-black dark:text-white disabled:opacity-50"
+                >
+                  {isJoining ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Link2 className="w-4 h-4" />
                   )}
                 </button>
               </div>
@@ -254,9 +350,22 @@ export default function Dashboard() {
                   <span className="block font-mono text-[10px] uppercase tracking-widest text-[#888] mb-2">
                     Partition View
                   </span>
-                  <h2 className="text-4xl font-serif italic">
-                    {selectedPool.name}
-                  </h2>
+                  <div className="flex items-center gap-4">
+                    <h2 className="text-4xl font-serif italic">
+                      {selectedPool.name}
+                    </h2>
+                    <button
+                      onClick={handleCopyLink}
+                      className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors"
+                      title="Copy share link"
+                    >
+                      {copiedLink ? (
+                        <Check className="w-5 h-5 text-emerald-500" />
+                      ) : (
+                        <Copy className="w-5 h-5 text-[#888] hover:text-black dark:hover:text-white" />
+                      )}
+                    </button>
+                  </div>
                 </div>
                 <ExpenseLogger
                   poolId={selectedPool.id}

@@ -5,6 +5,7 @@ import { triggerToast } from '../services/toast';
 import { db } from '../services/db';
 import { Loader2, Activity, Send } from 'lucide-react';
 import { motion } from 'framer-motion';
+import SettleUp from './SettleUp';
 
 export default function ExpenseLogger({ poolId }) {
   const { address, kit } = useStellarStore();
@@ -190,6 +191,8 @@ export default function ExpenseLogger({ poolId }) {
           </div>
         )}
       </div>
+
+      <SettleUp expenses={expenses} />
     </div>
   );
 }
