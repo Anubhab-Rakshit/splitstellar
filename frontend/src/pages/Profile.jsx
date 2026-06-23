@@ -109,12 +109,12 @@ export default function Profile() {
                 </div>
               </form>
             ) : (
-              <div className="flex items-center gap-4 group">
-                <h1 className="text-6xl md:text-8xl font-serif italic tracking-tight">
+              <div className="flex items-center gap-4 group w-full">
+                <h1 className="text-5xl md:text-8xl font-serif italic tracking-tight truncate">
                   {profileName || 'Anonymous'}
                 </h1>
-                <button onClick={handleEditName} className="opacity-0 group-hover:opacity-100 transition-opacity p-3 hover:bg-black/5 dark:hover:bg-white/10 rounded-full" title="Edit Alias">
-                  <Edit2 className="w-8 h-8 text-[#888] hover:text-black dark:hover:text-white" />
+                <button onClick={handleEditName} className="opacity-0 group-hover:opacity-100 transition-opacity p-3 hover:bg-black/5 dark:hover:bg-white/10 rounded-full shrink-0" title="Edit Alias">
+                  <Edit2 className="w-6 h-6 md:w-8 md:h-8 text-[#888] hover:text-black dark:hover:text-white" />
                 </button>
               </div>
             )}

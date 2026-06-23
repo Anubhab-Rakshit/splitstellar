@@ -205,7 +205,7 @@ export default function Dashboard() {
                   <button
                     key={pool.id}
                     onClick={() => setSelectedPool(pool)}
-                    className={`w-full text-left p-6 border transition-all duration-300 ${
+                    className={`w-full text-left p-4 sm:p-6 border transition-all duration-300 ${
                       selectedPool?.id === pool.id
                         ? 'border-black dark:border-white bg-[#F7F7F7] dark:bg-[#111]'
                         : 'border-[#E5E5E5] dark:border-[#222] hover:border-[#CCC] dark:hover:border-[#444] bg-white dark:bg-black'
@@ -230,8 +230,8 @@ export default function Dashboard() {
 
           <div className="lg:col-span-8">
             {selectedPool ? (
-              <div className="border border-[#E5E5E5] dark:border-[#222] bg-white dark:bg-[#030303] p-8 transition-colors duration-500">
-                <div className="border-b border-[#E5E5E5] dark:border-[#222] pb-6 mb-8 transition-colors duration-500">
+              <div className="border border-[#E5E5E5] dark:border-[#222] bg-white dark:bg-[#030303] p-4 sm:p-8 transition-colors duration-500 overflow-hidden">
+                <div className="border-b border-[#E5E5E5] dark:border-[#222] pb-6 mb-6 sm:mb-8 transition-colors duration-500">
                   <span className="block font-mono text-[10px] uppercase tracking-widest text-[#888] mb-2">
                     Partition View
                   </span>

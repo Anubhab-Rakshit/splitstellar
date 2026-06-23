@@ -24,7 +24,7 @@ export default function Landing() {
               >
                 <div className="mb-4"></div>
                 
-                <h1 className="text-[4rem] sm:text-[5.5rem] lg:text-[7rem] font-serif italic leading-[0.9] text-white mb-10">
+                <h1 className="text-5xl sm:text-[5.5rem] lg:text-[7rem] font-serif italic leading-[1] sm:leading-[0.9] text-white mb-8 sm:mb-10">
                   The standard <br/>
                   <span className="not-italic opacity-50">for settlement.</span>
                 </h1>
