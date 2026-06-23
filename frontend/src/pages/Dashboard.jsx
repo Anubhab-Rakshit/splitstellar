@@ -43,9 +43,27 @@ export default function Dashboard() {
     }
   }, [address]);
 
+  const scanPools = useCallback(async () => {
+    const results = [];
+    let misses = 0;
+    for (let id = 1; misses < 5; id++) {
+      const pool = await fetchPoolById(id);
+      if (pool) {
+        results.push(pool);
+        saveKnownPoolId(id);
+        misses = 0;
+      } else {
+        misses++;
+      }
+    }
+    return results;
+  }, [fetchPoolById]);
+
   const syncPools = useCallback(async () => {
     const knownIds = loadKnownPoolIds();
     if (knownIds.length === 0) {
+      const scanned = await scanPools();
+      setPools(scanned);
       setLoadingPools(false);
       return;
     }
@@ -57,7 +75,7 @@ export default function Dashboard() {
       .map((r) => r.value);
     setPools(loaded);
     setLoadingPools(false);
-  }, [fetchPoolById]);
+  }, [fetchPoolById, scanPools]);
 
   const pollEvents = useCallback(async () => {
     try {
@@ -65,9 +83,10 @@ export default function Dashboard() {
       if (result.events?.length) {
         for (const event of result.events) {
           const { value, id } = convertEventTopics(event);
-          if (value && value.pool_id && !loadKnownPoolIds().includes(value.pool_id)) {
-            saveKnownPoolId(value.pool_id);
-            const poolData = await fetchPoolById(value.pool_id);
+          const poolId = value?.pool_id ?? value?.id;
+          if (poolId != null && !loadKnownPoolIds().includes(poolId)) {
+            saveKnownPoolId(poolId);
+            const poolData = await fetchPoolById(poolId);
             if (poolData) {
               setPools((prev) => {
                 if (prev.some((p) => p.id === poolData.id)) return prev;
