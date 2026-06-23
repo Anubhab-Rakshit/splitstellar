@@ -4,7 +4,7 @@ Decentralized expense splitting on the Stellar network powered by Soroban smart 
 
 **Live demo:** [splitstellar.vercel.app](https://splitstellar.vercel.app/)
 
-**Youtube Link: ** [View here](https://youtu.be/ZxvrIm2kZoI)
+**Youtube Link:** [View here](https://youtu.be/ZxvrIm2kZoI)
 
 ---
 
