@@ -4,6 +4,7 @@ import { useStellarStore } from '../hooks/useStellar';
 import ExpenseLogger from '../components/ExpenseLogger';
 import { simulateCall, buildAndSubmit, fetchEvents, convertEventTopics } from '../services/soroban';
 import { triggerToast } from '../services/toast';
+import { db } from '../services/db';
 import { Loader2, Plus, ArrowRight } from 'lucide-react';
 
 const POLL_MS = 10000;
@@ -107,6 +108,7 @@ export default function Dashboard() {
       setPools((prev) => [pool, ...prev]);
       setNewPoolName('');
       setSelectedPool(pool);
+      db.logActivity(address, 'create_pool', { pool_id: pool.id, pool_name: newPoolName.trim() });
       triggerToast('Pool created on ledger', 'success');
     } catch (err) {
       console.error(err);

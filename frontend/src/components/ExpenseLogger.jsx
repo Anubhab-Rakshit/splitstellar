@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useStellarStore } from '../hooks/useStellar';
 import { simulateCall, buildAndSubmit } from '../services/soroban';
 import { triggerToast } from '../services/toast';
+import { db } from '../services/db';
 import { Loader2, Activity, Send } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -55,6 +56,7 @@ export default function ExpenseLogger({ poolId }) {
       setExpenses((prev) => [newExpense, ...prev]);
       setAmount('');
       setDescription('');
+      db.logActivity(address, 'log_expense', { pool_id: Number(poolId), description, amount: Math.round(parseFloat(amount) * 1e7) });
       triggerToast('Expense logged on ledger', 'success');
     } catch (err) {
       console.error(err);
