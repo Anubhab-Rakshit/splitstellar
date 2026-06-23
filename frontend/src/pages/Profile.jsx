@@ -1,14 +1,42 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useStellarStore } from '../hooks/useStellar';
-import { Copy, Check, Activity, ExternalLink } from 'lucide-react';
+import { Copy, Check, Activity, ExternalLink, Edit2, Loader2 } from 'lucide-react';
 import { triggerToast } from '../services/toast';
 import { db } from '../services/db';
 
 export default function Profile() {
-  const { address, balance, profileName } = useStellarStore();
+  const { address, balance, profileName, setProfileName } = useStellarStore();
   const [copied, setCopied] = useState(false);
   const [activities, setActivities] = useState(null);
+  
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [isSavingName, setIsSavingName] = useState(false);
+
+  const handleEditName = () => {
+    setEditName(profileName || '');
+    setIsEditingName(true);
+  };
+
+  const handleSaveName = async (e) => {
+    e.preventDefault();
+    if (!editName.trim() || !address) return;
+    setIsSavingName(true);
+    try {
+      const updatedProfile = await db.updateProfile(address, editName.trim());
+      if (updatedProfile) {
+        setProfileName(updatedProfile.name);
+        triggerToast("Profile updated", "success");
+      }
+    } catch (err) {
+      console.error(err);
+      triggerToast("Failed to update profile", "error");
+    } finally {
+      setIsSavingName(false);
+      setIsEditingName(false);
+    }
+  };
 
   useEffect(() => {
     if (!address) return;
@@ -61,9 +89,36 @@ export default function Profile() {
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       >
         <div className="mb-16">
-          <h1 className="text-6xl md:text-8xl font-serif italic tracking-tight mb-6">
-            {profileName || 'Anonymous'}
-          </h1>
+          <div className="flex items-center gap-4 mb-6">
+            {isEditingName ? (
+              <form onSubmit={handleSaveName} className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="bg-transparent border-b border-[#CCC] dark:border-[#333] focus:border-black dark:focus:border-white text-5xl md:text-7xl font-serif italic tracking-tight outline-none w-full max-w-[400px] text-black dark:text-white"
+                  autoFocus
+                />
+                <div className="flex gap-2">
+                  <button type="submit" disabled={isSavingName} className="btn-primary px-6 py-3">
+                    {isSavingName ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save"}
+                  </button>
+                  <button type="button" onClick={() => setIsEditingName(false)} className="btn-secondary px-6 py-3">
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="flex items-center gap-4 group">
+                <h1 className="text-6xl md:text-8xl font-serif italic tracking-tight">
+                  {profileName || 'Anonymous'}
+                </h1>
+                <button onClick={handleEditName} className="opacity-0 group-hover:opacity-100 transition-opacity p-3 hover:bg-black/5 dark:hover:bg-white/10 rounded-full" title="Edit Alias">
+                  <Edit2 className="w-8 h-8 text-[#888] hover:text-black dark:hover:text-white" />
+                </button>
+              </div>
+            )}
+          </div>
           
           <div className="flex flex-col sm:flex-row sm:items-center gap-6 border-y border-[#E5E5E5] dark:border-[#222] py-6 transition-colors duration-500">
             

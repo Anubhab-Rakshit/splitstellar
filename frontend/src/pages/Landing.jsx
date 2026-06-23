@@ -22,9 +22,7 @@ export default function Landing() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
               >
-                <div className="mb-12 font-mono text-xs uppercase tracking-[0.3em] text-text-secondary border-b border-[#333333] inline-block pb-2">
-                  Soroban Protocol v1.0.4
-                </div>
+                <div className="mb-4"></div>
                 
                 <h1 className="text-[4rem] sm:text-[5.5rem] lg:text-[7rem] font-serif italic leading-[0.9] text-white mb-10">
                   The standard <br/>

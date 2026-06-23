@@ -118,6 +118,26 @@ export const db = {
     if (error) throw error;
     return data;
   },
+  updateProfile: async (wallet_address, name) => {
+    if (supabaseUrl.includes('placeholder')) {
+      const profiles = readMockDb('profiles');
+      const idx = profiles.findIndex(p => p.wallet_address === wallet_address);
+      if (idx !== -1) {
+        profiles[idx].name = name;
+        writeMockDb('profiles', profiles);
+        return profiles[idx];
+      }
+      return null;
+    }
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ name })
+      .eq('wallet_address', wallet_address)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
   logActivity: async (wallet_address, type, details) => {
     const activity = { id: Math.random().toString(36).substring(2, 15), wallet_address, type, details, timestamp: new Date().toISOString() };
     if (supabaseUrl.includes('placeholder')) {
