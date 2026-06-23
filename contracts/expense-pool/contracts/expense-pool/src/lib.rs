@@ -1,7 +1,7 @@
 #![no_std]
 use soroban_sdk::{
-    contract, contractimpl, contracttype, contracterror, symbol_short,
-    Env, String, Vec, Address, Symbol, IntoVal, Val,
+    contract, contracterror, contractimpl, contracttype, symbol_short, Address, Env, IntoVal,
+    String, Symbol, Val, Vec,
 };
 
 // ── Error Types ──────────────────────────────────────────
@@ -101,9 +101,7 @@ impl ExpensePoolContract {
             created_at: env.ledger().timestamp(),
         };
 
-        env.storage()
-            .persistent()
-            .set(&DataKey::Pool(count), &pool);
+        env.storage().persistent().set(&DataKey::Pool(count), &pool);
         env.storage()
             .persistent()
             .set(&DataKey::PoolExpenses(count), &Vec::<Expense>::new(&env));

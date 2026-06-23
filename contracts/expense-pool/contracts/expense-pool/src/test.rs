@@ -2,7 +2,7 @@
 
 use super::*;
 use soroban_sdk::testutils::Address as _;
-use soroban_sdk::{Env, String, Address};
+use soroban_sdk::{Address, Env, String};
 
 fn setup() -> (Env, ExpensePoolContractClient<'static>, Address) {
     let env = Env::default();
@@ -25,8 +25,6 @@ fn test_create_pool() {
     assert_eq!(pool.name, String::from_str(&env, "Bali Trip 2026"));
     assert_eq!(pool.creator, creator);
     assert_eq!(pool.total_expenses, 0);
-
-
 }
 
 #[test]
@@ -56,9 +54,18 @@ fn test_multiple_pools() {
     assert_eq!(p1.id, 1);
     assert_eq!(p2.id, 2);
     assert_eq!(p3.id, 3);
-    assert_eq!(client.get_pool(&1).unwrap().name, String::from_str(&env, "Pool A"));
-    assert_eq!(client.get_pool(&2).unwrap().name, String::from_str(&env, "Pool B"));
-    assert_eq!(client.get_pool(&3).unwrap().name, String::from_str(&env, "Pool C"));
+    assert_eq!(
+        client.get_pool(&1).unwrap().name,
+        String::from_str(&env, "Pool A")
+    );
+    assert_eq!(
+        client.get_pool(&2).unwrap().name,
+        String::from_str(&env, "Pool B")
+    );
+    assert_eq!(
+        client.get_pool(&3).unwrap().name,
+        String::from_str(&env, "Pool C")
+    );
 }
 
 // ── Expense Tests ────────────────────────────────────────
@@ -87,15 +94,39 @@ fn test_get_pool_expenses() {
 
     let pool = client.create_pool(&String::from_str(&env, "Road Trip"), &creator);
 
-    client.log_expense(&pool.id, &String::from_str(&env, "Gas"), &i128::from(200), &creator);
-    client.log_expense(&pool.id, &String::from_str(&env, "Food"), &i128::from(150), &creator);
-    client.log_expense(&pool.id, &String::from_str(&env, "Hotel"), &i128::from(800), &creator);
+    client.log_expense(
+        &pool.id,
+        &String::from_str(&env, "Gas"),
+        &i128::from(200),
+        &creator,
+    );
+    client.log_expense(
+        &pool.id,
+        &String::from_str(&env, "Food"),
+        &i128::from(150),
+        &creator,
+    );
+    client.log_expense(
+        &pool.id,
+        &String::from_str(&env, "Hotel"),
+        &i128::from(800),
+        &creator,
+    );
 
     let expenses = client.get_pool_expenses(&pool.id);
     assert_eq!(expenses.len(), 3);
-    assert_eq!(expenses.get(0).unwrap().description, String::from_str(&env, "Gas"));
-    assert_eq!(expenses.get(1).unwrap().description, String::from_str(&env, "Food"));
-    assert_eq!(expenses.get(2).unwrap().description, String::from_str(&env, "Hotel"));
+    assert_eq!(
+        expenses.get(0).unwrap().description,
+        String::from_str(&env, "Gas")
+    );
+    assert_eq!(
+        expenses.get(1).unwrap().description,
+        String::from_str(&env, "Food")
+    );
+    assert_eq!(
+        expenses.get(2).unwrap().description,
+        String::from_str(&env, "Hotel")
+    );
 }
 
 #[test]
@@ -103,7 +134,12 @@ fn test_get_single_expense() {
     let (env, client, creator) = setup();
 
     let pool = client.create_pool(&String::from_str(&env, "Party"), &creator);
-    let expense = client.log_expense(&pool.id, &String::from_str(&env, "Cake"), &i128::from(300), &creator);
+    let expense = client.log_expense(
+        &pool.id,
+        &String::from_str(&env, "Cake"),
+        &i128::from(300),
+        &creator,
+    );
 
     let fetched = client.get_expense(&expense.id).unwrap();
     assert_eq!(fetched.id, expense.id);
@@ -172,10 +208,20 @@ fn test_pool_total_expenses_update() {
     let (env, client, creator) = setup();
     let pool = client.create_pool(&String::from_str(&env, "Counter test"), &creator);
 
-    client.log_expense(&pool.id, &String::from_str(&env, "E1"), &i128::from(10), &creator);
+    client.log_expense(
+        &pool.id,
+        &String::from_str(&env, "E1"),
+        &i128::from(10),
+        &creator,
+    );
     assert_eq!(client.get_pool(&pool.id).unwrap().total_expenses, 1);
 
-    client.log_expense(&pool.id, &String::from_str(&env, "E2"), &i128::from(20), &creator);
+    client.log_expense(
+        &pool.id,
+        &String::from_str(&env, "E2"),
+        &i128::from(20),
+        &creator,
+    );
     assert_eq!(client.get_pool(&pool.id).unwrap().total_expenses, 2);
 }
 
@@ -209,7 +255,10 @@ fn test_verify_balance_insufficient() {
     let owner = Address::generate(&env);
 
     let result = client.try_verify_balance(&token_id, &owner, &i128::from(1000));
-    assert!(matches!(result, Err(Ok(ContractError::InsufficientBalance))));
+    assert!(matches!(
+        result,
+        Err(Ok(ContractError::InsufficientBalance))
+    ));
 }
 
 // ── Mock Token Contracts ─────────────────────────────────
