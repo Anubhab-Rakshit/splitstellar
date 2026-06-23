@@ -2,7 +2,7 @@
 
 # ── Contract ──────────────────────────────────────────────
 build-contract:
-	cd contracts/expense-pool && soroban contract build
+	cd contracts/expense-pool && stellar contract build
 
 test-contract:
 	cd contracts/expense-pool && cargo test

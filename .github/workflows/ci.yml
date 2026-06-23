@@ -66,7 +66,8 @@ jobs:
       - name: Build
         run: npx vite build
         env:
-          VITE_CONTRACT_ID: ${{ vars.VITE_CONTRACT_ID || 'CBDYYKZ3AKERUGSJKBYX6EY6FXR7LVT7LHBSCR54FWQHVR32CIL67KQA' }}
+          VITE_SOROBAN_CONTRACT_ID: ${{ vars.VITE_SOROBAN_CONTRACT_ID || 'CAG5MXEQORC4ZP57WI4WJVXWHP5CZHXXMA77VV63JVSW42GNMJYAMUCJ' }}
+          VITE_SOROBAN_RPC_URL: ${{ vars.VITE_SOROBAN_RPC_URL || 'https://soroban-testnet.stellar.org' }}
 
       - name: Upload dist artifact
         uses: actions/upload-pages-artifact@v3

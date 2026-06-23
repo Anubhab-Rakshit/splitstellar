@@ -8,12 +8,9 @@ Decentralized expense splitting on the Stellar network using Soroban smart contr
 stellar-project/
 ├── contracts/
 │   └── expense-pool/         # Soroban smart contract (Rust)
-│       ├── contracts/
-│       │   └── expense-pool/
-│       │       └── src/
-│       │           ├── lib.rs    # 6 exported functions + events
-│       │           └── test.rs   # 14 tests
-│       └── Cargo.toml
+│       └── src/
+│           ├── lib.rs    # 6 exported functions + events
+│           └── test.rs   # 14 tests
 ├── frontend/                  # React + Vite + Tailwind v4
 │   └── src/
 │       ├── components/        # WalletModal, ExpenseLogger, Toast, etc.
@@ -42,7 +39,7 @@ make test
 
 ## Smart Contract
 
-**Deployed on Testnet:** `CBDYYKZ3AKERUGSJKBYX6EY6FXR7LVT7LHBSCR54FWQHVR32CIL67KQA`
+**Deployed on Testnet:** `CAG5MXEQORC4ZP57WI4WJVXWHP5CZHXXMA77VV63JVSW42GNMJYAMUCJ`
 
 ### Functions
 
@@ -120,7 +117,7 @@ GitHub Actions workflow (`.github/workflows/ci.yml`):
 Copy `.env.example` to `frontend/.env`:
 
 ```env
-VITE_CONTRACT_ID=CBDYYKZ3AKERUGSJKBYX6EY6FXR7LVT7LHBSCR54FWQHVR32CIL67KQA
+VITE_SOROBAN_CONTRACT_ID=CAG5MXEQORC4ZP57WI4WJVXWHP5CZHXXMA77VV63JVSW42GNMJYAMUCJ
 VITE_STELLAR_NETWORK=testnet
 VITE_SUPABASE_URL=           # optional, mock fallback used when blank
 VITE_SUPABASE_ANON_KEY=      # optional
