@@ -146,7 +146,7 @@ impl ExpensePoolContract {
             .get(&DataKey::PoolExpenses(pool_id))
             .unwrap_or(Vec::<Expense>::new(&env));
 
-        let expense_id = (pool.total_expenses + 1) as u64;
+        let expense_id = pool.total_expenses + 1;
         let expense = Expense {
             id: expense_id,
             pool_id,
