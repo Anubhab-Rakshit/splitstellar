@@ -7,12 +7,12 @@ export default function Landing() {
   const y2 = useTransform(scrollY, [0, 1000], [0, -100]);
   
   return (
-    <div className="min-h-screen bg-black overflow-hidden relative selection:bg-white selection:text-black">
+    <div className="min-h-screen bg-[#F7F7F7] dark:bg-black overflow-hidden relative selection:bg-black dark:selection:bg-white selection:text-white dark:selection:text-black">
       
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 relative z-10 pt-20 sm:pt-32 pb-20 sm:pb-32">
         
         {/* HERO SECTION */}
-        <section className="min-h-[85vh] flex flex-col justify-center border-b border-[#222222] pb-16">
+        <section className="min-h-[85vh] flex flex-col justify-center border-b border-[#E5E5E5] dark:border-[#222222] pb-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
             
             {/* Left: Massive Typography */}
@@ -24,12 +24,12 @@ export default function Landing() {
               >
                 <div className="mb-4"></div>
                 
-                <h1 className="text-4xl sm:text-[5.5rem] lg:text-[7rem] font-serif italic leading-[1] sm:leading-[0.9] text-white mb-6 sm:mb-10">
+                <h1 className="text-4xl sm:text-[5.5rem] lg:text-[7rem] font-serif italic leading-[1] sm:leading-[0.9] text-black dark:text-white mb-6 sm:mb-10">
                   The standard <br/>
                   <span className="not-italic opacity-50">for settlement.</span>
                 </h1>
                 
-                <p className="text-sm sm:text-lg font-mono text-text-secondary max-w-lg mb-10 sm:mb-16 leading-relaxed">
+                <p className="text-sm sm:text-lg font-mono text-[#666] dark:text-text-secondary max-w-lg mb-10 sm:mb-16 leading-relaxed">
                   Engineered for cryptographic certainty. SplitStellar utilizes the Stellar network to resolve cross-border shared expenses with sub-second finality.
                 </p>
                 
@@ -37,7 +37,7 @@ export default function Landing() {
                   <Link to="/dashboard" className="btn-primary">
                     Initialize App
                   </Link>
-                  <a href="https://github.com" target="_blank" rel="noreferrer" className="font-mono text-xs uppercase tracking-widest text-text-secondary hover:text-white transition-colors border-b border-transparent hover:border-white pb-1">
+                  <a href="https://github.com" target="_blank" rel="noreferrer" className="font-mono text-xs uppercase tracking-widest text-[#666] dark:text-text-secondary hover:text-black dark:hover:text-white transition-colors border-b border-transparent hover:border-black dark:hover:border-white pb-1">
                     Read Manifesto
                   </a>
                 </div>
@@ -50,43 +50,43 @@ export default function Landing() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
-                className="border border-[#222222] bg-[#050505] p-8 relative"
+                className="border border-[#E5E5E5] dark:border-[#222222] bg-white dark:bg-[#050505] p-8 relative"
               >
                 {/* Decoration marks */}
-                <div className="absolute top-0 left-0 w-2 h-[1px] bg-white -translate-x-full" />
-                <div className="absolute top-0 left-0 w-[1px] h-2 bg-white -translate-y-full" />
-                <div className="absolute bottom-0 right-0 w-2 h-[1px] bg-white translate-x-full" />
-                <div className="absolute bottom-0 right-0 w-[1px] h-2 bg-white translate-y-full" />
+                <div className="absolute top-0 left-0 w-2 h-[1px] bg-black dark:bg-white -translate-x-full" />
+                <div className="absolute top-0 left-0 w-[1px] h-2 bg-black dark:bg-white -translate-y-full" />
+                <div className="absolute bottom-0 right-0 w-2 h-[1px] bg-black dark:bg-white translate-x-full" />
+                <div className="absolute bottom-0 right-0 w-[1px] h-2 bg-black dark:bg-white translate-y-full" />
 
-                <div className="flex justify-between items-end border-b border-[#333333] pb-4 mb-8">
-                  <span className="font-mono text-[10px] uppercase tracking-widest text-text-secondary">Network State</span>
+                <div className="flex justify-between items-end border-b border-[#CCC] dark:border-[#333333] pb-4 mb-8">
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-[#666] dark:text-text-secondary">Network State</span>
                   <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-                    <span className="font-mono text-[10px] uppercase text-white">Synced</span>
+                    <div className="w-1.5 h-1.5 bg-black dark:bg-white rounded-full animate-pulse" />
+                    <span className="font-mono text-[10px] uppercase text-black dark:text-white">Synced</span>
                   </div>
                 </div>
 
                 <div className="space-y-6">
-                  <div className="flex justify-between border-b border-[#111111] pb-2 font-mono text-xs">
-                    <span className="text-text-tertiary">Ledger</span>
-                    <span className="text-white">52,194,002</span>
+                  <div className="flex justify-between border-b border-[#E5E5E5] dark:border-[#111111] pb-2 font-mono text-xs">
+                    <span className="text-[#999] dark:text-text-tertiary">Ledger</span>
+                    <span className="text-black dark:text-white">52,194,002</span>
                   </div>
-                  <div className="flex justify-between border-b border-[#111111] pb-2 font-mono text-xs">
-                    <span className="text-text-tertiary">Latency</span>
-                    <span className="text-white">1.2s</span>
+                  <div className="flex justify-between border-b border-[#E5E5E5] dark:border-[#111111] pb-2 font-mono text-xs">
+                    <span className="text-[#999] dark:text-text-tertiary">Latency</span>
+                    <span className="text-black dark:text-white">1.2s</span>
                   </div>
-                  <div className="flex justify-between border-b border-[#111111] pb-2 font-mono text-xs">
-                    <span className="text-text-tertiary">Protocol</span>
-                    <span className="text-white">Soroban VM</span>
+                  <div className="flex justify-between border-b border-[#E5E5E5] dark:border-[#111111] pb-2 font-mono text-xs">
+                    <span className="text-[#999] dark:text-text-tertiary">Protocol</span>
+                    <span className="text-black dark:text-white">Soroban VM</span>
                   </div>
-                  <div className="flex justify-between border-b border-[#111111] pb-2 font-mono text-xs">
-                    <span className="text-text-tertiary">Hash</span>
-                    <span className="text-text-secondary">0x8F9...2A1B</span>
+                  <div className="flex justify-between border-b border-[#E5E5E5] dark:border-[#111111] pb-2 font-mono text-xs">
+                    <span className="text-[#999] dark:text-text-tertiary">Hash</span>
+                    <span className="text-[#666] dark:text-text-secondary">0x8F9...2A1B</span>
                   </div>
                 </div>
 
-                <div className="mt-12 pt-6 border-t border-[#333333]">
-                  <div className="font-mono text-[10px] text-text-secondary leading-loose">
+                <div className="mt-12 pt-6 border-t border-[#CCC] dark:border-[#333333]">
+                  <div className="font-mono text-[10px] text-[#666] dark:text-text-secondary leading-loose">
                     {`fn execute_settlement(
   env: Env,
   pool_id: BytesN<32>,
@@ -109,10 +109,10 @@ export default function Landing() {
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="mb-16 max-w-3xl"
           >
-            <h2 className="text-4xl md:text-5xl font-serif text-white mb-6">
+            <h2 className="text-4xl md:text-5xl font-serif text-black dark:text-white mb-6">
               Architectural purity.
             </h2>
-            <p className="text-sm font-mono text-text-secondary max-w-lg leading-relaxed">
+            <p className="text-sm font-mono text-[#666] dark:text-text-secondary max-w-lg leading-relaxed">
               We stripped away the noise. What remains is a high-performance settlement engine built natively on Soroban smart contracts. No intermediaries, no friction.
             </p>
           </motion.div>
@@ -121,11 +121,11 @@ export default function Landing() {
             {/* Cell 1 */}
             <motion.div 
               style={{ y: y1 }}
-              className="border-t border-[#333333] pt-6"
+              className="border-t border-[#CCC] dark:border-[#333333] pt-6"
             >
-              <div className="font-mono text-xs text-text-secondary mb-4">01</div>
-              <h3 className="text-2xl font-serif italic text-white mb-4">Immutable State</h3>
-              <p className="text-xs font-mono text-text-secondary leading-relaxed">
+              <div className="font-mono text-xs text-[#666] dark:text-text-secondary mb-4">01</div>
+              <h3 className="text-2xl font-serif italic text-black dark:text-white mb-4">Immutable State</h3>
+              <p className="text-xs font-mono text-[#666] dark:text-text-secondary leading-relaxed">
                 Cryptographic certainty for every logged expense. The ledger acts as the ultimate arbiter of truth for group settlements.
               </p>
             </motion.div>
@@ -133,22 +133,22 @@ export default function Landing() {
             {/* Cell 2 */}
             <motion.div 
               style={{ y: y2 }}
-              className="border-t border-[#333333] pt-6"
+              className="border-t border-[#CCC] dark:border-[#333333] pt-6"
             >
-              <div className="font-mono text-xs text-text-secondary mb-4">02</div>
-              <h3 className="text-2xl font-serif italic text-white mb-4">Soroban Native</h3>
-              <p className="text-xs font-mono text-text-secondary leading-relaxed">
+              <div className="font-mono text-xs text-[#666] dark:text-text-secondary mb-4">02</div>
+              <h3 className="text-2xl font-serif italic text-black dark:text-white mb-4">Soroban Native</h3>
+              <p className="text-xs font-mono text-[#666] dark:text-text-secondary leading-relaxed">
                 Complex routing and debt-simplification algorithms run directly on the network via Rust-based smart contracts.
               </p>
             </motion.div>
 
             {/* Cell 3 */}
             <motion.div 
-              className="border-t border-[#333333] pt-6"
+              className="border-t border-[#CCC] dark:border-[#333333] pt-6"
             >
-              <div className="font-mono text-xs text-text-secondary mb-4">03</div>
-              <h3 className="text-2xl font-serif italic text-white mb-4">Global Liquidity</h3>
-              <p className="text-xs font-mono text-text-secondary leading-relaxed">
+              <div className="font-mono text-xs text-[#666] dark:text-text-secondary mb-4">03</div>
+              <h3 className="text-2xl font-serif italic text-black dark:text-white mb-4">Global Liquidity</h3>
+              <p className="text-xs font-mono text-[#666] dark:text-text-secondary leading-relaxed">
                 Path payments allow Alice to pay in USDC while Bob receives XLM, handled atomically in a single transaction.
               </p>
             </motion.div>

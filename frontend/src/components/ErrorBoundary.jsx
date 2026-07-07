@@ -25,7 +25,7 @@ export default class ErrorBoundary extends Component {
           <h2 className="font-serif italic text-2xl mb-2">
             {this.props.title || 'Something went wrong'}
           </h2>
-          <p className="font-mono text-xs text-[#888] mb-6">
+          <p className="font-mono text-xs text-[#666] dark:text-[#888] mb-6">
             {this.props.message || 'An unexpected error occurred.'}
           </p>
           <button
@@ -33,7 +33,7 @@ export default class ErrorBoundary extends Component {
               this.setState({ hasError: false, error: null });
               window.location.reload();
             }}
-            className="px-6 py-3 border border-[#333] hover:bg-black/5 dark:hover:bg-white/5 font-mono text-xs uppercase tracking-widest transition-colors"
+            className="px-6 py-3 border border-[#CCC] dark:border-[#333] hover:bg-black/5 dark:hover:bg-white/5 font-mono text-xs uppercase tracking-widest transition-colors"
           >
             Reload
           </button>

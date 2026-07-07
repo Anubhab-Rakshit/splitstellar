@@ -19,14 +19,14 @@ export default function InitialLoader({ onComplete }) {
         <motion.div
           key="loader"
           exit={{ display: "none" }} // Snaps instantly away
-          className="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center overflow-hidden"
+          className="fixed inset-0 z-[100] bg-white dark:bg-black flex flex-col items-center justify-center overflow-hidden"
         >
           <div className="overflow-hidden">
             <motion.h1
               initial={{ y: "100%", opacity: 0 }}
               animate={{ y: "0%", opacity: 1 }}
               transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-              className="text-4xl md:text-6xl font-serif text-black italic tracking-tight"
+              className="text-4xl md:text-6xl font-serif text-black dark:text-white italic tracking-tight"
             >
               SplitStellar.
             </motion.h1>
@@ -36,7 +36,7 @@ export default function InitialLoader({ onComplete }) {
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
             transition={{ delay: 0.8, duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-            className="w-16 h-[1px] bg-black mt-6 origin-left"
+            className="w-16 h-[1px] bg-black dark:bg-white mt-6 origin-left"
           />
         </motion.div>
       )}

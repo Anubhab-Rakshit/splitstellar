@@ -363,7 +363,7 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen pt-24 sm:pt-40 px-6 flex flex-col items-center justify-center text-center">
         <h1 className="text-4xl font-serif italic mb-4">Awaiting Connection</h1>
-        <p className="text-sm font-mono text-[#888]">
+        <p className="text-sm font-mono text-[#666] dark:text-[#888]">
           Please connect your wallet to access the settlement engine.
         </p>
       </div>
@@ -383,7 +383,7 @@ export default function Dashboard() {
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-serif italic tracking-tight mb-4">
             Command Center
           </h1>
-          <p className="font-mono text-sm text-[#888]">
+          <p className="font-mono text-sm text-[#666] dark:text-[#888]">
             Manage cryptographic expense partitions.
           </p>
         </div>
@@ -415,7 +415,7 @@ export default function Dashboard() {
                   placeholder="NEW PARTITION NAME"
                   value={newPoolName}
                   onChange={(e) => setNewPoolName(e.target.value)}
-                  className="flex-1 bg-transparent border-none outline-none p-4 font-mono text-xs text-black dark:text-white uppercase placeholder:text-[#888]"
+                  className="flex-1 bg-transparent border-none outline-none p-4 font-mono text-xs text-black dark:text-white uppercase placeholder:text-[#666] dark:text-[#888]"
                   required
                 />
                 <button
@@ -439,7 +439,7 @@ export default function Dashboard() {
                   placeholder="INVITE CODE OR PARTITION ID"
                   value={joinCode}
                   onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                  className="flex-1 bg-transparent border-none outline-none p-4 font-mono text-xs text-black dark:text-white uppercase placeholder:text-[#888]"
+                  className="flex-1 bg-transparent border-none outline-none p-4 font-mono text-xs text-black dark:text-white uppercase placeholder:text-[#666] dark:text-[#888]"
                 />
                 <button
                   type="submit"
@@ -458,11 +458,11 @@ export default function Dashboard() {
             <div className="space-y-4">
               {loadingPools ? (
                 <div className="flex justify-center p-12 border border-[#E5E5E5] dark:border-[#222]">
-                  <Loader2 className="w-6 h-6 animate-spin text-[#888]" />
+                  <Loader2 className="w-6 h-6 animate-spin text-[#666] dark:text-[#888]" />
                 </div>
               ) : pools.length === 0 ? (
                 <div className="p-6 border border-[#E5E5E5] dark:border-[#222] text-center transition-colors duration-500">
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-[#888]">
+                  <p className="font-mono text-[10px] uppercase tracking-widest text-[#666] dark:text-[#888]">
                     No Partitions Found
                   </p>
                 </div>
@@ -485,7 +485,7 @@ export default function Dashboard() {
                         className={`w-4 h-4 transition-transform duration-300 ${selectedPool?.id === pool.id ? 'translate-x-1' : ''}`}
                       />
                     </div>
-                    <div className="font-mono text-[10px] text-[#888] break-all">
+                    <div className="font-mono text-[10px] text-[#666] dark:text-[#888] break-all">
                       ID: {pool.id}
                     </div>
                   </button>
@@ -494,7 +494,7 @@ export default function Dashboard() {
             </div>
             <button
               onClick={() => syncPools(true)}
-              className="mt-4 w-full p-3 border border-dashed border-[#E5E5E5] dark:border-[#333] font-mono text-[10px] uppercase tracking-widest text-[#888] hover:text-black dark:hover:text-white hover:border-black dark:hover:border-white transition-colors"
+              className="mt-4 w-full p-3 border border-dashed border-[#E5E5E5] dark:border-[#333] font-mono text-[10px] uppercase tracking-widest text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white hover:border-black dark:hover:border-white transition-colors"
             >
               {loadingPools ? (
                 <Loader2 className="w-3 h-3 animate-spin mx-auto" />
@@ -509,7 +509,7 @@ export default function Dashboard() {
               <div className="border border-[#E5E5E5] dark:border-[#222] bg-white dark:bg-black p-8 text-center transition-colors duration-500">
                 <div className="w-16 h-[1px] bg-black dark:bg-white mb-6 mx-auto" />
                 <h3 className="font-serif italic text-2xl mb-2">{joinPoolInfo.pool.name}</h3>
-                <p className="font-mono text-[10px] uppercase tracking-widest text-[#888] mb-6">
+                <p className="font-mono text-[10px] uppercase tracking-widest text-[#666] dark:text-[#888] mb-6">
                   You need access to this pool
                 </p>
                 {joinRequestStatus === 'pending' ? (
@@ -532,7 +532,7 @@ export default function Dashboard() {
             ) : selectedPool ? (
               <div className="border border-[#E5E5E5] dark:border-[#222] bg-white dark:bg-[#030303] p-4 sm:p-8 transition-colors duration-500 overflow-x-hidden">
                 <div className="border-b border-[#E5E5E5] dark:border-[#222] pb-6 mb-6 sm:mb-8 transition-colors duration-500">
-                  <span className="block font-mono text-[10px] uppercase tracking-widest text-[#888] mb-2">
+                  <span className="block font-mono text-[10px] uppercase tracking-widest text-[#666] dark:text-[#888] mb-2">
                     Partition View
                   </span>
                   <div className="flex items-center gap-4 flex-wrap">
@@ -547,13 +547,13 @@ export default function Dashboard() {
                       {copiedLink ? (
                         <Check className="w-5 h-5 text-emerald-500" />
                       ) : (
-                        <Copy className="w-5 h-5 text-[#888] hover:text-black dark:hover:text-white" />
+                        <Copy className="w-5 h-5 text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white" />
                       )}
                     </button>
                   </div>
                   {inviteCodes[selectedPool.id] && (
                     <div className="mt-3 flex items-center gap-2">
-                      <span className="font-mono text-[10px] uppercase tracking-widest text-[#888]">
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-[#666] dark:text-[#888]">
                         Invite Code:
                       </span>
                       <code className="font-mono text-xs px-2 py-0.5 bg-[#F7F7F7] dark:bg-[#111] border border-[#E5E5E5] dark:border-[#333] tracking-wider">
@@ -566,7 +566,7 @@ export default function Dashboard() {
                         }}
                         className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded transition-colors"
                       >
-                        <Copy className="w-3 h-3 text-[#888]" />
+                        <Copy className="w-3 h-3 text-[#666] dark:text-[#888]" />
                       </button>
                     </div>
                   )}
@@ -584,7 +584,7 @@ export default function Dashboard() {
                     <div className="space-y-3">
                       {filteredPendingRequests.map((req) => (
                         <div key={req.id} className="flex items-center justify-between p-3 border border-[#E5E5E5] dark:border-[#333] bg-white dark:bg-black">
-                          <div className="font-mono text-xs text-[#888]">
+                          <div className="font-mono text-xs text-[#666] dark:text-[#888]">
                             {req.requester_address?.substring(0, 12)}...
                           </div>
                           <div className="flex items-center gap-2">
@@ -621,7 +621,7 @@ export default function Dashboard() {
                 <h3 className="font-serif italic text-2xl mb-2">
                   Select a Partition
                 </h3>
-                <p className="font-mono text-[10px] uppercase tracking-widest text-[#888]">
+                <p className="font-mono text-[10px] uppercase tracking-widest text-[#666] dark:text-[#888]">
                   Initialize a new ledger partition or select an existing one to
                   begin cryptographic settlement.
                 </p>

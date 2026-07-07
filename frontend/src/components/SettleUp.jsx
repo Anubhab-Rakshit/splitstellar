@@ -67,7 +67,7 @@ export default function SettleUp({ expenses }) {
         </span>
       </div>
 
-      <div className="text-center mb-6 font-mono text-sm text-[#888]">
+      <div className="text-center mb-6 font-mono text-sm text-[#666] dark:text-[#888]">
         {breakdown.rows.length} participants · {breakdown.totalXlm.toFixed(2)} XLM total ·{' '}
         {breakdown.shareXlm.toFixed(2)} XLM each
       </div>
@@ -82,7 +82,7 @@ export default function SettleUp({ expenses }) {
               <div className="font-mono text-xs">
                 {row.payer === address ? 'You' : shorten(row.payer)}
               </div>
-              <div className="font-mono text-[10px] text-[#888] mt-0.5">
+              <div className="font-mono text-[10px] text-[#666] dark:text-[#888] mt-0.5">
                 Paid {row.paidXlm.toFixed(2)} XLM · Share {row.shareXlm.toFixed(2)} XLM
               </div>
             </div>
@@ -93,7 +93,7 @@ export default function SettleUp({ expenses }) {
                     ? 'text-emerald-500'
                     : row.balance < 0
                       ? 'text-red-500'
-                      : 'text-[#888]'
+                      : 'text-[#666] dark:text-[#888]'
                 }`}
               >
                 {row.balance > 0 ? '+' : ''}{row.balance.toFixed(2)} XLM
@@ -117,7 +117,7 @@ export default function SettleUp({ expenses }) {
         ))}
       </div>
 
-      <p className="mt-4 font-mono text-[9px] text-[#888] text-center">
+      <p className="mt-4 font-mono text-[9px] text-[#666] dark:text-[#888] text-center">
         Settlement powered by Stellar — instant, borderless, near-zero fees.
       </p>
     </div>

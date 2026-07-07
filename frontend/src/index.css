@@ -12,6 +12,8 @@
   --color-text-tertiary: rgba(255, 255, 255, 0.35);
   --color-accent-blue: #3B82F6;
   --color-accent-emerald: #10B981;
+  --color-accent-danger: #EF4444;
+  --color-accent-amber: #F59E0B;
 }
 
 @layer base {
@@ -41,7 +43,7 @@
   }
 
   .glass-card {
-    @apply bg-[#050A14] border border-[rgba(255,255,255,0.06)] rounded-2xl p-6 transition-colors duration-500;
+    @apply bg-[#F7F7F7] dark:bg-[#050A14] border border-[#E5E5E5] dark:border-[rgba(255,255,255,0.06)] rounded-2xl p-6 transition-colors duration-500;
   }
 
   .custom-scrollbar::-webkit-scrollbar {
@@ -51,8 +53,11 @@
     background: transparent;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.1);
+    background: rgba(0,0,0,0.15);
     border-radius: 4px;
+  }
+  html.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.1);
   }
 
   .btn-primary {

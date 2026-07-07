@@ -54,9 +54,9 @@ export default function ToastContainer() {
                 <Icon className={`w-5 h-5 ${toast.type === 'loading' ? 'animate-spin' : ''}`} />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-white">{toast.message}</p>
+                <p className="text-sm font-medium text-black dark:text-white">{toast.message}</p>
               </div>
-              <button onClick={() => removeToast(toast.id)} className="text-text-secondary hover:text-white transition-colors">
+              <button onClick={() => removeToast(toast.id)} className="text-[#666] dark:text-text-secondary hover:text-black dark:hover:text-white transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </motion.div>

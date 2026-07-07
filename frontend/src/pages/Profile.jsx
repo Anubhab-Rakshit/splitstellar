@@ -78,7 +78,7 @@ export default function Profile() {
     return (
       <div className="min-h-screen pt-24 sm:pt-40 px-6 flex flex-col items-center justify-center text-center">
         <h1 className="text-4xl font-serif italic mb-4">Connect Wallet</h1>
-        <p className="text-sm font-mono text-[#888]">Please connect your Stellar wallet to view your profile.</p>
+        <p className="text-sm font-mono text-[#666] dark:text-[#888]">Please connect your Stellar wallet to view your profile.</p>
       </div>
     );
   }
@@ -116,7 +116,7 @@ export default function Profile() {
                   {profileName || 'Anonymous'}
                 </h1>
                 <button onClick={handleEditName} className="opacity-0 group-hover:opacity-100 transition-opacity p-3 hover:bg-black/5 dark:hover:bg-white/10 rounded-full shrink-0" title="Edit Alias">
-                  <Edit2 className="w-6 h-6 md:w-8 md:h-8 text-[#888] hover:text-black dark:hover:text-white" />
+                  <Edit2 className="w-6 h-6 md:w-8 md:h-8 text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white" />
                 </button>
               </div>
             )}
@@ -125,7 +125,7 @@ export default function Profile() {
           <div className="flex flex-col sm:flex-row sm:items-center gap-6 border-y border-[#E5E5E5] dark:border-[#222] py-6 transition-colors duration-500">
             
             <div className="flex-1">
-              <span className="block text-[10px] font-mono uppercase tracking-widest text-[#888] mb-2">Wallet Address</span>
+              <span className="block text-[10px] font-mono uppercase tracking-widest text-[#666] dark:text-[#888] mb-2">Wallet Address</span>
               <div className="flex items-center gap-4">
                 <span className="font-mono text-sm sm:text-base break-all">{address}</span>
                 <button 
@@ -141,7 +141,7 @@ export default function Profile() {
             <div className="w-full sm:w-[1px] h-[1px] sm:h-12 bg-[#E5E5E5] dark:bg-[#222] transition-colors duration-500" />
 
             <div className="flex-1 sm:text-right">
-              <span className="block text-[10px] font-mono uppercase tracking-widest text-[#888] mb-2">Available Balance (Testnet)</span>
+              <span className="block text-[10px] font-mono uppercase tracking-widest text-[#666] dark:text-[#888] mb-2">Available Balance (Testnet)</span>
               <span className="font-mono text-2xl">{balance ? `${parseFloat(balance).toFixed(2)} XLM` : "0.00 XLM"}</span>
             </div>
 
@@ -152,18 +152,18 @@ export default function Profile() {
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-serif italic">Recent Activity</h2>
             <div className="flex items-center gap-2 px-3 py-1 border border-[#E5E5E5] dark:border-[#333] rounded-full transition-colors duration-500">
-              <Activity className="w-3 h-3 text-[#888]" />
-              <span className="text-[10px] font-mono uppercase tracking-widest text-[#888]">Live Sync</span>
+              <Activity className="w-3 h-3 text-[#666] dark:text-[#888]" />
+              <span className="text-[10px] font-mono uppercase tracking-widest text-[#666] dark:text-[#888]">Live Sync</span>
             </div>
           </div>
 
           {activities === null ? (
             <div className="border border-[#E5E5E5] dark:border-[#222] bg-white dark:bg-black transition-colors duration-500 p-6 text-center">
-              <p className="text-sm font-mono text-[#888] animate-pulse">Loading activity...</p>
+              <p className="text-sm font-mono text-[#666] dark:text-[#888] animate-pulse">Loading activity...</p>
             </div>
           ) : activities.length === 0 ? (
             <div className="border border-[#E5E5E5] dark:border-[#222] bg-white dark:bg-black transition-colors duration-500 p-6 text-center">
-              <p className="text-sm font-mono text-[#888]">No recent activity yet.</p>
+              <p className="text-sm font-mono text-[#666] dark:text-[#888]">No recent activity yet.</p>
             </div>
           ) : (
           <div className="border border-[#E5E5E5] dark:border-[#222] bg-white dark:bg-black transition-colors duration-500">
@@ -173,10 +173,10 @@ export default function Profile() {
                 className={`flex items-center justify-between p-6 ${index !== activities.length - 1 ? 'border-b border-[#E5E5E5] dark:border-[#222]' : ''} transition-colors duration-500 hover:bg-black/5 dark:hover:bg-white/5`}
               >
                 <div className="flex items-center gap-6">
-                  <div className="hidden sm:block font-mono text-[10px] text-[#888]">{act.timestamp ? new Date(act.timestamp).toLocaleString() : ''}</div>
+                  <div className="hidden sm:block font-mono text-[10px] text-[#666] dark:text-[#888]">{act.timestamp ? new Date(act.timestamp).toLocaleString() : ''}</div>
                     <div>
                       <div className="font-mono text-xs uppercase tracking-wider mb-1">{act.type.replace('_', ' ')}</div>
-                      <div className="font-mono text-[10px] text-[#888] flex items-center gap-1">
+                      <div className="font-mono text-[10px] text-[#666] dark:text-[#888] flex items-center gap-1">
                         {act.details?.pool_name || act.details?.description || ''}
                         {act.details?.tx_hash && (
                           <a

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStellarStore } from '../hooks/useStellar';
 import { X, Anchor, Cloud, Zap, Link2, ExternalLink, AlertTriangle } from 'lucide-react';
@@ -23,17 +23,27 @@ export default function WalletModal() {
   const { isWalletModalOpen, setWalletModalOpen, kit, setConnecting } = useStellarStore();
   const [notInstalledWallet, setNotInstalledWallet] = useState(null);
 
+  const isMobile = useMemo(() =>
+    /Mobi|Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
+  []);
+
   const handleConnect = async (walletId) => {
     try {
       setConnecting(true);
       setNotInstalledWallet(null);
+
+      if (isMobile && walletId !== 'walletconnect') {
+        const wallet = WALLETS.find((w) => w.id === walletId);
+        setNotInstalledWallet(wallet || { id: walletId, name: walletId });
+        return;
+      }
+
       await kit.setWallet(walletId);
       const { address } = await kit.fetchAddress();
       useStellarStore.getState().setAddress(address);
       setWalletModalOpen(false);
       triggerToast(`Connected to ${walletId}`, "success");
       
-      // Fetch balance...
       const res = await fetch(`https://horizon-testnet.stellar.org/accounts/${address}`);
       const data = await res.json();
       const nativeBalance = data.balances?.find(b => b.asset_type === 'native')?.balance;
@@ -42,21 +52,20 @@ export default function WalletModal() {
       
     } catch (err) {
       console.error(err);
-      let errMsg = "Connection failed";
       const errString = err.toString().toLowerCase();
       
-      if (errString.includes("not installed") || errString.includes("no provider")) {
+      if (errString.includes("reject") || errString.includes("cancel") || errString.includes("denied")) {
+        useStellarStore.getState().setError("Connection rejected by user");
+        triggerToast("Connection rejected by user", "error");
+      } else {
         const wallet = WALLETS.find((w) => w.id === walletId);
-        setNotInstalledWallet(wallet || { id: walletId, name: walletId });
-        return;
-      } else if (errString.includes("reject") || errString.includes("cancel") || errString.includes("denied")) {
-        errMsg = "Connection rejected by user";
-      } else if (errString.includes("timeout")) {
-        errMsg = "Connection timed out";
+        if (wallet) {
+          setNotInstalledWallet(wallet);
+        } else {
+          useStellarStore.getState().setError("Connection failed");
+          triggerToast("Connection failed", "error");
+        }
       }
-      
-      useStellarStore.getState().setError(errMsg);
-      triggerToast(errMsg, "error");
     } finally {
       setConnecting(false);
     }
@@ -85,7 +94,7 @@ export default function WalletModal() {
               <h2 className="text-2xl font-serif italic text-black dark:text-white transition-colors duration-500">Connect Wallet</h2>
               <button 
                 onClick={() => setWalletModalOpen(false)}
-                className="text-[#888] hover:text-black dark:hover:text-white transition-colors"
+                className="text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -107,7 +116,7 @@ export default function WalletModal() {
                       <span className="font-mono text-sm text-black dark:text-white transition-colors duration-500">{wallet.name}</span>
                     </div>
                     {wallet.recommended && (
-                      <span className="text-[10px] font-mono uppercase tracking-widest px-2 py-1 bg-[#F7F7F7] dark:bg-[#111] text-[#888] rounded-sm transition-colors duration-500">
+                      <span className="text-[10px] font-mono uppercase tracking-widest px-2 py-1 bg-[#F7F7F7] dark:bg-[#111] text-[#666] dark:text-[#888] rounded-sm transition-colors duration-500">
                         Recommended
                       </span>
                     )}
@@ -146,7 +155,7 @@ export default function WalletModal() {
                 href="https://laboratory.stellar.org/#account-creator?network=test" 
                 target="_blank" 
                 rel="noreferrer"
-                className="text-[10px] font-mono uppercase tracking-widest text-[#888] hover:text-black dark:hover:text-white transition-colors"
+                className="text-[10px] font-mono uppercase tracking-widest text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white transition-colors"
               >
                 Get Testnet XLM ↗
               </a>

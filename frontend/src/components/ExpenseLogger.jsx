@@ -111,7 +111,7 @@ export default function ExpenseLogger({ poolId, poolCreator }) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>
-            <label className="block text-[10px] font-mono uppercase tracking-widest text-[#888] mb-2">
+            <label className="block text-[10px] font-mono uppercase tracking-widest text-[#666] dark:text-[#888] mb-2">
               Description
             </label>
             <input
@@ -124,7 +124,7 @@ export default function ExpenseLogger({ poolId, poolCreator }) {
             />
           </div>
           <div>
-            <label className="block text-[10px] font-mono uppercase tracking-widest text-[#888] mb-2">
+            <label className="block text-[10px] font-mono uppercase tracking-widest text-[#666] dark:text-[#888] mb-2">
               Amount (stroops)
             </label>
             <input
@@ -170,11 +170,11 @@ export default function ExpenseLogger({ poolId, poolCreator }) {
 
         {loadingExpenses ? (
           <div className="flex justify-center p-12 border border-[#E5E5E5] dark:border-[#222]">
-            <Loader2 className="w-6 h-6 animate-spin text-[#888]" />
+            <Loader2 className="w-6 h-6 animate-spin text-[#666] dark:text-[#888]" />
           </div>
         ) : expenses.length === 0 ? (
           <div className="p-12 border border-[#E5E5E5] dark:border-[#222] text-center bg-[#F7F7F7] dark:bg-[#050505] transition-colors duration-500">
-            <p className="font-mono text-xs text-[#888]">
+            <p className="font-mono text-xs text-[#666] dark:text-[#888]">
               No cryptographic records found in this partition.
             </p>
           </div>
@@ -191,7 +191,7 @@ export default function ExpenseLogger({ poolId, poolCreator }) {
                   <div className="font-mono text-sm mb-1">
                     {exp.description}
                   </div>
-                  <div className="flex items-center gap-4 font-mono text-[10px] text-[#888]">
+                  <div className="flex items-center gap-4 font-mono text-[10px] text-[#666] dark:text-[#888]">
                     <span>
                       {exp.payer
                         ? `${exp.payer.substring(0, 8)}...`

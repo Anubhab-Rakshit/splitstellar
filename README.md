@@ -4,7 +4,7 @@ Decentralized expense splitting on the Stellar network powered by Soroban smart 
 
 **Live demo:** [splitstellar.vercel.app](https://splitstellar.vercel.app/)
 
-**Youtube Link:** [View here](https://youtu.be/ZxvrIm2kZoI)
+**Youtube Link:** [View here](https://youtu.be/1UexAQg4Rbw)
 
 ---
 
@@ -30,13 +30,13 @@ Decentralized expense splitting on the Stellar network powered by Soroban smart 
 
 ### Desktop
 
-<img width="1510" alt="Landing" src="https://github.com/user-attachments/assets/06530e58-2bd3-4d43-8623-1b825ba32df2" />
+<img width="1510" alt="Landing" src="pictures/ss-1.png" />
 
-<img width="1354" alt="Dashboard" src="https://github.com/user-attachments/assets/9373f94d-094d-48ad-bd6c-b56ce270a199" />
+<img width="1354" alt="Dashboard" src="pictures/ss-2.png" />
 
-### Mobile
+### Analytics Dashboard
 
-<img width="300" alt="Mobile" src="https://github.com/user-attachments/assets/7241b794-0b45-48b2-be29-573472bd54cf" />
+<img width="1354" alt="Analytics" src="pictures/ss-3.png" />
 
 ---
 
@@ -93,53 +93,57 @@ stellar-project/
 
 ---
 
-## On-Chain Transactions
+## Onboarded Wallets (Testnet)
 
-All pool and expense data lives on the Stellar testnet. Below are verified transactions from real usage:
-
-### 1. Pool Creation — "Manali Trip 2026"
+11 unique Stellar wallets interacted with the app during Level 4 testing:
 
 ```
-create_pool("Manali Trip 2026", GBYX...GUSN)
+GAG7BIU5EL7KOBVVM4HFD5NOZVIKUT7JK3WYLUGVYMYTJOIST3K27ZJ7
+GA72JHQ5C3JDZ3H5RVUNYZ6GGXJWN6V6NHSXU2OJY7JJ2GF3IC5MIFUY
+GB2GLZJEOFZXGK3OJTD25B2XOZNP7GLIPKXNJKQ7FC66LIWTHJTHN6EB
+GBRZI47KWUCFX64IRERZOWKKMZ5WSKBAPSZ2VVN3DLMTUQIUA6RBA3YX
+GBPIWK56OE3Z7Q4ZZCHHWRTGKXWA2IOV3DK2HCEAVW53PITZRVZLC7VJ
+GDGZUKLVW5X3U6U4I3JIJLQMJJRAGGDGR3AUYUUYEM2W7OJFV7EIRZXN
+GCJ2RC2HZN4D232SFJMLFBUJEZWB6OYCIFAZG6SCYUQP5Z5LB2RG4YEP
+GDA7V5EKSYXDO5URT7FQSFQJCLDV3YR4SUXMXCYZ7UWAISAPEVGSCB23
+GD4BOUGXDFVYJMT6X6KFGCFRSMPNDSU3W6UGYS22AVZAWCOBVDXOVDFL
+GCG34N562IX57PLLVKVC6LYQEK7VNX3HBR5KIECNT22MR5P7MOHN7ECW
+GBGEJTLNY3A4BMZGFAWFVVBJZOZLFCLD6Y2FROAYVN26R2EPEJZA7ADF
 ```
 
-| Field | Value |
-|-------|-------|
-| **ID** | `1` |
-| **Creator** | `GBYXCRSBELNKB6EURZ4U4YF6NGZQRUND24R6XE2DRZ2GUSN` |
-| **Created At** | `1782203503` |
-| **Tx Hash** | [`d41147ddbc0f59a64c56cbe536f279bb95644e9e1ff6debad060600d06e3c443`](https://stellar.expert/explorer/testnet/tx/13906859291381760) |
-| **Explorer** | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/13906859291381760#13906859291381761) |
+## Example Transaction Hashes
 
-### 2. Expense Logged — "Bus Booking"
+Verified on-chain transactions from real usage during testing:
 
-```
-log_expense(1, "Bus Booking", 5000000, GBYX...GUSN)
-```
+| # | Tx Hash | Explorer |
+|---|---------|----------|
+| 1 | `24f5270cc06e1bd2627b68a8d2d7dbb0a6e8a7e139dbd119ff7d86c2fb2d17b3` | [View](https://stellar.expert/explorer/testnet/tx/24f5270cc06e1bd2627b68a8d2d7dbb0a6e8a7e139dbd119ff7d86c2fb2d17b3) |
+| 2 | `f3dd06701e9abb9f2ff4d5d1b38939e2a4ea54d8522c6b73a5c0a5740882073e` | [View](https://stellar.expert/explorer/testnet/tx/f3dd06701e9abb9f2ff4d5d1b38939e2a4ea54d8522c6b73a5c0a5740882073e) |
+| 3 | `f46b38406cffa5835df9577051432f69bbaf56c814a8643cb95058d008ae377d` | [View](https://stellar.expert/explorer/testnet/tx/f46b38406cffa5835df9577051432f69bbaf56c814a8643cb95058d008ae377d) |
+| 4 | `959b790bf32a027c081388b7b48b0b4c88a6752e403f66475e81e9811d6c281b` | [View](https://stellar.expert/explorer/testnet/tx/959b790bf32a027c081388b7b48b0b4c88a6752e403f66475e81e9811d6c281b) |
+| 5 | `ae094e905aa49d17d62dbada3026d06a0cf4c3575b7ac9ef6daea1334d40cde7` | [View](https://stellar.expert/explorer/testnet/tx/ae094e905aa49d17d62dbada3026d06a0cf4c3575b7ac9ef6daea1334d40cde7) |
+| 6 | `5011d841e1999c38dd8cef99f1583aa8b39e77af1eaed192f2adbdc77644f75c` | [View](https://stellar.expert/explorer/testnet/tx/5011d841e1999c38dd8cef99f1583aa8b39e77af1eaed192f2adbdc77644f75c) |
 
-| Field | Value |
-|-------|-------|
-| **Pool** | `1` (Manali Trip 2026) |
-| **Amount** | `5,000,000` stroops (`0.5 XLM`) |
-| **Description** | `Bus Booking` |
-| **Payer** | `GBYXCRSBELNKB6EURZ4U4YF6NGZQRUND24R6XE2DRZ2GUSN` |
-| **Tx Hash** | [`3f7571a65d320277470e006e885bed111588892854c732e1f802de9fbc178687`](https://stellar.expert/explorer/testnet/tx/13906897946091520) |
-| **Explorer** | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/13906897946091520#13906897946091521) |
+---
 
-### 3. Expense Logged — "Hotel Booking"
+## Feedback
 
-```
-log_expense(1, "Hotel Booking", 10000000, GBYX...GUSN)
-```
+- **Google Form:** [Submit feedback](https://forms.gle/2gjEdehQZsiQ1GqY9)
+- **Response Spreadsheet:** [View responses](https://docs.google.com/spreadsheets/d/1k7NOD86ff6VQdbosQo0M5DkEAmExZouflWb0qGyLkRA/edit?usp=sharing)
 
-| Field | Value |
-|-------|-------|
-| **Pool** | `1` (Manali Trip 2026) |
-| **Amount** | `10,000,000` stroops (`1 XLM`) |
-| **Description** | `Hotel Booking` |
-| **Payer** | `GBYXCRSBELNKB6EURZ4U4YF6NGZQRUND24R6XE2DRZ2GUSN` |
-| **Tx Hash** | [`fb9f80e7d2d00b65e0579adc47fa4998b35fcbaec0850e7f2680caef1f9a9104`](https://stellar.expert/explorer/testnet/tx/13907207183691776) |
-| **Explorer** | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/13907207183691776#13907207183691777) |
+### User Feedback Summary
+
+> **Security & Access Control** — Testers flagged that random pool IDs were guessable and anyone could join without confirmation. **Addressed**: invite-code-gated access + owner approval system implemented; `?pool=ID` links no longer auto-join non-members.
+>
+> **Notifications** — Multiple users requested real-time alerts when expenses are added. Flagged for future work.
+>
+> **Dark / Light Theme** — Several users praised the dark/white theme toggle. Already supported.
+>
+> **Expense Tagging** — Request for categorizing/tagging expenses. Flagged for future work.
+>
+> **Gamification** — Suggestion to make the experience more game-like. Flagged for future work.
+>
+> **UI/UX** — Overall positive feedback on the interface design and usability.
 
 ---
 

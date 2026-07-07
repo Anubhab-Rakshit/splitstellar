@@ -58,14 +58,14 @@ export default function ProfileModal() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="relative w-full max-w-md bg-[#0D1526] border border-[rgba(255,255,255,0.1)] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden p-8"
+            className="relative w-full max-w-md bg-white dark:bg-[#0D1526] border border-[#E5E5E5] dark:border-[rgba(255,255,255,0.1)] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden p-8"
           >
-            <div className="w-16 h-16 rounded-full bg-[rgba(34,197,94,0.1)] border border-[rgba(34,197,94,0.2)] flex items-center justify-center mb-6 mx-auto">
+            <div className="w-16 h-16 rounded-full bg-emerald-50 dark:bg-[rgba(34,197,94,0.1)] border border-emerald-200 dark:border-[rgba(34,197,94,0.2)] flex items-center justify-center mb-6 mx-auto">
               <User className="w-8 h-8 text-accent-emerald" />
             </div>
             
-            <h2 className="text-2xl font-display font-semibold text-center mb-2">Claim Your Alias</h2>
-            <p className="text-text-secondary text-sm text-center mb-8">
+            <h2 className="text-2xl font-display font-semibold text-center text-black dark:text-white mb-2">Claim Your Alias</h2>
+            <p className="text-[#666] dark:text-text-secondary text-sm text-center mb-8">
               Welcome to SplitStellar. Please choose a public name for your wallet address so friends can recognize you.
             </p>
 
@@ -76,7 +76,7 @@ export default function ProfileModal() {
                   value={alias}
                   onChange={(e) => setAlias(e.target.value)}
                   placeholder="e.g. Satoshi" 
-                  className="w-full bg-[#050A14] border border-[rgba(255,255,255,0.1)] rounded-xl px-5 py-4 text-white text-lg focus:outline-none focus:border-accent-emerald focus:ring-1 focus:ring-accent-emerald transition-all text-center placeholder:text-text-tertiary"
+                  className="w-full bg-[#F7F7F7] dark:bg-[#050A14] border border-[#CCC] dark:border-[rgba(255,255,255,0.1)] rounded-xl px-5 py-4 text-black dark:text-white text-lg focus:outline-none focus:border-accent-emerald focus:ring-1 focus:ring-accent-emerald transition-all text-center placeholder:text-[#999] dark:placeholder:text-text-tertiary"
                   autoFocus
                   maxLength={20}
                 />
