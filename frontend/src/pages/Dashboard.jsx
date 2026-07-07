@@ -50,6 +50,7 @@ export default function Dashboard() {
   const [joinPoolInfo, setJoinPoolInfo] = useState(null);
   const eventCursorRef = useRef(null);
   const processedCodeRef = useRef(null);
+  const processedPoolRef = useRef(null);
 
   const fetchPoolById = useCallback(async (poolId) => {
     try {
@@ -110,13 +111,14 @@ export default function Dashboard() {
   const syncPendingRequests = useCallback(async () => {
     if (!address) return;
     try {
-      const requests = await db.getPendingRequests(address);
+      const ownedPoolIds = pools.filter(p => p.creator === address).map(p => p.id);
+      const requests = await db.getPendingRequests(address, ownedPoolIds);
       setPendingRequests(requests);
       setPendingCount(requests.length);
     } catch {
       /* silent */
     }
-  }, [address]);
+  }, [address, pools]);
 
   const fetchInviteCode = useCallback(async (poolId, poolName) => {
     if (inviteCodeCache.current[poolId]) return inviteCodeCache.current[poolId];
@@ -256,23 +258,24 @@ export default function Dashboard() {
   useEffect(() => {
     if (!address || searchParams.has('code')) return;
     const poolParam = searchParams.get('pool');
-    if (poolParam && !selectedPool) {
-      const poolId = Number(poolParam);
-      if (!isNaN(poolId) && poolId >= 1 && Number.isInteger(poolId)) {
-        fetchPoolById(poolId).then(async (pool) => {
-          if (!pool) return;
-          const isMember = await db.isPoolMember(pool.id, address);
-          if (isMember) {
-            setSelectedPool(pool);
-          } else {
-            await db.addPoolMember(pool.id, address);
-            saveKnownPoolId(address, pool.id);
-            setPools((prev) => (prev.some((p) => p.id === pool.id) ? prev : [pool, ...prev]));
-            setSelectedPool(pool);
-          }
-        });
+    if (!poolParam) return;
+    const poolId = Number(poolParam);
+    if (isNaN(poolId) || poolId < 1 || !Number.isInteger(poolId)) return;
+    if (processedPoolRef.current === poolId) return;
+    processedPoolRef.current = poolId;
+    if (selectedPool && selectedPool.id === poolId) return;
+
+    fetchPoolById(poolId).then(async (pool) => {
+      if (!pool) return;
+      const isMember = await db.isPoolMember(pool.id, address);
+      if (isMember || pool.creator === address) {
+        setSelectedPool(pool);
+      } else {
+        setSelectedPool(null);
+        setJoinPoolInfo({ pool, inviteCode: String(poolId) });
+        setJoinRequestStatus(null);
       }
-    }
+    });
   }, [address, searchParams, selectedPool, fetchPoolById]);
 
   useEffect(() => {

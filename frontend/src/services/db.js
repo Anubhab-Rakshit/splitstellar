@@ -280,16 +280,19 @@ export const db = {
     return data || { id: 'stub', status: 'pending' };
   },
 
-  getPendingRequests: async (wallet_address) =>
+  getPendingRequests: async (wallet_address, ownedPoolIds) =>
     withFallback(
       async () => {
-        const owned = await supabase.from('expense_pools').select('id').eq('created_by', wallet_address);
-        if (owned.error) throw owned.error;
-        if (!owned.data?.length) return [];
-        const ids = owned.data.map(r => r.id);
+        let ids = ownedPoolIds;
+        if (!ids || ids.length === 0) {
+          const owned = await supabase.from('expense_pools').select('id').eq('created_by', wallet_address);
+          if (owned.error) throw owned.error;
+          ids = (owned.data || []).map(r => r.id);
+        }
+        if (!ids.length) return [];
         const { data, error } = await supabase
           .from('join_requests')
-          .select('*, expense_pools!inner(name)')
+          .select('*')
           .in('pool_id', ids)
           .eq('status', 'pending')
           .order('created_at', { ascending: false });
@@ -305,8 +308,8 @@ export const db = {
       },
     ),
 
-  getPendingCount: async (wallet_address) => {
-    const requests = await db.getPendingRequests(wallet_address);
+  getPendingCount: async (wallet_address, ownedPoolIds) => {
+    const requests = await db.getPendingRequests(wallet_address, ownedPoolIds);
     return requests.length;
   },
 

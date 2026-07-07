@@ -91,15 +91,18 @@ export default function ExpenseLogger({ poolId, poolCreator }) {
     }
   };
 
+  const canView = isMember || poolCreator === address;
+
   return (
     <div>
-      {!isMember && poolCreator !== address ? (
+      {!canView ? (
         <div className="mb-12 p-6 border border-amber-500/40 bg-amber-50 dark:bg-amber-950/20 text-center">
           <p className="font-mono text-xs text-amber-700 dark:text-amber-400">
             You are not a member of this pool. Join via the pool link or enter the pool ID to log expenses.
           </p>
         </div>
       ) : (
+        <>
       <form
         onSubmit={handleLogExpense}
         className="mb-12 border border-[#E5E5E5] dark:border-[#333] p-6 bg-[#F7F7F7] dark:bg-[#050505] transition-colors duration-500"
@@ -153,7 +156,6 @@ export default function ExpenseLogger({ poolId, poolCreator }) {
           )}
         </button>
       </form>
-      )}
 
       <div>
         <div className="flex items-center justify-between mb-6">
@@ -217,6 +219,8 @@ export default function ExpenseLogger({ poolId, poolCreator }) {
       </div>
 
       <SettleUp expenses={expenses} />
+        </>
+      )}
     </div>
   );
 }
