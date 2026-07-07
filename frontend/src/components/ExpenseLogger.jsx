@@ -6,6 +6,7 @@ import { db } from '../services/db';
 import { Loader2, Activity, Send } from 'lucide-react';
 import { motion } from 'framer-motion';
 import SettleUp from './SettleUp';
+import { track } from '../services/analytics';
 
 export default function ExpenseLogger({ poolId }) {
   const { address, kit } = useStellarStore();
@@ -57,6 +58,7 @@ export default function ExpenseLogger({ poolId }) {
       setExpenses((prev) => [newExpense, ...prev]);
       setAmount('');
       setDescription('');
+      track('log_expense', { pool_id: Number(poolId), amount, description, wallet_address: address });
       db.logActivity(address, 'log_expense', {
         pool_id: Number(poolId),
         description,

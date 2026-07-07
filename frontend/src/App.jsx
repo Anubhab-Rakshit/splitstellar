@@ -12,6 +12,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import Landing from './pages/Landing';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
+import Analytics from './pages/Analytics';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -46,6 +47,7 @@ function App() {
             <Route path="/" element={<ErrorBoundary fallback="landing"><Landing /></ErrorBoundary>} />
             <Route path="/dashboard" element={<ErrorBoundary fallback="dashboard"><Dashboard /></ErrorBoundary>} />
             <Route path="/profile" element={<ErrorBoundary fallback="profile"><Profile /></ErrorBoundary>} />
+            <Route path="/analytics" element={<ErrorBoundary fallback="analytics"><Analytics /></ErrorBoundary>} />
           </Routes>
         </SmoothScroll>
       )}

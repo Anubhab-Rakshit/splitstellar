@@ -18,7 +18,7 @@ export default function Notchbar() {
   };
 
   return (
-    <div className="fixed top-8 left-1/2 -translate-x-1/2 z-40 w-full max-w-[700px] px-4">
+    <div className="fixed top-4 sm:top-8 left-1/2 -translate-x-1/2 z-40 w-full max-w-[700px] px-2 sm:px-4">
       <motion.div 
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -33,7 +33,10 @@ export default function Notchbar() {
           <Link to="/" className={`text-[10px] font-mono uppercase tracking-widest transition-colors ${location.pathname === '/' ? 'text-black dark:text-white font-bold' : 'text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white'}`}>Home</Link>
           <Link to="/dashboard" className={`text-[10px] font-mono uppercase tracking-widest transition-colors ${location.pathname === '/dashboard' ? 'text-black dark:text-white font-bold' : 'text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white'}`}>App</Link>
           {address && (
-            <Link to="/profile" className={`text-[10px] font-mono uppercase tracking-widest transition-colors ${location.pathname === '/profile' ? 'text-black dark:text-white font-bold' : 'text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white'}`}>Profile</Link>
+            <>
+              <Link to="/profile" className={`text-[10px] font-mono uppercase tracking-widest transition-colors ${location.pathname === '/profile' ? 'text-black dark:text-white font-bold' : 'text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white'}`}>Profile</Link>
+              <Link to="/analytics" className={`text-[10px] font-mono uppercase tracking-widest transition-colors ${location.pathname === '/analytics' ? 'text-black dark:text-white font-bold' : 'text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white'}`}>Analytics</Link>
+            </>
           )}
         </div>
 
@@ -91,7 +94,10 @@ export default function Notchbar() {
             <Link onClick={() => setIsMenuOpen(false)} to="/" className={`text-xs font-mono uppercase tracking-widest transition-colors ${location.pathname === '/' ? 'text-black dark:text-white font-bold' : 'text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white'}`}>Home</Link>
             <Link onClick={() => setIsMenuOpen(false)} to="/dashboard" className={`text-xs font-mono uppercase tracking-widest transition-colors ${location.pathname === '/dashboard' ? 'text-black dark:text-white font-bold' : 'text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white'}`}>App</Link>
             {address && (
-              <Link onClick={() => setIsMenuOpen(false)} to="/profile" className={`text-xs font-mono uppercase tracking-widest transition-colors ${location.pathname === '/profile' ? 'text-black dark:text-white font-bold' : 'text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white'}`}>Profile</Link>
+              <>
+                <Link onClick={() => setIsMenuOpen(false)} to="/profile" className={`text-xs font-mono uppercase tracking-widest transition-colors ${location.pathname === '/profile' ? 'text-black dark:text-white font-bold' : 'text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white'}`}>Profile</Link>
+                <Link onClick={() => setIsMenuOpen(false)} to="/analytics" className={`text-xs font-mono uppercase tracking-widest transition-colors ${location.pathname === '/analytics' ? 'text-black dark:text-white font-bold' : 'text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white'}`}>Analytics</Link>
+              </>
             )}
           </motion.div>
         )}

@@ -4,6 +4,7 @@ import { useStellarStore } from '../hooks/useStellar';
 import { Copy, Check, Activity, ExternalLink, Edit2, Loader2 } from 'lucide-react';
 import { triggerToast } from '../services/toast';
 import { db } from '../services/db';
+import { track } from '../services/analytics';
 
 export default function Profile() {
   const { address, balance, profileName, setProfileName } = useStellarStore();
@@ -27,6 +28,7 @@ export default function Profile() {
       const updatedProfile = await db.updateProfile(address, editName.trim());
       if (updatedProfile) {
         setProfileName(updatedProfile.name);
+        track('update_profile', { profile_name: editName.trim(), wallet_address: address });
         triggerToast("Profile updated", "success");
       }
     } catch (err) {
@@ -74,7 +76,7 @@ export default function Profile() {
 
   if (!address) {
     return (
-      <div className="min-h-screen pt-40 px-6 flex flex-col items-center justify-center text-center">
+      <div className="min-h-screen pt-24 sm:pt-40 px-6 flex flex-col items-center justify-center text-center">
         <h1 className="text-4xl font-serif italic mb-4">Connect Wallet</h1>
         <p className="text-sm font-mono text-[#888]">Please connect your Stellar wallet to view your profile.</p>
       </div>
@@ -82,7 +84,7 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen pt-40 pb-32 px-6 lg:px-12 max-w-[1000px] mx-auto">
+    <div className="min-h-screen pt-24 sm:pt-40 pb-20 sm:pb-32 px-6 lg:px-12 max-w-[1000px] mx-auto">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

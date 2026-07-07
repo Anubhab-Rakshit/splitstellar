@@ -3,6 +3,7 @@ import { useStellarStore } from '../hooks/useStellar';
 import { sendPayment } from '../services/soroban';
 import { triggerToast } from '../services/toast';
 import { Loader2, ArrowRightLeft } from 'lucide-react';
+import { track } from '../services/analytics';
 
 function shorten(pubkey) {
   return `${pubkey.substring(0, 6)}...${pubkey.substring(pubkey.length - 4)}`;
@@ -44,6 +45,7 @@ export default function SettleUp({ expenses }) {
     setPaying(destination);
     try {
       const txHash = await sendPayment(address, kit, destination, amountXlm);
+      track('settle_payment', { destination, amount: amountXlm, wallet_address: address });
       triggerToast(`Settled ${amountXlm.toFixed(2)} XLM — tx: ${txHash.slice(0, 12)}...`, 'success');
     } catch (err) {
       console.error(err);

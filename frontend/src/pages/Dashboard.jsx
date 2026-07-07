@@ -7,6 +7,7 @@ import { simulateCall, buildAndSubmit, fetchEvents, convertEventTopics } from '.
 import { triggerToast } from '../services/toast';
 import { db } from '../services/db';
 import { Loader2, Plus, ArrowRight, Link2, Copy, Check } from 'lucide-react';
+import { track } from '../services/analytics';
 
 const POLL_MS = 10000;
 const STORAGE_KEY = 'splitstellar_known_pools';
@@ -199,6 +200,7 @@ export default function Dashboard() {
       setPools((prev) => [pool, ...prev]);
       setNewPoolName('');
       setSelectedPool(pool);
+      track('create_pool', { pool_id: pool.id, pool_name: newPoolName.trim(), wallet_address: address });
       db.logActivity(address, 'create_pool', {
         pool_id: pool.id,
         pool_name: newPoolName.trim(),
@@ -215,7 +217,7 @@ export default function Dashboard() {
 
   if (!address) {
     return (
-      <div className="min-h-screen pt-40 px-6 flex flex-col items-center justify-center text-center">
+          <div className="min-h-screen pt-24 sm:pt-40 px-6 flex flex-col items-center justify-center text-center">
         <h1 className="text-4xl font-serif italic mb-4">
           Awaiting Connection
         </h1>
@@ -227,14 +229,14 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen pt-40 pb-32 px-6 lg:px-12 max-w-[1200px] mx-auto">
+    <div className="min-h-screen pt-24 sm:pt-40 pb-20 sm:pb-32 px-6 lg:px-12 max-w-[1200px] mx-auto">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       >
         <div className="mb-16">
-          <h1 className="text-5xl md:text-7xl font-serif italic tracking-tight mb-4">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-serif italic tracking-tight mb-4">
             Command Center
           </h1>
           <p className="font-mono text-sm text-[#888]">
@@ -345,13 +347,13 @@ export default function Dashboard() {
 
           <div className="lg:col-span-8">
             {selectedPool ? (
-              <div className="border border-[#E5E5E5] dark:border-[#222] bg-white dark:bg-[#030303] p-4 sm:p-8 transition-colors duration-500 overflow-hidden">
+              <div                className="border border-[#E5E5E5] dark:border-[#222] bg-white dark:bg-[#030303] p-4 sm:p-8 transition-colors duration-500 overflow-x-hidden">
                 <div className="border-b border-[#E5E5E5] dark:border-[#222] pb-6 mb-6 sm:mb-8 transition-colors duration-500">
                   <span className="block font-mono text-[10px] uppercase tracking-widest text-[#888] mb-2">
                     Partition View
                   </span>
                   <div className="flex items-center gap-4">
-                    <h2 className="text-4xl font-serif italic">
+                      <h2 className="text-2xl sm:text-4xl font-serif italic">
                       {selectedPool.name}
                     </h2>
                     <button

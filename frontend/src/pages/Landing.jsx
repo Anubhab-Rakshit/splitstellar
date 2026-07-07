@@ -9,7 +9,7 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-black overflow-hidden relative selection:bg-white selection:text-black">
       
-      <div className="max-w-[1400px] mx-auto px-6 lg:px-12 relative z-10 pt-32 pb-32">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 relative z-10 pt-20 sm:pt-32 pb-20 sm:pb-32">
         
         {/* HERO SECTION */}
         <section className="min-h-[85vh] flex flex-col justify-center border-b border-[#222222] pb-16">
@@ -24,12 +24,12 @@ export default function Landing() {
               >
                 <div className="mb-4"></div>
                 
-                <h1 className="text-5xl sm:text-[5.5rem] lg:text-[7rem] font-serif italic leading-[1] sm:leading-[0.9] text-white mb-8 sm:mb-10">
+                <h1 className="text-4xl sm:text-[5.5rem] lg:text-[7rem] font-serif italic leading-[1] sm:leading-[0.9] text-white mb-6 sm:mb-10">
                   The standard <br/>
                   <span className="not-italic opacity-50">for settlement.</span>
                 </h1>
                 
-                <p className="text-lg font-mono text-text-secondary max-w-lg mb-16 leading-relaxed">
+                <p className="text-sm sm:text-lg font-mono text-text-secondary max-w-lg mb-10 sm:mb-16 leading-relaxed">
                   Engineered for cryptographic certainty. SplitStellar utilizes the Stellar network to resolve cross-border shared expenses with sub-second finality.
                 </p>
                 
