@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useStellarStore } from '../hooks/useStellar';
 import { simulateCall, buildAndSubmit } from '../services/soroban';
 import { triggerToast } from '../services/toast';
@@ -8,13 +8,21 @@ import { motion } from 'framer-motion';
 import SettleUp from './SettleUp';
 import { track } from '../services/analytics';
 
-export default function ExpenseLogger({ poolId }) {
+export default function ExpenseLogger({ poolId, poolCreator }) {
   const { address, kit } = useStellarStore();
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [expenses, setExpenses] = useState([]);
   const [loadingExpenses, setLoadingExpenses] = useState(true);
+  const [isMember, setIsMember] = useState(false);
+  const memberChecked = useRef(false);
+
+  useEffect(() => {
+    if (!address || memberChecked.current) return;
+    memberChecked.current = true;
+    db.isPoolMember(poolId, address).then(setIsMember).catch(() => {});
+  }, [poolId, address]);
 
   const fetchExpenses = useCallback(async () => {
     if (!poolId) return;
@@ -43,6 +51,12 @@ export default function ExpenseLogger({ poolId }) {
   const handleLogExpense = async (e) => {
     e.preventDefault();
     if (!amount || !description || !address || !kit) return;
+
+    const parsed = parseFloat(amount);
+    if (isNaN(parsed) || parsed <= 0 || !Number.isFinite(parsed)) {
+      triggerToast('Enter a valid positive amount', 'error');
+      return;
+    }
 
     setIsSubmitting(true);
     triggerToast('Submitting to Soroban contract...', 'info');
@@ -79,6 +93,13 @@ export default function ExpenseLogger({ poolId }) {
 
   return (
     <div>
+      {!isMember && poolCreator !== address ? (
+        <div className="mb-12 p-6 border border-amber-500/40 bg-amber-50 dark:bg-amber-950/20 text-center">
+          <p className="font-mono text-xs text-amber-700 dark:text-amber-400">
+            You are not a member of this pool. Join via the pool link or enter the pool ID to log expenses.
+          </p>
+        </div>
+      ) : (
       <form
         onSubmit={handleLogExpense}
         className="mb-12 border border-[#E5E5E5] dark:border-[#333] p-6 bg-[#F7F7F7] dark:bg-[#050505] transition-colors duration-500"
@@ -132,6 +153,7 @@ export default function ExpenseLogger({ poolId }) {
           )}
         </button>
       </form>
+      )}
 
       <div>
         <div className="flex items-center justify-between mb-6">
