@@ -10,21 +10,24 @@ import { Loader2, Plus, ArrowRight, Link2, Copy, Check } from 'lucide-react';
 import { track } from '../services/analytics';
 
 const POLL_MS = 10000;
-const STORAGE_KEY = 'splitstellar_known_pools';
 
-function loadKnownPoolIds() {
+function storageKey(address) {
+  return `splitstellar_known_pools_${address}`;
+}
+
+function loadKnownPoolIds(address) {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    return JSON.parse(localStorage.getItem(storageKey(address)) || '[]');
   } catch {
     return [];
   }
 }
 
-function saveKnownPoolId(id) {
-  const ids = loadKnownPoolIds();
+function saveKnownPoolId(address, id) {
+  const ids = loadKnownPoolIds(address);
   if (!ids.includes(id)) {
     ids.push(id);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
+    localStorage.setItem(storageKey(address), JSON.stringify(ids));
   }
 }
 
@@ -49,65 +52,32 @@ export default function Dashboard() {
     }
   }, [address]);
 
-  const scanPools = useCallback(async () => {
-    const results = [];
-    let misses = 0;
-    for (let id = 1; misses < 5; id++) {
-      const pool = await fetchPoolById(id);
-      if (pool) {
-        results.push(pool);
-        saveKnownPoolId(id);
-        misses = 0;
-      } else {
-        misses++;
-      }
-    }
-    return results;
-  }, [fetchPoolById]);
-
   const syncPools = useCallback(async () => {
-    const knownIds = loadKnownPoolIds();
-    let loaded;
-    if (knownIds.length === 0) {
-      loaded = await scanPools();
-      setPools(loaded);
-    } else {
-      const results = await Promise.allSettled(
-        knownIds.map((id) => fetchPoolById(id)),
-      );
-      loaded = results
-        .filter((r) => r.status === 'fulfilled' && r.value)
-        .map((r) => r.value);
-      setPools(loaded);
-    }
+    const knownIds = loadKnownPoolIds(address);
+    const results = await Promise.allSettled(
+      knownIds.map((id) => fetchPoolById(id)),
+    );
+    const loaded = results
+      .filter((r) => r.status === 'fulfilled' && r.value)
+      .map((r) => r.value);
+    setPools(loaded);
     setLoadingPools(false);
     return loaded;
-  }, [fetchPoolById, scanPools]);
+  }, [address, fetchPoolById]);
 
   const pollEvents = useCallback(async () => {
     try {
       const result = await fetchEvents(address, eventCursorRef.current);
       if (result.events?.length) {
         for (const event of result.events) {
-          const { value, id } = convertEventTopics(event);
-          const poolId = value?.pool_id ?? value?.id;
-          if (poolId != null && !loadKnownPoolIds().includes(poolId)) {
-            saveKnownPoolId(poolId);
-            const poolData = await fetchPoolById(poolId);
-            if (poolData) {
-              setPools((prev) => {
-                if (prev.some((p) => p.id === poolData.id)) return prev;
-                return [poolData, ...prev];
-              });
-            }
-          }
+          const { id } = convertEventTopics(event);
           eventCursorRef.current = id;
         }
       }
     } catch {
       /* event poll errors are silent */
     }
-  }, [address, fetchPoolById, eventCursorRef]);
+  }, [address, eventCursorRef]);
 
   useEffect(() => {
     if (!address) return;
@@ -125,7 +95,7 @@ export default function Dashboard() {
           } else {
             fetchPoolById(poolId).then((pool) => {
               if (pool && !cancelled) {
-                saveKnownPoolId(pool.id);
+                saveKnownPoolId(address, pool.id);
                 setPools((prev) => {
                   if (prev.some((p) => p.id === pool.id)) return prev;
                   return [pool, ...prev];
@@ -160,7 +130,7 @@ export default function Dashboard() {
     try {
       const pool = await fetchPoolById(poolId);
       if (pool) {
-        saveKnownPoolId(pool.id);
+        saveKnownPoolId(address, pool.id);
         setPools((prev) => {
           if (prev.some((p) => p.id === pool.id)) return prev;
           return [pool, ...prev];
@@ -196,7 +166,7 @@ export default function Dashboard() {
         name: newPoolName.trim(),
         creator: address,
       });
-      saveKnownPoolId(pool.id);
+      saveKnownPoolId(address, pool.id);
       setPools((prev) => [pool, ...prev]);
       setNewPoolName('');
       setSelectedPool(pool);
