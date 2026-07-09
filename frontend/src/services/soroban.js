@@ -59,6 +59,12 @@ function toScVal(method, args) {
       return [nativeToScVal(BigInt(args.poolId), { type: 'u64' })];
     case 'get_expense':
       return [nativeToScVal(BigInt(args.expenseId), { type: 'u64' })];
+    case 'verify_balance':
+      return [
+        nativeToScVal(args.tokenId, { type: 'address' }),
+        nativeToScVal(args.owner, { type: 'address' }),
+        nativeToScVal(BigInt(args.required), { type: 'i128' }),
+      ];
     default:
       throw new Error(`Unknown method: ${method}`);
   }

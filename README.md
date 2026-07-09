@@ -67,16 +67,20 @@ stellar-project/
 
 **Deployed on Testnet:** [`CAG5MXEQORC4ZP57WI4WJVXWHP5CZHXXMA77VV63JVSW42GNMJYAMUCJ`](https://stellar.expert/explorer/testnet/contract/CAG5MXEQORC4ZP57WI4WJVXWHP5CZHXXMA77VV63JVSW42GNMJYAMUCJ)
 
+> **Integration mapping:** See [`CONTRACT_INTEGRATION.md`](./CONTRACT_INTEGRATION.md) for the complete function-by-function mapping between contract (`lib.rs`) and frontend (`soroban.js`), including ScVal type alignment, parameter names, parser logic, event definitions, and file references.
+
 ### Functions
 
-| Function | Description |
-|----------|-------------|
-| `create_pool(name, creator)` | Create a new expense pool |
-| `get_pool(pool_id)` | Read pool details by ID |
-| `log_expense(pool_id, description, amount, payer)` | Log an expense in a pool |
-| `get_pool_expenses(pool_id)` | List all expenses in a pool |
-| `get_expense(expense_id)` | Get a single expense by ID |
-| `verify_balance(address, amount)` | Inter-contract balance check |
+| Function | Contract (`lib.rs`) | ScVal Mapping (`soroban.js`) | Frontend Call | Parser |
+|----------|--------------------|------------------------------|---------------|--------|
+| `create_pool(name, creator)` | `lib.rs:84 → Pool` | `toScVal` line 45 | `buildAndSubmit(address, kit, 'create_pool', ...)` | `parseNative` line 77 |
+| `get_pool(pool_id)` | `lib.rs:119 → Option<Pool>` | `toScVal` line 57 | `simulateCall(address, 'get_pool', ...)` | `parseNative` line 77 |
+| `log_expense(pool_id, desc, amount, payer)` | `lib.rs:124 → Result<Expense>` | `toScVal` line 50 | `buildAndSubmit(address, kit, 'log_expense', ...)` | `parseNative` line 108 |
+| `get_pool_expenses(pool_id)` | `lib.rs:199 → Vec<Expense>` | `toScVal` line 57 | `simulateCall(address, 'get_pool_expenses', ...)` | `parseNative` line 88 |
+| `get_expense(expense_id)` | `lib.rs:207 → Option<Expense>` | `toScVal` line 60 | `simulateCall(address, 'get_expense', ...)` | `parseNative` line 97 |
+| `verify_balance(token_id, owner, required)` | `lib.rs:184 → Result<bool>` | `toScVal` line 62 | `simulateCall(address, 'verify_balance', ...)` | — |
+
+> **Parameter alignment:** Contract `u64` → JS `BigInt()`, `String` → JS `string`, `Address` → JS `string`, `i128` → JS `BigInt()`. See [`CONTRACT_INTEGRATION.md`](./CONTRACT_INTEGRATION.md#parameter-type-alignment) for full type mapping.
 
 ### Error Codes
 
@@ -241,7 +245,8 @@ GitHub Actions workflow (`.github/workflows/ci.yml`):
 
 - **Frontend** — React SPA with Zustand state, Tailwind CSS, Framer Motion
 - **Wallet** — Freighter / Albedo / xBull via `@creit.tech/stellar-wallets-kit`
-- **Contract** — Rust Soroban smart contract deployed on testnet
+- **Contract** — Rust Soroban smart contract deployed on testnet (6 functions, 2 events)
+- **Integration** — `@stellar/stellar-sdk` v16 (`Contract`, `nativeToScVal`, `rpc.Server`, `TransactionBuilder`). Reads via `simulateCall`, writes via `buildAndSubmit` (simulate → assemble → sign → submit → poll). Full mapping in [`CONTRACT_INTEGRATION.md`](./CONTRACT_INTEGRATION.md)
 - **Events** — Real-time polling (8–10s intervals) for pool discovery
 - **Persistence** — Pool IDs in `localStorage`, profiles/activity in Supabase
 - **CI/CD** — GitHub Actions → lint, test, build → Vercel deploy
