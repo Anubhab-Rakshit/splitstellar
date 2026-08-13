@@ -21,15 +21,12 @@ class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-[#F7F7F7] dark:bg-[#050A14] text-black dark:text-white p-5 font-mono transition-colors duration-500">
+        <div className="min-h-screen bg-[#F7F7F7] dark:bg-[#050A14] text-black dark:text-white p-5 font-mono transition-colors duration-500 flex flex-col items-center justify-center text-center">
           <h1 className="text-red-500 text-2xl font-bold mb-4">Something went wrong.</h1>
-          <p className="mb-4 text-[#666] dark:text-text-secondary">Please check the browser console for more details.</p>
-          <pre className="text-amber-500 bg-[#E5E5E5] dark:bg-[#111D33] p-3 rounded overflow-x-auto mb-3">
-            {this.state.error && this.state.error.toString()}
-          </pre>
-          <pre className="text-[#666] dark:text-[#94A3B8] bg-[#E5E5E5] dark:bg-[#111D33] p-3 rounded overflow-x-auto">
-            {this.state.errorInfo && this.state.errorInfo.componentStack}
-          </pre>
+          <p className="mb-4 text-[#666] dark:text-text-secondary">An unexpected error occurred. Please try refreshing the page.</p>
+          <button onClick={() => window.location.reload()} className="btn-primary px-6 py-3 text-xs">
+            Reload Page
+          </button>
         </div>
       );
     }

@@ -6,14 +6,12 @@ import { useStellarStore } from '../hooks/useStellar';
 import { triggerToast } from '../services/toast';
 
 export default function Notchbar() {
-  const { address, balance, isConnecting, profileName, theme, toggleTheme, setWalletModalOpen, setAddress, setBalance, setProfileName } = useStellarStore();
+  const { address, balance, isConnecting, profileName, theme, toggleTheme, setWalletModalOpen, disconnect } = useStellarStore();
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const disconnectWallet = () => {
-    setAddress(null);
-    setBalance(null);
-    setProfileName(null);
+    disconnect();
     triggerToast("Wallet disconnected", "info");
   };
 

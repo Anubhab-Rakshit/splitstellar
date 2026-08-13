@@ -44,10 +44,10 @@ export default function Profile() {
     if (!address) return;
     let cancelled = false;
 
-    db.getRecentActivities()
+    db.getRecentActivities(address)
       .then((acts) => {
         if (!cancelled) {
-          setActivities(acts.filter((a) => a.wallet_address === address));
+          setActivities(acts);
         }
       })
       .catch((err) => {

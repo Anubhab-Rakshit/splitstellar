@@ -25,7 +25,7 @@ export default function ExpenseLogger({ poolId, poolCreator }) {
   }, [poolId, address]);
 
   const fetchExpenses = useCallback(async () => {
-    if (!poolId) return;
+    if (!poolId || !isMember) return;
     try {
       const data = await simulateCall(address, 'get_pool_expenses', {
         poolId,
@@ -34,10 +34,10 @@ export default function ExpenseLogger({ poolId, poolCreator }) {
     } catch {
       /* poll failures are silent */
     }
-  }, [poolId, address]);
+  }, [poolId, address, isMember]);
 
   useEffect(() => {
-    if (!poolId) return;
+    if (!poolId || !isMember) return;
     const initialLoad = async () => {
       setLoadingExpenses(true);
       await fetchExpenses();
@@ -46,7 +46,7 @@ export default function ExpenseLogger({ poolId, poolCreator }) {
     const id = setInterval(() => fetchExpenses(), 8000);
     setTimeout(initialLoad, 0);
     return () => clearInterval(id);
-  }, [poolId, fetchExpenses]);
+  }, [poolId, fetchExpenses, isMember]);
 
   const handleLogExpense = async (e) => {
     e.preventDefault();

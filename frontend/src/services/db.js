@@ -374,14 +374,21 @@ export const db = {
     if (error && !isTableNotFound(error)) throw error;
   },
 
-  getRecentActivities: async () =>
+  getRecentActivities: async (walletAddress) =>
     withFallback(
       async () => {
-        const { data, error } = await supabase.from('activities').select('*').order('timestamp', { ascending: false }).limit(20);
+        let query = supabase.from('activities').select('*').order('timestamp', { ascending: false }).limit(20);
+        if (walletAddress) query = query.eq('wallet_address', walletAddress);
+        const { data, error } = await query;
         if (error) throw error;
         return data;
       },
-      () => readMockDb('activities').slice(0, 20),
+      () => {
+        const all = readMockDb('activities');
+        return walletAddress
+          ? all.filter(a => a.wallet_address === walletAddress).slice(0, 20)
+          : all.slice(0, 20);
+      },
     ),
 };
 

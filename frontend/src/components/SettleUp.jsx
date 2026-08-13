@@ -99,7 +99,7 @@ export default function SettleUp({ expenses }) {
                 {row.balance > 0 ? '+' : ''}{row.balance.toFixed(2)} XLM
                 {row.balance > 0 ? ' due' : row.balance < 0 ? ' owes' : ''}
               </span>
-              {row.balance < 0 && row.payer !== address && (
+              {row.balance > 0 && row.payer !== address && (
                 <button
                   onClick={() => handlePay(row.payer, Math.abs(row.balance))}
                   disabled={paying === row.payer}

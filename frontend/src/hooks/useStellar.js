@@ -26,7 +26,8 @@ export const useStellarStore = create((set) => ({
   setConnecting: (isConnecting) => set({ isConnecting }),
   setWalletModalOpen: (isOpen) => set({ isWalletModalOpen: isOpen }),
   setProfileName: (name) => set({ profileName: name }),
-  toggleTheme: () => set((state) => ({ theme: state.theme === 'dark' ? 'light' : 'dark' }))
+  toggleTheme: () => set((state) => ({ theme: state.theme === 'dark' ? 'light' : 'dark' })),
+  disconnect: () => set({ address: null, balance: null, profileName: null, error: null }),
 }));
 
 let kitInstance = null;

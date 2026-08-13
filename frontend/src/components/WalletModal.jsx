@@ -45,9 +45,13 @@ export default function WalletModal() {
       triggerToast(`Connected to ${walletId}`, "success");
       
       const res = await fetch(`https://horizon-testnet.stellar.org/accounts/${address}`);
-      const data = await res.json();
-      const nativeBalance = data.balances?.find(b => b.asset_type === 'native')?.balance;
-      useStellarStore.getState().setBalance(nativeBalance || "0");
+      if (res.ok) {
+        const data = await res.json();
+        const nativeBalance = data.balances?.find(b => b.asset_type === 'native')?.balance;
+        useStellarStore.getState().setBalance(nativeBalance || "0");
+      } else {
+        useStellarStore.getState().setBalance("0");
+      }
       track('wallet_connect', { wallet_id: walletId, wallet_address: address });
       
     } catch (err) {

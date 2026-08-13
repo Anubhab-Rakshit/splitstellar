@@ -2,19 +2,16 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { getAll, getStats, clearAnalytics, syncAnalytics } from '../services/analytics';
 import { Activity, Users, BarChart3, Trash2 } from 'lucide-react';
-
-function toIST(iso) {
-  if (!iso) return '';
-  return new Date(iso).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-}
+import { useStellarStore } from '../hooks/useStellar';
 
 export default function Analytics() {
+  const { address } = useStellarStore();
   const [events, setEvents] = useState(() => getAll());
   const [filter, setFilter] = useState('');
 
   useEffect(() => {
-    syncAnalytics().then(() => setEvents(getAll()));
-  }, []);
+    if (address) syncAnalytics().then(() => setEvents(getAll()));
+  }, [address]);
 
   const stats = getStats();
 
@@ -26,6 +23,15 @@ export default function Analytics() {
   const filtered = filter
     ? events.filter((e) => e.event.includes(filter) || e.properties?.wallet_address?.includes(filter))
     : events;
+
+  if (!address) {
+    return (
+      <div className="min-h-screen pt-24 sm:pt-40 px-6 flex flex-col items-center justify-center text-center">
+        <h1 className="text-4xl font-serif italic mb-4">Connect Wallet</h1>
+        <p className="text-sm font-mono text-[#666] dark:text-[#888]">Please connect your wallet to view analytics.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pt-24 sm:pt-40 pb-20 sm:pb-32 px-6 lg:px-12 max-w-[1000px] mx-auto">
@@ -70,40 +76,6 @@ export default function Analytics() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          {stats && (
-            <div className="border border-[#E5E5E5] dark:border-[#222] p-6 bg-white dark:bg-black">
-              <h3 className="font-serif italic text-lg mb-4">Events Breakdown</h3>
-              <div className="space-y-2">
-                {Object.entries(stats.byEvent)
-                  .sort(([, a], [, b]) => b - a)
-                  .map(([event, count]) => (
-                    <div key={event} className="flex items-center justify-between font-mono text-xs">
-                      <span className="text-[#666] dark:text-[#888]">{event}</span>
-                      <span>{count}</span>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          )}
-          {stats && (
-            <div className="border border-[#E5E5E5] dark:border-[#222] p-6 bg-white dark:bg-black">
-              <h3 className="font-serif italic text-lg mb-4">Daily Activity</h3>
-              <div className="space-y-2">
-                {Object.entries(stats.byDate)
-                  .sort(([a], [b]) => a.localeCompare(b))
-                  .slice(-14)
-                  .map(([day, count]) => (
-                    <div key={day} className="flex items-center justify-between font-mono text-xs">
-                      <span className="text-[#666] dark:text-[#888]">{day}</span>
-                      <span>{count} events</span>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          )}
-        </div>
-
         <div className="mb-4">
           <input
             type="text"
@@ -122,12 +94,7 @@ export default function Analytics() {
           ) : (
             filtered.slice().reverse().slice(0, 100).map((e, i) => (
               <div key={i} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div className="flex items-center gap-3">
-                  <span className="font-mono text-[10px] text-[#666] dark:text-[#888] w-16 shrink-0">
-                    {toIST(e.timestamp)}
-                  </span>
-                  <span className="font-mono text-xs uppercase tracking-wider">{e.event}</span>
-                </div>
+                <span className="font-mono text-xs uppercase tracking-wider">{e.event}</span>
                 <div className="font-mono text-[10px] text-[#666] dark:text-[#888] truncate max-w-[300px]">
                   {e.properties?.wallet_address
                     ? `${e.properties.wallet_address.slice(0, 8)}...`

@@ -50,7 +50,6 @@ export default function Dashboard() {
   const [joinPoolInfo, setJoinPoolInfo] = useState(null);
   const eventCursorRef = useRef(null);
   const processedCodeRef = useRef(null);
-  const processedPoolRef = useRef(null);
 
   const fetchPoolById = useCallback(async (poolId) => {
     try {
@@ -135,20 +134,10 @@ export default function Dashboard() {
     if (!input || !address) return;
     setIsLookingUpCode(true);
     try {
-      let poolLookup = await getPoolIdByInviteCode(input);
+      const poolLookup = await getPoolIdByInviteCode(input);
       if (!poolLookup) {
-        const poolId = Number(input);
-        if (isNaN(poolId) || poolId < 1 || !Number.isInteger(poolId)) {
-          triggerToast('Invalid invite code', 'error');
-          return;
-        }
-        const poolData = await fetchPoolById(poolId);
-        if (!poolData) {
-          triggerToast('Pool not found', 'error');
-          return;
-        }
-        await ensurePoolInviteCode(poolId, poolData.name, poolData.creator);
-        poolLookup = { id: poolId, name: poolData.name, created_by: poolData.creator };
+        triggerToast('Invalid invite code', 'error');
+        return;
       }
 
       const poolData = await fetchPoolById(poolLookup.id);
@@ -256,33 +245,10 @@ export default function Dashboard() {
   }, [address, searchParams, handleJoinByCode]);
 
   useEffect(() => {
-    if (!address || searchParams.has('code')) return;
-    const poolParam = searchParams.get('pool');
-    if (!poolParam) return;
-    const poolId = Number(poolParam);
-    if (isNaN(poolId) || poolId < 1 || !Number.isInteger(poolId)) return;
-    if (processedPoolRef.current === poolId) return;
-    processedPoolRef.current = poolId;
-    if (selectedPool && selectedPool.id === poolId) return;
-
-    fetchPoolById(poolId).then(async (pool) => {
-      if (!pool) return;
-      const isMember = await db.isPoolMember(pool.id, address);
-      if (isMember || pool.creator === address) {
-        setSelectedPool(pool);
-      } else {
-        setSelectedPool(null);
-        setJoinPoolInfo({ pool, inviteCode: String(poolId) });
-        setJoinRequestStatus(null);
-      }
-    });
-  }, [address, searchParams, selectedPool, fetchPoolById]);
-
-  useEffect(() => {
-    if (selectedPool) {
-      setSearchParams({ pool: selectedPool.id }, { replace: true });
+    if (searchParams.has('pool') || searchParams.has('code')) {
+      setSearchParams({}, { replace: true });
     }
-  }, [selectedPool, setSearchParams]);
+  }, [searchParams, setSearchParams]);
 
   useEffect(() => {
     if (!selectedPool) return;
@@ -508,7 +474,7 @@ export default function Dashboard() {
             {showJoinRequestUI ? (
               <div className="border border-[#E5E5E5] dark:border-[#222] bg-white dark:bg-black p-8 text-center transition-colors duration-500">
                 <div className="w-16 h-[1px] bg-black dark:bg-white mb-6 mx-auto" />
-                <h3 className="font-serif italic text-2xl mb-2">{joinPoolInfo.pool.name}</h3>
+                <h3 className="font-serif italic text-2xl mb-2">Private Pool</h3>
                 <p className="font-mono text-[10px] uppercase tracking-widest text-[#666] dark:text-[#888] mb-6">
                   You need access to this pool
                 </p>
