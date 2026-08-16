@@ -362,7 +362,7 @@ export default function Guide() {
               </h3>
               <p className="font-mono text-xs text-[#666] dark:text-[#888] leading-relaxed">
                 SplitStellar supports Freighter, Albedo, xBull, and WalletConnect-compatible wallets. 
-                Mobile users can connect via WalletConnect QR code.
+                On mobile, connect with Albedo (works in your browser) or WalletConnect.
               </p>
             </motion.div>
           </div>

@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { getCategoryById } from '../services/categories';
 import { getEarnedBadges, calculateBadgeProgress, getAllBadges } from '../services/badges';
 import { staggerContainer, fadeUpItem, scaleReveal } from '../services/animations';
 import { Trophy, TrendingUp, Calendar, Wallet } from 'lucide-react';
@@ -99,7 +98,6 @@ export default function MemberProfile({ address, expenses }) {
     return {
       ...userStats,
       earnedBadges,
-      recentExpenses: userExpenses.slice(0, 5),
     };
   }, [address, expenses]);
 
@@ -107,7 +105,7 @@ export default function MemberProfile({ address, expenses }) {
     return (
       <div className="p-8 border border-[#E5E5E5] dark:border-[#222] text-center">
         <p className="font-mono text-xs text-[#666] dark:text-[#888]">
-          No activity data available
+          Log an expense to unlock your stats and achievements.
         </p>
       </div>
     );
@@ -120,40 +118,6 @@ export default function MemberProfile({ address, expenses }) {
       animate="animate"
       className="space-y-6"
     >
-      {/* Profile Header */}
-      <motion.div
-        variants={fadeUpItem}
-        className="p-6 border border-[#E5E5E5] dark:border-[#333] bg-white dark:bg-black"
-      >
-        <div className="flex items-start gap-4">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-black to-[#333] dark:from-white dark:to-[#999] flex items-center justify-center">
-            <span className="font-serif italic text-2xl text-white dark:text-black">
-              {address?.substring(2, 4).toUpperCase()}
-            </span>
-          </div>
-          <div className="flex-1">
-            <div className="font-mono text-xs text-[#666] dark:text-[#888] mb-1">Wallet Address</div>
-            <div className="font-mono text-sm text-black dark:text-white break-all">
-              {address}
-            </div>
-            <div className="flex items-center gap-4 mt-3">
-              <div className="flex items-center gap-1">
-                <Trophy className="w-3 h-3 text-amber-500" />
-                <span className="font-mono text-[10px] text-[#666] dark:text-[#888]">
-                  {stats.earnedBadges.length} badges
-                </span>
-              </div>
-              <div className="flex items-center gap-1">
-                <TrendingUp className="w-3 h-3 text-emerald-500" />
-                <span className="font-mono text-[10px] text-[#666] dark:text-[#888]">
-                  {stats.totalExpenses} expenses
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
       {/* Stats Grid */}
       <motion.div
         variants={fadeUpItem}
@@ -187,6 +151,14 @@ export default function MemberProfile({ address, expenses }) {
         className="p-6 border border-[#E5E5E5] dark:border-[#333] bg-white dark:bg-black"
       >
         <h3 className="font-serif italic text-lg mb-4">Achievements</h3>
+        <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 px-3 py-1 border border-[#E5E5E5] dark:border-[#333] rounded-full">
+            <Trophy className="w-3 h-3 text-amber-500" />
+            <span className="text-[10px] font-mono uppercase tracking-widest text-[#666] dark:text-[#888]">
+              {stats.earnedBadges.length} / {getAllBadges().length} earned
+            </span>
+          </div>
+        </div>
         <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
           {getAllBadges().slice(0, 10).map(badge => {
             const earned = stats.earnedBadges.some(e => e.id === badge.id);
@@ -202,49 +174,6 @@ export default function MemberProfile({ address, expenses }) {
           })}
         </div>
       </motion.div>
-
-      {/* Recent Activity */}
-      {stats.recentExpenses.length > 0 && (
-        <motion.div
-          variants={fadeUpItem}
-          className="p-6 border border-[#E5E5E5] dark:border-[#333] bg-white dark:bg-black"
-        >
-          <h3 className="font-serif italic text-lg mb-4">Recent Activity</h3>
-          <div className="space-y-3">
-            {stats.recentExpenses.map((exp, i) => {
-              const cat = exp.category ? getCategoryById(exp.category) : null;
-              return (
-                <motion.div
-                  key={exp.id || i}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: i * 0.05 }}
-                  className="flex items-center justify-between p-3 bg-[#F7F7F7] dark:bg-[#111]"
-                >
-                  <div className="flex items-center gap-3">
-                    {cat && (
-                      <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: cat.color + '20' }}>
-                        <cat.icon className="w-3 h-3" style={{ color: cat.color }} />
-                      </div>
-                    )}
-                    <div>
-                      <div className="font-mono text-xs text-black dark:text-white">
-                        {exp.description}
-                      </div>
-                      <div className="font-mono text-[10px] text-[#666] dark:text-[#888]">
-                        {exp.createdAt ? new Date(exp.createdAt).toLocaleDateString() : 'Unknown date'}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="font-mono text-xs text-black dark:text-white">
-                    {(exp.amount / 1e7).toFixed(2)} XLM
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-        </motion.div>
-      )}
     </motion.div>
   );
 }

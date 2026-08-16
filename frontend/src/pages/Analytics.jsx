@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { getAll, getStats, clearAnalytics, syncAnalytics } from '../services/analytics';
-import { Activity, BarChart3, Trash2 } from 'lucide-react';
+import { Activity, Users, BarChart3, Trash2 } from 'lucide-react';
 import { useStellarStore } from '../hooks/useStellar';
 
 export default function Analytics() {
@@ -21,7 +21,7 @@ export default function Analytics() {
   };
 
   const filtered = filter
-    ? events.filter((e) => e.event.includes(filter) || e.url?.includes(filter))
+    ? events.filter((e) => e.event.includes(filter) || e.properties?.wallet_address?.includes(filter))
     : events;
 
   if (!address) {
@@ -51,13 +51,20 @@ export default function Analytics() {
         </div>
 
         {stats && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
             <div className="border border-[#E5E5E5] dark:border-[#222] p-6 bg-white dark:bg-black">
               <div className="flex items-center gap-3 mb-3">
                 <Activity className="w-4 h-4 text-[#666] dark:text-[#888]" />
                 <span className="font-mono text-[10px] uppercase tracking-widest text-[#666] dark:text-[#888]">Total Events</span>
               </div>
               <span className="font-mono text-4xl">{stats.total}</span>
+            </div>
+            <div className="border border-[#E5E5E5] dark:border-[#222] p-6 bg-white dark:bg-black">
+              <div className="flex items-center gap-3 mb-3">
+                <Users className="w-4 h-4 text-[#666] dark:text-[#888]" />
+                <span className="font-mono text-[10px] uppercase tracking-widest text-[#666] dark:text-[#888]">Unique Wallets</span>
+              </div>
+              <span className="font-mono text-4xl">{stats.uniqueWallets}</span>
             </div>
             <div className="border border-[#E5E5E5] dark:border-[#222] p-6 bg-white dark:bg-black">
               <div className="flex items-center gap-3 mb-3">
@@ -74,7 +81,7 @@ export default function Analytics() {
             type="text"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            placeholder="Filter by event..."
+            placeholder="Filter by event or wallet..."
             className="w-full bg-transparent border border-[#E5E5E5] dark:border-[#333] p-4 font-mono text-xs text-black dark:text-white outline-none focus:border-black dark:focus:border-white"
           />
         </div>
@@ -85,11 +92,13 @@ export default function Analytics() {
               No events recorded yet. Interact with the app to generate data.
             </div>
           ) : (
-            filtered.slice().reverse().slice(0, 10).map((e, i) => (
+            filtered.slice().reverse().slice(0, 100).map((e, i) => (
               <div key={i} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <span className="font-mono text-xs uppercase tracking-wider">{e.event}</span>
                 <div className="font-mono text-[10px] text-[#666] dark:text-[#888] truncate max-w-[300px]">
-                  {e.url?.slice(0, 40)}
+                  {e.properties?.wallet_address
+                    ? `${e.properties.wallet_address.slice(0, 5)}...`
+                    : ''}
                 </div>
               </div>
             ))

@@ -115,7 +115,12 @@ export default function Profile() {
                 </div>
               </form>
             ) : (
-              <div className="flex items-center gap-4 group w-full">
+              <div className="flex items-center gap-5 group w-full">
+                <div className="hidden sm:flex w-16 h-16 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-emerald-400 via-teal-500 to-teal-700 flex items-center justify-center shrink-0 shadow-lg shadow-teal-500/20">
+                  <span className="font-serif italic text-2xl md:text-4xl text-white">
+                    {(profileName || 'A').charAt(0).toUpperCase()}
+                  </span>
+                </div>
                 <h1 className="text-5xl md:text-8xl font-serif italic tracking-tight truncate">
                   {profileName || 'Anonymous'}
                 </h1>
@@ -154,15 +159,7 @@ export default function Profile() {
 
         {expenses.length > 0 && (
           <div className="mb-16">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-serif italic">Member Profile</h2>
-              <div className="flex items-center gap-2 px-3 py-1 border border-[#E5E5E5] dark:border-[#333] rounded-full transition-colors duration-500">
-                <Activity className="w-3 h-3 text-[#666] dark:text-[#888]" />
-                <span className="text-[10px] font-mono uppercase tracking-widest text-[#666] dark:text-[#888]">
-                  {expenses.length} expenses
-                </span>
-              </div>
-            </div>
+            <h2 className="text-2xl font-serif italic mb-8">Stats & Achievements</h2>
             <MemberProfile address={address} expenses={expenses} />
           </div>
         )}

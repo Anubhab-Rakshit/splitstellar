@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useStellarStore } from '../hooks/useStellar';
+import { useStellarStore, WALLETCONNECT_PROJECT_ID } from '../hooks/useStellar';
 import { X, Anchor, Cloud, Zap, Link2, ExternalLink, AlertTriangle } from 'lucide-react';
 import { triggerToast } from '../services/toast';
 import { track } from '../services/analytics';
@@ -27,14 +27,22 @@ export default function WalletModal() {
     /Mobi|Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
   []);
 
+  const isExtensionOnlyWallet = (walletId) => walletId === 'freighter' || walletId === 'xbull';
+
   const handleConnect = async (walletId) => {
     try {
       setConnecting(true);
       setNotInstalledWallet(null);
 
-      if (isMobile && walletId !== 'walletconnect') {
+      if (isMobile && isExtensionOnlyWallet(walletId)) {
         const wallet = WALLETS.find((w) => w.id === walletId);
-        setNotInstalledWallet(wallet || { id: walletId, name: walletId });
+        setNotInstalledWallet({ ...wallet, unavailable: 'mobile' });
+        return;
+      }
+
+      if (walletId === 'walletconnect' && !WALLETCONNECT_PROJECT_ID) {
+        const wallet = WALLETS.find((w) => w.id === walletId);
+        setNotInstalledWallet({ ...wallet, unavailable: 'unconfigured' });
         return;
       }
 
@@ -119,7 +127,12 @@ export default function WalletModal() {
                       </div>
                       <span className="font-mono text-sm text-black dark:text-white transition-colors duration-500">{wallet.name}</span>
                     </div>
-                    {wallet.recommended && (
+                    {isMobile && wallet.id === 'albedo' && (
+                      <span className="text-[10px] font-mono uppercase tracking-widest px-2 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-sm transition-colors duration-500">
+                        Best on mobile
+                      </span>
+                    )}
+                    {!isMobile && wallet.recommended && (
                       <span className="text-[10px] font-mono uppercase tracking-widest px-2 py-1 bg-[#F7F7F7] dark:bg-[#111] text-[#666] dark:text-[#888] rounded-sm transition-colors duration-500">
                         Recommended
                       </span>
@@ -135,20 +148,37 @@ export default function WalletModal() {
                   <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
                   <div>
                     <p className="font-mono text-xs font-bold text-amber-700 dark:text-amber-400 mb-1">
-                      {notInstalledWallet.name} not found
+                      {notInstalledWallet.unavailable === 'mobile'
+                        ? `${notInstalledWallet.name} needs a browser extension`
+                        : notInstalledWallet.unavailable === 'unconfigured'
+                          ? 'WalletConnect is not configured yet'
+                          : `${notInstalledWallet.name} not found`}
                     </p>
                     <p className="font-mono text-[10px] text-amber-600 dark:text-amber-500 mb-3">
-                      Install the {notInstalledWallet.name} browser extension to connect.
+                      {notInstalledWallet.unavailable === 'mobile'
+                        ? 'Browser extensions don\u2019t run on mobile. Use Albedo, which works directly in your browser, or WalletConnect.'
+                        : notInstalledWallet.unavailable === 'unconfigured'
+                          ? 'This deployment has no WalletConnect project ID. Albedo works right now on mobile.'
+                          : `Install the ${notInstalledWallet.name} browser extension to connect.`}
                     </p>
-                    <a
-                      href={DOWNLOAD_URLS[notInstalledWallet.id] || '#'}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => setNotInstalledWallet(null)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-mono text-[10px] uppercase tracking-widest rounded-sm transition-colors"
-                    >
-                      Download {notInstalledWallet.name} <ExternalLink className="w-3 h-3" />
-                    </a>
+                    {notInstalledWallet.unavailable ? (
+                      <button
+                        onClick={() => handleConnect('albedo')}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-mono text-[10px] uppercase tracking-widest rounded-sm transition-colors"
+                      >
+                        Use Albedo <Cloud className="w-3 h-3" />
+                      </button>
+                    ) : (
+                      <a
+                        href={DOWNLOAD_URLS[notInstalledWallet.id] || '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setNotInstalledWallet(null)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-mono text-[10px] uppercase tracking-widest rounded-sm transition-colors"
+                      >
+                        Download {notInstalledWallet.name} <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
                   </div>
                 </div>
               </div>

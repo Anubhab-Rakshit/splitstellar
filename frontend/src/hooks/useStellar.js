@@ -30,21 +30,35 @@ export const useStellarStore = create((set) => ({
   disconnect: () => set({ address: null, balance: null, profileName: null, error: null }),
 }));
 
+export const WALLETCONNECT_PROJECT_ID = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID;
+
 let kitInstance = null;
 
 export const initializeStellarKit = () => {
   if (!kitInstance) {
+    const modules = [
+      new FreighterModule(),
+      new AlbedoModule(),
+      new xBullModule(),
+    ];
+
+    if (WALLETCONNECT_PROJECT_ID) {
+      modules.push(new WalletConnectModule({
+        projectId: WALLETCONNECT_PROJECT_ID,
+        allowedChains: ['stellar:testnet'],
+        metadata: {
+          name: 'SplitStellar',
+          description: 'Split expenses with friends on the Stellar network',
+          url: 'https://splitstellar.vercel.app',
+          icons: ['https://splitstellar.vercel.app/favicon.ico'],
+        },
+      }));
+    }
+
     StellarWalletsKit.init({
       network: Networks.TESTNET,
       selectedWalletId: 'freighter',
-      modules: [
-        new FreighterModule(),
-        new AlbedoModule(),
-        new xBullModule(),
-        new WalletConnectModule({
-          projectId: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || 'e3f7e8c5a0b4d6f8a2c4e6f8a0b2d4f6',
-        }),
-      ],
+      modules,
     });
     kitInstance = StellarWalletsKit;
     useStellarStore.getState().setKit(StellarWalletsKit);
