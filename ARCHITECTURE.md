@@ -34,7 +34,7 @@ flowchart TB
 
     subgraph stellar["Stellar Testnet"]
         RPC[RPC — soroban-testnet.stellar.org]
-        CT[ExpensePool Contract — CAMFEWTNBPLGOWA5P3TD2GVEGDNE6G4TUVFRNWSZN67ZWNTBBNNUYG25]
+        CT[ExpensePool Contract — CAG5MXEQORC4ZP57WI4WJVXWHP5CZHXXMA77VV63JVSW42GNMJYAMUCJ]
     end
 
     subgraph persist["Persistence"]
