@@ -9,6 +9,9 @@ Decentralized expense splitting on the Stellar network powered by Soroban smart 
 - **User guide:** [splitstellar.vercel.app/guide](https://splitstellar.vercel.app/guide)
 - **Testnet contract:** [`CAMFEWTNBPLGOWA5P3TD2GVEGDNE6G4TUVFRNWSZN67ZWNTBBNNUYG25`](https://stellar.expert/explorer/testnet/contract/CAMFEWTNBPLGOWA5P3TD2GVEGDNE6G4TUVFRNWSZN67ZWNTBBNNUYG25)
 - **Integration map:** [`CONTRACT_INTEGRATION.md`](./CONTRACT_INTEGRATION.md)
+- **User data:** [Google Sheets](https://docs.google.com/spreadsheets/d/1k7NOD86ff6VQdbosQo0M5DkEAmExZouflWb0qGyLkRA/edit?usp=sharing)
+- **Feedback form:** [Google Form](https://forms.gle/2gjEdehQZsiQ1GqY9)
+- **Presentation deck:** [Google Drive (PDF)](https://drive.google.com/drive/folders/18ymk8qxpR95uYYyXeDYsOXN_FPp9e1dF?usp=drive_link)
 
 ## Quick navigation
 
