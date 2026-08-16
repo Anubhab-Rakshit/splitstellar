@@ -245,6 +245,17 @@ GitHub Actions workflow (`.github/workflows/ci.yml`):
 
 ---
 
+## Level 5 Changes
+
+| Commit | Description |
+|--------|-------------|
+| [`6e93761`](https://github.com/Anubhab-Rakshit/splitstellar/commit/6e93761) | **security:** harden Soroban contract with membership validation and input limits |
+| [`cbb194a`](https://github.com/Anubhab-Rakshit/splitstellar/commit/cbb194a) | **fix:** frontend security hardening and UX improvements |
+| [`4bab17c`](https://github.com/Anubhab-Rakshit/splitstellar/commit/4bab17c) | **feat:** add premium user guide page |
+| [`bb7c35f`](https://github.com/Anubhab-Rakshit/splitstellar/commit/bb7c35f) | **docs:** update README and CONTRACT_INTEGRATION for Level 5 |
+
+---
+
 ## Architecture
 
 ```
