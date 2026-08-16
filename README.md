@@ -5,7 +5,7 @@
 Decentralized expense splitting on the Stellar network powered by Soroban smart contracts. Create expense pools, log transactions on-chain, and settle balances — all directly from your wallet.
 
 - **Live demo:** [splitstellar.vercel.app](https://splitstellar.vercel.app/)
-- **Demo video:** [Watch on YouTube](https://youtu.be/1UexAQg4Rbw)
+- **Demo video:** [Watch on YouTube](https://youtu.be/Txo6T-UR3vo)
 - **User guide:** [splitstellar.vercel.app/guide](https://splitstellar.vercel.app/guide)
 - **Testnet contract:** [`CAMFEWTNBPLGOWA5P3TD2GVEGDNE6G4TUVFRNWSZN67ZWNTBBNNUYG25`](https://stellar.expert/explorer/testnet/contract/CAMFEWTNBPLGOWA5P3TD2GVEGDNE6G4TUVFRNWSZN67ZWNTBBNNUYG25)
 - **Integration map:** [`CONTRACT_INTEGRATION.md`](./CONTRACT_INTEGRATION.md)
@@ -387,7 +387,7 @@ VITE_SUPABASE_ANON_KEY=         # optional
 - Public GitHub repository
 - 55 meaningful commits
 - Live deployed application — [splitstellar.vercel.app](https://splitstellar.vercel.app/)
-- Demo video — [YouTube](https://youtu.be/1UexAQg4Rbw)
+- Demo video — [YouTube](https://youtu.be/Txo6T-UR3vo)
 - Presentation — [Google Drive](https://drive.google.com/drive/folders/18ymk8qxpR95uYYyXeDYsOXN_FPp9e1dF?usp=drive_link)
 - Proof of 50+ users — 51 verified in the feedback table above + 66 verified on-chain transactions
 - Screenshots of analytics and transaction activity
