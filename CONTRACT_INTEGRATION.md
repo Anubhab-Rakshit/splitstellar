@@ -106,6 +106,15 @@ Networks, BASE_FEE, Account, Operation, Asset
 | **Frontend call** | `simulateCall(address, 'verify_balance', { tokenId, owner, required })` |
 | **Purpose** | Inter-contract balance verification (cross-contract invocation) |
 
+### 9. `get_pool_members`
+
+| Layer | Detail |
+|-------|--------|
+| **Contract** (`lib.rs:307`) | `fn get_pool_members(env: Env, pool_id: u64) -> Vec<Address>` |
+| **ScVal** | Return value parsed as an array of `address` strings |
+| **Frontend call** | Not invoked by the frontend; membership UI reads `db.getPoolMembers` (Supabase), while on-chain membership is enforced via `add_pool_member` + `is_pool_member` and tracked by `Pool.member_count` |
+| **Purpose** | Read-only membership listing API (reserved for future batch operations) |
+
 ---
 
 ## Parameter Type Alignment
@@ -188,7 +197,7 @@ Events are polled in `Dashboard.jsx:98` (`pollEvents()` via `fetchEvents`/`conve
 
 | File | Role |
 |------|------|
-| `contracts/expense-pool/src/lib.rs` | Smart contract (8 functions + 2 events + 20 tests) |
+| `contracts/expense-pool/src/lib.rs` | Smart contract (9 functions + 2 events + 20 tests) |
 | `contracts/expense-pool/src/test.rs` | Unit tests for all contract functions |
 | `frontend/src/services/soroban.js` | Soroban RPC layer (simulate, build/submit, parse) |
 | `frontend/src/hooks/useStellar.js` | Zustand store + wallet kit initialization |
