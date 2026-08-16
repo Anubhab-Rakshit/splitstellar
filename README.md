@@ -22,6 +22,7 @@ Decentralized expense splitting on the Stellar network powered by Soroban smart 
 - [Feedback → improvements → commits](#feedback--improvements--commits)
 - [Recent features](#recent-features)
 - [Smart contract](#smart-contract)
+- [Architecture](#architecture)
 - [Workflows](#workflows)
 - [Getting started](#getting-started)
 - [Submission checklist](#submission-checklist)
@@ -342,63 +343,106 @@ VITE_SUPABASE_ANON_KEY=         # optional
 
 ## Architecture
 
+> Full deep-dive — data flows, sequence diagrams, directory layout, and testing: [`ARCHITECTURE.md`](./ARCHITECTURE.md)
+
+### System overview
+
+```mermaid
+flowchart TB
+    subgraph client["Frontend — React 19 SPA (Vite)"]
+        P[Pages — Landing / Dashboard / Profile / Analytics / Guide]
+        C[Components — WalletModal, ExpenseLogger, SettleUp, MemberProfile, CommandPalette]
+        S[State — Zustand store useStellarStore]
+    end
+
+    subgraph services["Services Layer"]
+        WB[soroban.js — simulateCall / buildAndSubmit / sendPayment]
+        DB[db.js — Supabase + localStorage fallback]
+        AN[analytics.js — event tracking]
+    end
+
+    subgraph wallet["Wallet Layer — stellar-wallets-kit"]
+        W1[Freighter]
+        W2[Albedo]
+        W3[xBull]
+        W4[WalletConnect]
+    end
+
+    subgraph stellar["Stellar Testnet"]
+        RPC[RPC — soroban-testnet.stellar.org]
+        CT[ExpensePool Contract — CAMFEWT...YG25]
+    end
+
+    subgraph persist["Persistence"]
+        SB[(Supabase)]
+        LS[(localStorage)]
+    end
+
+    P --> C
+    P --> S
+    C --> WB
+    C --> DB
+    C --> AN
+    WB --> CT
+    CT --> RPC
+    C --> W1 & W2 & W3 & W4
+    W1 & W2 & W3 & W4 --> RPC
+    DB --> SB
+    DB -. fallback .-> LS
+    AN --> SB
+    AN -. fallback .-> LS
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                           Frontend (React / Vite)                        │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌────────────┐ │
-│  │   Dashboard   │  │   Expense    │  │   Settle Up   │  │   Guide    │ │
-│  │   (Pools)     │  │   Logger     │  │   Calculator  │  │   (Help)   │ │
-│  └───────┬───────┘  └───────┬──────┘  └───────┬──────┘  └────────────┘ │
-└──────────┼──────────────────┼─────────────────┼──────────────────────────┘
-           │                  │                 │
-           │    ┌─────────────┴─────────────────┘
-           │    │
-           ▼    ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│                     Services Layer (soroban.js)                          │
-│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────────┐  │
-│  │  simulateCall()   │  │  buildAndSubmit() │  │  sendPayment()       │  │
-│  │  (Read ops)       │  │  (Write ops)      │  │  (Settlement)        │  │
-│  └────────┬─────────┘  └────────┬─────────┘  └──────────┬───────────┘  │
-└───────────┼─────────────────────┼───────────────────────┼───────────────┘
-            │                     │                       │
-            ▼                     ▼                       ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│                        Stellar Network                                   │
-│  ┌──────────────────────────────────────────────────────────────────┐  │
-│  │                    Soroban Contract (Rust)                        │  │
-│  │  ┌────────────────┐  ┌────────────────┐  ┌────────────────────┐ │  │
-│  │  │  create_pool    │  │  log_expense    │  │  verify_balance    │ │  │
-│  │  │  get_pool       │  │  get_expenses   │  │  is_pool_member    │ │  │
-│  │  │  add_member     │  │  get_expense    │  │                    │ │  │
-│  │  └────────────────┘  └────────────────┘  └────────────────────┘ │  │
-│  └──────────────────────────────────────────────────────────────────┘  │
-│                                                                          │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────────────┐  │
-│  │   XLM    │  │   USDC   │  │   EURC   │  │   Anchor Assets      │  │
-│  │ (Native) │  │ (Circle) │  │ (Circle) │  │   (MoneyGram, etc.)  │  │
-│  └──────────┘  └──────────┘  └──────────┘  └──────────────────────┘  │
-│                                                                          │
-│                     + DEX (path payments for multi-currency)             │
-└─────────────────────────────────────────────────────────────────────────┘
-            │
-            ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│                        Persistence Layer                                  │
-│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────────┐  │
-│  │  Supabase         │  │  localStorage    │  │  Analytics           │  │
-│  │  (Profiles,       │  │  (Fallback)      │  │  (Events, Metrics)   │  │
-│  │   Pool Members)   │  │                  │  │                      │  │
-│  └──────────────────┘  └──────────────────┘  └──────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────────┘
+
+### On-chain read vs write
+
+```mermaid
+flowchart LR
+    subgraph Read["Read — simulateCall (no fee, no signature)"]
+        R1[Build tx] --> R2[simulateTransaction] --> R3[parse scValToNative]
+    end
+    subgraph Write["Write — buildAndSubmit (wallet signed)"]
+        W1[Simulate] --> W2[assembleTransaction] --> W3[Wallet sign] --> W4[Submit + poll] --> W5[Parse result]
+    end
 ```
+
+### Core workflows
+
+**Create a pool** — form → `buildAndSubmit('create_pool')` → wallet sign → contract stores `Pool` + event → Supabase saves invite code → shareable invite link.
+
+```mermaid
+flowchart LR
+    A[Create pool form] --> B[buildAndSubmit create_pool] --> C[Wallet signs tx] --> D[Contract stores Pool + event] --> E[Supabase pool + invite code] --> F[Share invite link]
+```
+
+**Invite & join** — invite code/link → `createJoinRequest` (pending) → owner approves → `add_pool_member` on-chain → member joins pool.
+
+```mermaid
+flowchart LR
+    A[Invite code / share link] --> B[createJoinRequest pending] --> C[Owner approves] --> D[add_pool_member on-chain] --> E[Member joined]
+```
+
+**Log expense** — form → `log_expense` on-chain → `ExpenseLoggedEvent` → persist to Supabase + cache → balances recalculate.
+
+```mermaid
+flowchart LR
+    A[ExpenseLogger] --> B[log_expense on-chain] --> C[Expense + event] --> D[Persist + cache] --> E[Recalculate balances]
+```
+
+**Settle up** — compute net balances → min-transaction payment plan → `verify_balance` → `sendPayment` (native XLM) → record tx hash.
+
+```mermaid
+flowchart LR
+    A[Settle Up] --> B[Net balance calculation] --> C[Min-transaction plan] --> D[verify_balance] --> E[sendPayment XLM] --> F[Record tx hash + activity]
+```
+
+### Layers
 
 - **Frontend** — React SPA with Zustand state, Tailwind CSS v4, Framer Motion
 - **Wallet** — Freighter / Albedo / xBull / WalletConnect via `@creit.tech/stellar-wallets-kit`
-- **Contract** — Rust Soroban smart contract on testnet (8 functions, 2 events, 20 tests)
+- **Contract** — Rust Soroban smart contract on testnet (9 functions, 2 events, 20 tests)
 - **Integration** — `@stellar/stellar-sdk` v16; reads via `simulateCall`, writes via `buildAndSubmit` (simulate → assemble → sign → submit → poll)
 - **Persistence** — Supabase with localStorage fallback
-- **CI/CD** — GitHub Actions → lint, test, build → Vercel deploy
+- **CI/CD** — GitHub Actions → lint, test, build → GitHub Pages; live demo on Vercel
 
 ---
 
