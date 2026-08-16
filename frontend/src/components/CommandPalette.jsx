@@ -23,7 +23,7 @@ import { useStellarStore } from '../hooks/useStellar';
 const fuse = new Fuse(COMMANDS, { keys: ['name', 'description', 'category'] });
 
 const COMMANDS = [
-  { id: 'home', name: 'Go to Dashboard', description: 'Navigate to main dashboard', category: 'Navigation', icon: Home, action: 'navigate', path: '/app' },
+  { id: 'home', name: 'Go to Dashboard', description: 'Navigate to main dashboard', category: 'Navigation', icon: Home, action: 'navigate', path: '/dashboard' },
   { id: 'analytics', name: 'View Analytics', description: 'Check spending insights', category: 'Navigation', icon: BarChart3, action: 'navigate', path: '/analytics' },
   { id: 'profile', name: 'View Profile', description: 'Manage your account', category: 'Navigation', icon: User, action: 'navigate', path: '/profile' },
   { id: 'guide', name: 'Open User Guide', description: 'Learn how SplitStellar works', category: 'Navigation', icon: BookOpen, action: 'navigate', path: '/guide' },
@@ -33,7 +33,7 @@ const COMMANDS = [
   { id: 'disconnect-wallet', name: 'Disconnect Wallet', description: 'Disconnect your wallet', category: 'Wallet', icon: LogOut, action: 'wallet', walletAction: 'disconnect' },
   { id: 'copy-address', name: 'Copy Wallet Address', description: 'Copy address to clipboard', category: 'Wallet', icon: Copy, action: 'wallet', walletAction: 'copy' },
   { id: 'view-explorer', name: 'View on Stellar Explorer', description: 'Open account in explorer', category: 'Wallet', icon: ExternalLink, action: 'wallet', walletAction: 'explorer' },
-  { id: 'new-pool', name: 'Create New Pool', description: 'Start a new expense pool', category: 'Actions', icon: Plus, action: 'navigate', path: '/app' },
+  { id: 'new-pool', name: 'Create New Pool', description: 'Start a new expense pool', category: 'Actions', icon: Plus, action: 'navigate', path: '/dashboard' },
 ];
 
 const categories = [...new Set(COMMANDS.map((c) => c.category))];
@@ -159,7 +159,7 @@ export default function CommandPalette() {
                   </button>
                 </div>
 
-                <Command.List className="max-h-[300px] overflow-y-auto p-2">
+                <Command.List className="max-h-[300px] overflow-y-auto p-2" data-lenis-prevent>
                   <Command.Empty className="py-6 text-center font-mono text-xs text-[#666] dark:text-[#888]">
                     No results found.
                   </Command.Empty>
