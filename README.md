@@ -20,6 +20,7 @@ Decentralized expense splitting on the Stellar network powered by Soroban smart 
 - [Level 5 — 50+ user proof](#level-5--user-growth-and-feedback)
 - [Verified transactions](#verified-transactions-level-5)
 - [Feedback → improvements → commits](#feedback--improvements--commits)
+- [Next phase — roadmap](#next-phase--roadmap)
 - [Recent features](#recent-features)
 - [Smart contract](#smart-contract)
 - [Architecture](#architecture)
@@ -230,7 +231,7 @@ Every actionable theme raised by Level 5 testers was matched to a shipped fix.
 | Profile — "Profile page can be more interesting" | Avishikta | Member profiles, achievement badges, spending insights | [`7739bc5`](https://github.com/Anubhab-Rakshit/splitstellar/commit/7739bc5) |
 | Emojis — "emojis support could be done" | Sarin Sanyal | Themed SVG achievement badges replacing emoji icons | [`7739bc5`](https://github.com/Anubhab-Rakshit/splitstellar/commit/7739bc5) |
 | Smoother UX — "a bit more smoother", "navigation could be smoother", "animations were sometimes causing delay" | Arin Das, Ayanika Sen, Subom Paul, Rick | Premium animations + ⌘K command palette + animation/performance tuning | [`6239bcf`](https://github.com/Anubhab-Rakshit/splitstellar/commit/6239bcf), [`f239526`](https://github.com/Anubhab-Rakshit/splitstellar/commit/f239526), [`abfbfe5`](https://github.com/Anubhab-Rakshit/splitstellar/commit/abfbfe5) |
-| Feature requests — QR/payment links, AI receipt scanning, auto-mark-paid, multi-chain | Shashi verma, Anushka Sarkar, praloy sahoo, Sanjuktta Kundu | Documented in the roadmap for future work | — |
+| Feature requests — QR/payment links, AI receipt scanning, auto-mark-paid, multi-chain | Shashi verma, Anushka Sarkar, praloy sahoo, Sanjuktta Kundu | Documented in the [next-phase roadmap](#next-phase--roadmap) for future work | — |
 
 ---
 
@@ -251,6 +252,20 @@ Iterated directly from the feedback loop above:
 | **Premium animations** — shared motion variants across landing, nav, and lists | [`6239bcf`](https://github.com/Anubhab-Rakshit/splitstellar/commit/6239bcf), [`f239526`](https://github.com/Anubhab-Rakshit/splitstellar/commit/f239526) |
 
 ---
+
+## Next Phase — Roadmap
+
+The next phase evolves the product directly from the feature requests collected across all **53 testers** (see [Feedback → Improvements → Commits](#feedback--improvements--commits)). Full prioritized breakdown with implementation notes: [`FEATURE_ROADMAP.md`](./FEATURE_ROADMAP.md).
+
+| Requested by testers | Next-phase plan | Priority |
+|----------------------|-----------------|----------|
+| QR codes & payment links — Shashi verma, Anushka Sarkar | QR-code pool joining + shareable payment links (SEP-7 style) | High |
+| Multi-chain & multi-currency — Shashi verma | Multi-currency path payments via the Stellar DEX + SEP-24 anchor on/off ramps | High |
+| AI receipt scanning — praloy sahoo | Camera → OCR auto-fill of amount, date, merchant with category suggestion | Medium |
+| Auto-mark-paid — Sanjuktta Kundu | Automatic settlement tracking + payment reminders | Medium |
+| Faster refresh & smoother UX — ongoing feedback | Real-time sync, reduced poll latency, skeleton polish | Medium |
+
+Each shipped next-phase feature will be linked back to its delivering commit, following the same feedback → improvement → commit pattern used above.
 
 ## Smart Contract
 
@@ -449,7 +464,7 @@ flowchart LR
 ## Submission Checklist
 
 - Public GitHub repository
-- 55 meaningful commits
+- 69 meaningful commits
 - Live deployed application — [splitstellar.vercel.app](https://splitstellar.vercel.app/)
 - Demo video — [YouTube](https://youtu.be/Txo6T-UR3vo)
 - Presentation — [Google Drive](https://drive.google.com/drive/folders/18ymk8qxpR95uYYyXeDYsOXN_FPp9e1dF?usp=drive_link)
