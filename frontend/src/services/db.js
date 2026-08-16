@@ -390,6 +390,49 @@ export const db = {
           : all.slice(0, 20);
       },
     ),
+
+  getPoolMembers: async (pool_id) =>
+    withFallback(
+      async () => {
+        const { data, error } = await supabase
+          .from('pool_members')
+          .select('wallet_address')
+          .eq('pool_id', pool_id);
+        if (error) throw error;
+        return (data || []).map(m => m.wallet_address);
+      },
+      () => {
+        const members = readMockDb('pool_members');
+        return members.filter(m => m.pool_id === pool_id).map(m => m.wallet_address);
+      },
+    ),
+
+  cacheExpenses: async (pool_id, expenses) => {
+    try {
+      const key = 'splitstellar_cached_expenses';
+      const cached = JSON.parse(localStorage.getItem(key) || '{}');
+      cached[pool_id] = expenses || [];
+      localStorage.setItem(key, JSON.stringify(cached));
+    } catch {
+      /* silent */
+    }
+  },
+
+  getCachedExpenses: () => {
+    try {
+      const key = 'splitstellar_cached_expenses';
+      const cached = JSON.parse(localStorage.getItem(key) || '{}');
+      const all = [];
+      for (const poolId of Object.keys(cached)) {
+        (cached[poolId] || []).forEach(exp => {
+          all.push({ ...exp, poolId });
+        });
+      }
+      return all;
+    } catch {
+      return [];
+    }
+  },
 };
 
 
