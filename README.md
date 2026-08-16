@@ -30,6 +30,24 @@
 
 ## Quick Links
 
+### 🧭 Navigate this README
+
+| | | |
+|---|---|---|
+| [📸 Screenshots](#screenshots) | [🏗️ Architecture](#architecture) | [⛓️ Smart Contract](#smart-contract) |
+| [🧰 Tech Stack](#tech-stack) | [🏅 Level 4 — Evidence](#level-4--evidence) | [📈 Level 5 — User Growth & Feedback](#level-5--user-growth-and-feedback) |
+| [🔧 Workflows](#workflows) | [🚀 Getting Started](#getting-started) | [✅ Submission Checklist](#submission-checklist) |
+
+#### Jump straight into Level 5 evidence
+
+| | |
+|---|---|
+| [📊 Rating distribution](#rating-distribution) | [🔗 Verified transactions](#verified-transactions-level-5) |
+| [💬 Feedback → Improvements → Commits](#feedback--improvements--commits) | [✨ Recent features](#recent-features) |
+| [🗺️ Next phase — roadmap](#next-phase--roadmap) | — |
+
+### 📎 Resources
+
 | Resource | Link |
 |----------|------|
 | 🚀 Live demo | [splitstellar.vercel.app](https://splitstellar.vercel.app/) |
@@ -42,20 +60,6 @@
 | 📊 Tester data | [Google Sheets](https://docs.google.com/spreadsheets/d/1k7NOD86ff6VQdbosQo0M5DkEAmExZouflWb0qGyLkRA/edit?usp=sharing) |
 | 📝 Feedback form | [Google Form](https://forms.gle/2gjEdehQZsiQ1GqY9) |
 | 📁 Presentation deck | [Google Drive (PDF)](https://drive.google.com/drive/folders/18ymk8qxpR95uYYyXeDYsOXN_FPp9e1dF?usp=drive_link) |
-
----
-
-## Table of Contents
-
-1. [Screenshots](#screenshots)
-2. [Architecture](#architecture)
-3. [Smart Contract](#smart-contract)
-4. [Tech Stack](#tech-stack)
-5. [Level 4 — Evidence](#level-4--evidence)
-6. [Level 5 — User Growth & Feedback](#level-5--user-growth-and-feedback)
-7. [Workflows](#workflows)
-8. [Getting Started](#getting-started)
-9. [Submission Checklist](#submission-checklist)
 
 ---
 
