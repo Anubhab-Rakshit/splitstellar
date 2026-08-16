@@ -5,7 +5,7 @@
 | Property | Value |
 |----------|-------|
 | Network | **Testnet** (`Test SDF Network ; September 2015`) |
-| Contract ID | `CAG5MXEQORC4ZP57WI4WJVXWHP5CZHXXMA77VV63JVSW42GNMJYAMUCJ` |
+| Contract ID | `CAMFEWTNBPLGOWA5P3TD2GVEGDNE6G4TUVFRNWSZN67ZWNTBBNNUYG25` |
 | RPC URL | `https://soroban-testnet.stellar.org` |
 
 ## SDK
@@ -33,7 +33,7 @@ Networks, BASE_FEE, Account, Operation, Asset
 | **Contract** (`lib.rs:97`) | `fn create_pool(env: Env, name: String, creator: Address) -> Pool` |
 | **ScVal** (`soroban.js:45`) | `nativeToScVal(args.name, { type: 'string' })`, `nativeToScVal(args.creator, { type: 'address' })` |
 | **Frontend call** | `buildAndSubmit(address, kit, 'create_pool', { name, creator })` |
-| **Called from** | `Dashboard.jsx:284` — create pool form submit handler |
+| **Called from** | `Dashboard.jsx:323` — create pool form submit handler |
 | **Parser** (`soroban.js:77`) | `parseNative('create_pool')` → `{ id, name, creator, total_expenses, created_at, member_count }` |
 | **Event** | `PoolCreatedEvent { pool_id, name, creator }` |
 | **Validation** | Pool name: 1-64 characters |
@@ -45,7 +45,7 @@ Networks, BASE_FEE, Account, Operation, Asset
 | **Contract** (`lib.rs:145`) | `fn get_pool(env: Env, pool_id: u64) -> Option<Pool>` |
 | **ScVal** (`soroban.js:57`) | `nativeToScVal(BigInt(args.poolId), { type: 'u64' })` |
 | **Frontend call** | `simulateCall(address, 'get_pool', { poolId })` |
-| **Called from** | `Dashboard.jsx:56` — `fetchPoolById()`, `Dashboard.jsx:71` — pool discovery scan |
+| **Called from** | `Dashboard.jsx:56` — `fetchPoolById()`, `Dashboard.jsx:88` — pool discovery scan |
 | **Parser** (`soroban.js:77`) | `parseNative('get_pool')` → `{ id, name, creator, total_expenses, created_at, member_count }` |
 
 ### 3. `is_pool_member`
@@ -73,7 +73,7 @@ Networks, BASE_FEE, Account, Operation, Asset
 | **Contract** (`lib.rs:193`) | `fn log_expense(env: Env, pool_id: u64, description: String, amount: i128, payer: Address) -> Result<Expense, ContractError>` |
 | **ScVal** (`soroban.js:50`) | `[nativeToScVal(BigInt(args.poolId), 'u64'), nativeToScVal(args.description, 'string'), nativeToScVal(BigInt(args.amount), 'i128'), nativeToScVal(args.payer, 'address')]` |
 | **Frontend call** | `buildAndSubmit(address, kit, 'log_expense', { poolId, description, amount, payer })` |
-| **Called from** | `ExpenseLogger.jsx:65` — expense form submit handler |
+| **Called from** | `ExpenseLogger.jsx:205` — expense form submit handler |
 | **Parser** (`soroban.js:108`) | `parseNative('log_expense')` → `{ id, pool_id, description, amount, payer, created_at }` |
 | **Event** | `ExpenseLoggedEvent { expense_id, pool_id, description, amount, payer }` |
 | **Validation** | Description: 1-128 characters, Amount: >0, Payer must be pool member |
@@ -85,7 +85,7 @@ Networks, BASE_FEE, Account, Operation, Asset
 | **Contract** (`lib.rs:261`) | `fn get_pool_expenses(env: Env, pool_id: u64) -> Vec<Expense>` |
 | **ScVal** (`soroban.js:57`) | `nativeToScVal(BigInt(args.poolId), { type: 'u64' })` |
 | **Frontend call** | `simulateCall(address, 'get_pool_expenses', { poolId })` |
-| **Called from** | `ExpenseLogger.jsx:30` — `fetchExpenses()`, polls every 12s |
+| **Called from** | `ExpenseLogger.jsx:66` — `fetchExpensesWithRetry()`, visibility-based polling (6s visible / 30s hidden) |
 | **Parser** (`soroban.js:88`) | `parseNative('get_pool_expenses')` → `[{ id, pool_id, description, amount, payer, created_at }]` |
 
 ### 7. `get_expense`
@@ -127,10 +127,10 @@ Networks, BASE_FEE, Account, Operation, Asset
 | 1 | `PoolNotFound` | Caught in `simulateCall`/`buildAndSubmit` try/catch |
 | 2 | `NotPoolCreator` | Caught in `simulateCall`/`buildAndSubmit` try/catch |
 | 3 | `InsufficientBalance` | Caught in `simulateCall`/`buildAndSubmit` try/catch |
-| 4 | `AmountZero` | Validated in `ExpenseLogger.jsx:56` before submission |
+| 4 | `AmountZero` | Validated in `ExpenseLogger.jsx:160` before submission |
 | 5 | `NotPoolMember` | Caught in `simulateCall`/`buildAndSubmit` try/catch |
-| 6 | `PoolNameTooLong` | Validated in `Dashboard.jsx:284` before submission (max 64 chars) |
-| 7 | `DescriptionTooLong` | Validated in `ExpenseLogger.jsx:56` before submission (max 128 chars) |
+| 6 | `PoolNameTooLong` | Validated in `Dashboard.jsx:316` before submission (max 64 chars) |
+| 7 | `DescriptionTooLong` | Validated in `ExpenseLogger.jsx:160` before submission (max 128 chars) |
 | 8 | `PoolFull` | Caught in `simulateCall`/`buildAndSubmit` try/catch (max 1000 expenses) |
 | 9 | `Unauthorized` | Caught in `simulateCall`/`buildAndSubmit` try/catch |
 
@@ -143,7 +143,24 @@ Networks, BASE_FEE, Account, Operation, Asset
 | `PoolCreatedEvent` | `pool_id, name, creator` | `create_pool()` |
 | `ExpenseLoggedEvent` | `expense_id, pool_id, description, amount, payer` | `log_expense()` |
 
-Events are polled in `Dashboard.jsx:97` (`pollEvents()` via `fetchEvents`/`convertEventTopics`) at 12-second intervals.
+Events are polled in `Dashboard.jsx:98` (`pollEvents()` via `fetchEvents`/`convertEventTopics`) at 12-second intervals.
+
+## Recent Additions (Level 6+)
+
+| Feature | Location |
+|---------|----------|
+| Expense categories (20 presets) | `frontend/src/services/categories.js` |
+| Smart split types (equal/percentage/exact/shares) | `ExpenseLogger.jsx` split-type dropdown |
+| Expense notes + undo/redo (last 5) | `ExpenseLogger.jsx` |
+| Currency selector (XLM/USDC/EURC, stroop storage) | `frontend/src/services/currency.js` |
+| CSV / HTML report export (XSS + formula-injection escaped) | `frontend/src/services/export.js` |
+| Real-time collab via visibility polling | `ExpenseLogger.jsx:111-149` |
+| Smart settlement (min-tx optimization) | `SettleUp.jsx` |
+| Spending insights / badges / member profiles | `frontend/src/services/badges.js`, `SpendingInsights.jsx`, `MemberProfile.jsx` |
+| Command palette (⌘K, cmdk + fuse.js) | `frontend/src/components/CommandPalette.jsx` |
+| Premium animations | `frontend/src/services/animations.js` |
+| Pool invite-link persistence + Web Share API | `Dashboard.jsx` (`pendingCodeRef`, `getShareLink`) |
+| Supabase helpers: `getPoolMembers`, `cacheExpenses`, `getCachedExpenses` | `frontend/src/services/db.js` |
 
 ---
 
@@ -161,7 +178,8 @@ Events are polled in `Dashboard.jsx:97` (`pollEvents()` via `fetchEvents`/`conve
 - **Join requests**: Owner approval required for new members
 
 ### Rate Limiting
-- **Event polling**: 12-second intervals with exponential backoff on errors
+- **Ledger polling**: 6-second intervals when the tab is visible, 30 seconds when hidden (`ExpenseLogger.jsx`)
+- **Event polling**: 12-second intervals (`POLL_MS` in `Dashboard.jsx:12`)
 - **Manual retry**: Up to 3 retries with exponential backoff for failed loads
 
 ---
