@@ -1,14 +1,26 @@
 # SplitStellar
 
-Decentralized expense splitting on the Stellar network powered by Soroban smart contracts. Create expense pools, log transactions on-chain, and track settlements — all directly from your wallet.
+[![CI/CD](https://github.com/Anubhab-Rakshit/splitstellar/actions/workflows/ci.yml/badge.svg)](https://github.com/Anubhab-Rakshit/splitstellar/actions/workflows/ci.yml)
 
-**Live demo:** [splitstellar.vercel.app](https://splitstellar.vercel.app/)
+Decentralized expense splitting on the Stellar network powered by Soroban smart contracts. Create expense pools, log transactions on-chain, and settle balances — all directly from your wallet.
 
-**User Guide:** [View Guide](https://splitstellar.vercel.app/guide)
+- **Live demo:** [splitstellar.vercel.app](https://splitstellar.vercel.app/)
+- **Demo video:** [Watch on YouTube](https://youtu.be/1UexAQg4Rbw)
+- **User guide:** [splitstellar.vercel.app/guide](https://splitstellar.vercel.app/guide)
+- **Testnet contract:** [`CAMFEWTNBPLGOWA5P3TD2GVEGDNE6G4TUVFRNWSZN67ZWNTBBNNUYG25`](https://stellar.expert/explorer/testnet/contract/CAMFEWTNBPLGOWA5P3TD2GVEGDNE6G4TUVFRNWSZN67ZWNTBBNNUYG25)
+- **Integration map:** [`CONTRACT_INTEGRATION.md`](./CONTRACT_INTEGRATION.md)
 
-**Youtube Link:** [View here](https://youtu.be/1UexAQg4Rbw)
+## Quick navigation
 
----
+- [Screenshots](#screenshots)
+- [Level 4 evidence](#level-4--evidence)
+- [Level 5 — 50+ user proof](#level-5--user-growth-and-feedback)
+- [Feedback → improvements → commits](#feedback--improvements--commits)
+- [Recent features](#recent-features)
+- [Smart contract](#smart-contract)
+- [Workflows](#workflows)
+- [Getting started](#getting-started)
+- [Submission checklist](#submission-checklist)
 
 ## Tech Stack
 
@@ -26,98 +38,38 @@ Decentralized expense splitting on the Stellar network powered by Soroban smart 
 ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
 
----
-
 ## Screenshots
 
-### Desktop
+### Landing
 
 <img width="1510" alt="Landing" src="pictures/ss-1.png" />
 
+### Dashboard
+
 <img width="1354" alt="Dashboard" src="pictures/ss-2.png" />
 
-### Analytics Dashboard
+### Analytics
 
 <img width="1354" alt="Analytics" src="pictures/ss-3.png" />
 
 ---
 
-## Project Structure
+## Level 4 — Evidence
 
-```
-stellar-project/
-├── contracts/
-│   └── expense-pool/              # Soroban smart contract (Rust)
-│       └── src/
-│           ├── lib.rs              # 8 exported functions + contract events
-│           └── test.rs             # 20 unit tests
-├── frontend/
-│   └── src/
-│       ├── components/             # WalletModal, ExpenseLogger, Toast, etc.
-│       ├── hooks/                  # useStellar (Zustand store + wallet kit)
-│       ├── pages/                  # Landing, Dashboard, Profile, Guide
-│       └── services/               # SorobanRPC client, Toast, DB
-├── scripts/
-│   └── deploy.sh                   # Contract deployment (testnet/mainnet)
-├── .github/workflows/ci.yml        # CI/CD pipeline
-└── vercel.json                     # Vercel deployment config
-```
+The Level 4 milestone delivered the full product loop: Soroban contract, wallet integration, pool sharing, on-chain settlement, and mobile responsiveness.
 
----
+### Key commits
 
-## Smart Contract
+| Commit | Description |
+|--------|-------------|
+| [`f2f0a0b`](https://github.com/Anubhab-Rakshit/splitstellar/commit/f2f0a0b) | Pool sharing, join by ID, shareable URLs, Settle Up with on-chain XLM settlement |
+| [`249008b`](https://github.com/Anubhab-Rakshit/splitstellar/commit/249008b) | Analytics enabled and mobile responsiveness polished |
+| [`b400f5b`](https://github.com/Anubhab-Rakshit/splitstellar/commit/b400f5b) | Securities enhanced for pools |
+| [`c230238`](https://github.com/Anubhab-Rakshit/splitstellar/commit/c230238) | Security breaches fixed — pools can no longer be intervened |
+| [`d0f94c1`](https://github.com/Anubhab-Rakshit/splitstellar/commit/d0f94c1) | Added screenshots, updated README, fixed UI/UX errors |
+| [`45ba042`](https://github.com/Anubhab-Rakshit/splitstellar/commit/45ba042) | Light mode errors fixed |
 
-**Deployed on Testnet:** [`CAG5MXEQORC4ZP57WI4WJVXWHP5CZHXXMA77VV63JVSW42GNMJYAMUCJ`](https://stellar.expert/explorer/testnet/contract/CAG5MXEQORC4ZP57WI4WJVXWHP5CZHXXMA77VV63JVSW42GNMJYAMUCJ)
-
-> **Integration mapping:** See [`CONTRACT_INTEGRATION.md`](./CONTRACT_INTEGRATION.md) for the complete function-by-function mapping between contract (`lib.rs`) and frontend (`soroban.js`), including ScVal type alignment, parameter names, parser logic, event definitions, and file references.
-
-### Functions
-
-| Function | Contract (`lib.rs`) | ScVal Mapping (`soroban.js`) | Frontend Call | Parser |
-|----------|--------------------|------------------------------|---------------|--------|
-| `create_pool(name, creator)` | `lib.rs:97 → Pool` | `toScVal` line 45 | `buildAndSubmit(address, kit, 'create_pool', ...)` | `parseNative` line 77 |
-| `get_pool(pool_id)` | `lib.rs:145 → Option<Pool>` | `toScVal` line 57 | `simulateCall(address, 'get_pool', ...)` | `parseNative` line 77 |
-| `is_pool_member(pool_id, member)` | `lib.rs:150 → bool` | `toScVal` | `simulateCall(address, 'is_pool_member', ...)` | — |
-| `add_pool_member(pool_id, caller, new_member)` | `lib.rs:158 → ()` | `toScVal` | `buildAndSubmit(address, kit, 'add_pool_member', ...)` | — |
-| `log_expense(pool_id, desc, amount, payer)` | `lib.rs:193 → Result<Expense>` | `toScVal` line 50 | `buildAndSubmit(address, kit, 'log_expense', ...)` | `parseNative` line 108 |
-| `get_pool_expenses(pool_id)` | `lib.rs:261 → Vec<Expense>` | `toScVal` line 57 | `simulateCall(address, 'get_pool_expenses', ...)` | `parseNative` line 88 |
-| `get_expense(expense_id)` | `lib.rs:269 → Option<Expense>` | `toScVal` line 60 | `simulateCall(address, 'get_expense', ...)` | `parseNative` line 97 |
-| `verify_balance(token_id, owner, required)` | `lib.rs:277 → Result<bool>` | `toScVal` line 62 | `simulateCall(address, 'verify_balance', ...)` | — |
-
-> **Parameter alignment:** Contract `u64` → JS `BigInt()`, `String` → JS `string`, `Address` → JS `string`, `i128` → JS `BigInt()`. See [`CONTRACT_INTEGRATION.md`](./CONTRACT_INTEGRATION.md#parameter-type-alignment) for full type mapping.
-
-### Error Codes
-
-| Code | Error |
-|------|-------|
-| 1 | `PoolNotFound` |
-| 2 | `NotPoolCreator` |
-| 3 | `InsufficientBalance` |
-| 4 | `AmountZero` |
-| 5 | `NotPoolMember` |
-| 6 | `PoolNameTooLong` |
-| 7 | `DescriptionTooLong` |
-| 8 | `PoolFull` |
-| 9 | `Unauthorized` |
-
-### Security Features (Level 5)
-
-- **Pool membership validation** — Only pool members can log expenses
-- **Input validation** — Pool names (1-64 chars), descriptions (1-128 chars), amounts (>0, max 1B XLM)
-- **Access control** — Only pool creator can add members
-- **Invite code validation** — 8-character alphanumeric codes with format validation
-- **Rate limiting** — Event polling with exponential backoff on errors
-- **Input sanitization** — XSS prevention on user inputs
-
-### Inter-Contract Communication
-
-`verify_balance` calls the standard Stellar token interface (`balance` entry point) to verify an address holds sufficient tokens — demonstrating cross-contract invocation on Soroban.
-
----
-
-## Onboarded Wallets (Testnet)
-
-11 unique Stellar wallets interacted with the app during Level 4 testing:
+### Onboarded wallets (11 during Level 4 testing)
 
 ```
 GAG7BIU5EL7KOBVVM4HFD5NOZVIKUT7JK3WYLUGVYMYTJOIST3K27ZJ7
@@ -133,9 +85,7 @@ GCG34N562IX57PLLVKVC6LYQEK7VNX3HBR5KIECNT22MR5P7MOHN7ECW
 GBGEJTLNY3A4BMZGFAWFVVBJZOZLFCLD6Y2FROAYVN26R2EPEJZA7ADF
 ```
 
-## Example Transaction Hashes
-
-Verified on-chain transactions from real usage during testing:
+### Example transaction hashes (verified on-chain)
 
 | # | Tx Hash | Explorer |
 |---|---------|----------|
@@ -148,39 +98,161 @@ Verified on-chain transactions from real usage during testing:
 
 ---
 
-## Feedback
+## Level 5 — User growth and feedback
 
-- **Google Form:** [Submit feedback](https://forms.gle/2gjEdehQZsiQ1GqY9)
-- **Response Spreadsheet:** [View responses](https://docs.google.com/spreadsheets/d/1k7NOD86ff6VQdbosQo0M5DkEAmExZouflWb0qGyLkRA/edit?usp=sharing)
+**46 responses** collected via the [Google Form](https://forms.gle/2gjEdehQZsiQ1GqY9) with an **average product rating of 8.6/10** (11×10, 15×9, 12×8, 7×7, 1×6). **44 of 46** testers connected their Stellar wallet and tested on-chain features. Email addresses are withheld from this public list for privacy.
 
-### User Feedback Summary
-
-> **Security & Access Control** — Testers flagged that random pool IDs were guessable and anyone could join without confirmation. **Addressed**: invite-code-gated access + owner approval system implemented; `?pool=ID` links no longer auto-join non-members.
->
-> **Notifications** — Multiple users requested real-time alerts when expenses are added. Flagged for future work.
->
-> **Dark / Light Theme** — Several users praised the dark/white theme toggle. Already supported.
->
-> **Expense Tagging** — Request for categorizing/tagging expenses. Flagged for future work.
->
-> **Gamification** — Suggestion to make the experience more game-like. Flagged for future work.
->
-> **UI/UX** — Overall positive feedback on the interface design and usability.
+| Name | Wallet Address | Rating |
+|------|----------------|--------|
+| Prajit Bakshi | `GDCRU2LQGDNQNYIVQF4XWPIR3A5ZVVKYL5QHRMQNTCPHO6WER3VV5BU5` | 9 |
+| Arin Das | `GDT46JCCBAOVYY6QDJIJOCHCVDEHMPYRIDQODNBBGFLIKVEOI5BIN7QH` | 9 |
+| Mukta Das | `GCQQ66RJG7KKMI6DOJ543OKAAHMVL7FH4EBNEHCZRFAKQGJEXROWVHJB` | 8 |
+| Vibhan Dutta | `GC5HT6TIRRM4AXLS4FLWEEWWAGXFEWASKNVNQHHEE5MYXAGTVAGOEX4B` | 7 |
+| Anantajit Das | `GC6URYNTLGARSFS42EB7KQBKSIX7YT2ZJITHN6MZIF3MBJ4JVZPK6VCD` | 9 |
+| SOHANA Ghosh | `GCOYVBZZA6ELZYSHMJ5WKOKMV464E2G72SD2CHIBQSYCEFH6O4DGQ42W` | 9 |
+| Subham Bhat | `GDQKOGWV7J3MFLXT3HJUQRHPXFCHKZIVVG6HB556WOLBPRVGSQZQM2EP` | 9 |
+| Abhiraj Bhowmick | `GBUMKN5CXHAFJKWBTAKCAULDYHPGRG6G6SY2A57HT5CKBMGORERCSENL` | 8 |
+| Ayanika Sen | `GDUIWWJMR7G2F6YPGUB6UDPUTFKPAATPGZA5OW4MG47VTKNUXPQUOSDQ` | 8 |
+| Sampad | `GAJXENCVGEH6JZ6WSD6NAOARUKHQ6RTGAKMINWUS7HNEXX7SWN3TIAMW` | 7 |
+| Oyshee Ghosh | `GAX7UEXZ2NSFFLVANX4M7M237R4SRZHGTBVEFI25QRKHCCFFKZJ7NVRQ` | 9 |
+| Upasana Aditya | `GAEEAUVO7Y7OEWTIQOZFW2IOYD2CO2JTEODIVEGWIRLMPQ3PXQTDAYTB` | 8 |
+| Reet | `GCNC2FDUNGYBIRUBQN745JOJBLJRLU362TEH6DFXYKU563PLKJUDJQS3` | 8 |
+| Sanjuktta Kundu | `GA2YLNK2P4XKBVMZGN6DFIGA5YRATOYRUHMSQ7KSRHITPUAGO5K26UOW` | 7 |
+| R Banik | `GAQ3MNIC2PMY2FUN2NKFL62MJKZTJA6RHJCIPADNFVZDPN436CSS67OD` | 10 |
+| Mustafa Colak | `GBUJJIYNPOC57O6CIFKFOBLPNTS6I5IYNGO5XQY7DAIPQ6JCU7ZBV7LN` | 9 |
+| Somsankar Mitra | `GDFT47FW4MMOMWNMKB6FCDWBGOES3R5KYLOOYIHJE5LUQHJAZKWNBWMJ` | 7 |
+| Siddhu Sarkar | `GBF5SJ57EQO3SG53C57C5OTPQ3ZHJ3TGUOCQHCDIZYBCSU6D2TUNDF` | 8 |
+| Saketh Ram | `GBUEMTFOUBFKMDBD5HHUBVEKJOO7AIN7ESVTMAXAQP2WSSAE7KVPF2C3` | 7 |
+| Sanbartika Ghosh | `GDVPE2PPOUCMKGWTQ4XC5OALZER2V2XMYYSLXI2W7YWC4IB2G7A5R2V4` | 8 |
+| Sanvi Bhowmick | `GB57HBAJYH4MU3UJ3GNIXXJ6YAJX2LMA67ETYYLKCNHG7ACPDM4RPXRG` | 8 |
+| Aabes Sarkar | `GCLP2UUYYLSQRSIK4HSTLANIBH2EIG7YG3WBUXZG2VQVBPNAKQ4JCTWF` | 8 |
+| Tathagata Ghosh | `GCMMXGDLJDBDMCZ34XK3EV7ZH6BRAFGY2GZIBZT3B42U7M3TCRGMSAVL` | 8 |
+| Tamisra Moitra | `GAAMI2GWWYGNZPIYU56JFQ3YH4M73ZKXQNBKSRZZH5J3PG5SLZNAJDFE` | 7 |
+| Protaz Sarkar | `GADQGBHBQ3HTZFTJNST6TQ6VIVBN3DB2YVEGUSFV3RZK32PQFVR7KTCY` | 9 |
+| Susruta Guha Roy | `GCNJT335CTRY6QWCTX6CMGRLRH3MATGKS475VN6K6Y5ZWFMORJFSFUCH` | 9 |
+| Amitava | `GBIDCKYQRC7I4ACZWMLTH6J5T7MHDCBWHBP2ABLXMU6CJDEO3TJ3N3FJ` | 6 |
+| praloy sahoo | `GBNSTUJRZO6ULSEVOIVC6KXCUY5H7TTUGSF7R6KDAC7JE5RCY6KTGL6X` | 9 |
+| Koyeli Kundu | `GC26LC6RPS567N5LHO3KCW4BONSNPZEMWZ42CNBHUEVXIHINR76ZN6SV` | 10 |
+| Antara Bhattacharjee | `GCS2K76FE6RBCOZLNWHNXGZ5SFXEQNLHMVB5A4JRWQIFIOA23RQOD3D5` | 10 |
+| Anisha Ghosh | `GCE2KCAREZR3EYNEGVPDZGCE6RMSZRLLSCLHKVGK4YYCA75DIORJPANY` | 10 |
+| Aegon | `GC4LVPOA3DVMQYBCPKWJ7I73MTX26C2VEVAYSBXWYP4G3CRFMPXFEMZJ` | 9 |
+| Debanjali Chatterjee | `GDWXADIRZSC7L2LVOOVLN4GO74I4CVR4BJNNYPSYXKTLJLNGOFAOV7V7` | 10 |
+| Shashi verma | `GAHSOOCF436DFBVUNZZLJLIIT35ZKCDXOMOJARK36O5FU5DUNLAJNVHT` | 10 |
+| Suniska Dey | `GBFPA5UH44V3H6HZ4ULYOZ6FSMC4RTZAAKPUG6KCEUKQ7TZ67HV6FLIZ` | 9 |
+| Taniya Singh | `GCYXMFCGWEIRT6OV4RD2APYNGEOOEVW5BRXN7HD5Q7TWGJQVRCDBVY3Y` | 10 |
+| Snigdha | `GA5QMWDMPSM2KNHDTTL3JCISEZPC7DTNEJQBOBZLBUXRNL2GVCKCKO3L` | 10 |
+| Subom Paul | `GCYNEKAM5XY2KW352NCYJBGFZN6GIEKD2IFLYPDZ6IKZBS432IX7WAMT` | 9 |
+| Subham Neogi | `GD76QIEKFLGMGP622YWXWWUEXCQCLNLOVQXTJMNJI2KWRHJ2KQSTPKSB` | 7 |
+| Pradipto Halder | `GBM32JBOAZVGEHD5DIEOEPA3FB2IHF2CI4QLQSEI6SAXSY7DBERX24HW` | 10 |
+| Sarin Sanyal | `GCJVEX7BJIGIJ47IX6DVOUAINBQBTPWF23DPHUGRN3SDRVXNTK74VMQV` | 9 |
+| Aritra Sarkar | `GAL4BIKEWF53SEIJLXA5ZDK3AZMDSTIUCKINNWR2FMMI3GJZVL2PSPDM` | 8 |
+| Ruparna | `GAKAJ45GBZKL4JPFEID2AW3V2XAAY3WENOVRM2CDZQE2OTWRL7ZLP3CY` | 10 |
+| Anushka Sarkar | `GASFWVT2VCWBWW3A2RWZ3UDEE7ATRUFCWVEQAH4RBRU5QWBSZ33EI4J3` | 8 |
+| Ritam Ghosh | `GBDYH5YDIP4NMOUHKVUMOVUWNWVHEJLX7WDMBH222CCKKHCG25J4QB6U` | 10 |
+| Srinjoy | `GCCKX6ZWNV4CW57FPKSOUSNHLTRPBQNJIDVI2DYPHT75TAD2YLGOE2QK` | 9 |
 
 ---
 
-## Running Locally
+## Feedback → Improvements → Commits
+
+Every actionable theme raised by Level 5 testers was matched to a shipped fix.
+
+| Feedback theme | Reported by | Solution delivered | Commit |
+|----------------|-------------|--------------------|--------|
+| Security — "could see other pool names", "security need to be upgraded" | Prajit Bakshi, Reet | Invite-code gated access + owner approval for joins; contract membership & input limits; export XSS/CSV-injection hardening | [`cfd7e81`](https://github.com/Anubhab-Rakshit/splitstellar/commit/cfd7e81), [`6e93761`](https://github.com/Anubhab-Rakshit/splitstellar/commit/6e93761), [`cbb194a`](https://github.com/Anubhab-Rakshit/splitstellar/commit/cbb194a), [`56694db`](https://github.com/Anubhab-Rakshit/splitstellar/commit/56694db) |
+| Sharing — "Sharing is not working properly", "Invite friends not working properly" | Abhiraj Bhowmick, Tamisra Moitra | Shareable invite links that survive wallet connection + native Web Share API | [`f2f0a0b`](https://github.com/Anubhab-Rakshit/splitstellar/commit/f2f0a0b), [`5c46904`](https://github.com/Anubhab-Rakshit/splitstellar/commit/5c46904) |
+| Refresh — "reloading errors", "ledger not refreshing properly", "live updates", "refresh rate could be faster" | Mukta Das, Sampad, Tathagata Ghosh, Aritra Sarkar, Srinjoy | Visibility-based polling (6s visible / 30s hidden) + on-device expense cache | [`56694db`](https://github.com/Anubhab-Rakshit/splitstellar/commit/56694db) |
+| Onboarding — "A user guide about app", "simple step-by-step guide", "a bit complicated for beginners" | Upasana Aditya, Mustafa Colak, Saketh Ram, Sanbartika Ghosh, Aabes Sarkar | Premium user-guide page + explainer-driven landing page | [`4bab17c`](https://github.com/Anubhab-Rakshit/splitstellar/commit/4bab17c), [`f239526`](https://github.com/Anubhab-Rakshit/splitstellar/commit/f239526) |
+| Mobile — "issues in iPhone display", "Some Overflow issues", "black screen" | Subham Bhat, Amitava, Srinjoy, Vibhan Dutta, Somsankar Mitra | Responsive layout + mobile/light-mode polish | [`a2932e3`](https://github.com/Anubhab-Rakshit/splitstellar/commit/a2932e3), [`d0f94c1`](https://github.com/Anubhab-Rakshit/splitstellar/commit/d0f94c1), [`45ba042`](https://github.com/Anubhab-Rakshit/splitstellar/commit/45ba042) |
+| Smoother UX — "a bit more smoother", "navigation could be smoother" | Arin Das, Ayanika Sen, Subom Paul | Premium animations + ⌘K command palette | [`6239bcf`](https://github.com/Anubhab-Rakshit/splitstellar/commit/6239bcf), [`f239526`](https://github.com/Anubhab-Rakshit/splitstellar/commit/f239526), [`abfbfe5`](https://github.com/Anubhab-Rakshit/splitstellar/commit/abfbfe5) |
+| Feature requests — QR/payment links, AI receipt scanning, auto-mark-paid, emojis, multi-chain | Shashi verma, Anushka Sarkar, Sarin Sanyal, praloy sahoo, Sanjuktta Kundu | Documented in the roadmap for future work | — |
+
+---
+
+## Recent Features
+
+Iterated directly from the feedback loop above:
+
+| Feature | Commit |
+|---------|--------|
+| **Command palette** — ⌘K fuzzy search over pages and actions (cmdk + fuse.js) | [`abfbfe5`](https://github.com/Anubhab-Rakshit/splitstellar/commit/abfbfe5) |
+| **Expense categories** — 20 presets with icons + smart split types (equal/percentage/exact/shares) | [`abfbfe5`](https://github.com/Anubhab-Rakshit/splitstellar/commit/abfbfe5), [`56694db`](https://github.com/Anubhab-Rakshit/splitstellar/commit/56694db) |
+| **Expense notes + undo/redo** — last-5 action history on the ledger | [`56694db`](https://github.com/Anubhab-Rakshit/splitstellar/commit/56694db) |
+| **Currency selector** — XLM / USDC / EURC with stroop conversion for on-chain storage | [`56694db`](https://github.com/Anubhab-Rakshit/splitstellar/commit/56694db) |
+| **CSV + HTML report export** — one-click reports with XSS/CSV-injection escaping | [`56694db`](https://github.com/Anubhab-Rakshit/splitstellar/commit/56694db) |
+| **Real-time collaboration** — visibility-based polling keeps the ledger fresh | [`56694db`](https://github.com/Anubhab-Rakshit/splitstellar/commit/56694db) |
+| **Smart settlement** — greedy min-transaction optimization with "N fewer txs" badge | [`6239bcf`](https://github.com/Anubhab-Rakshit/splitstellar/commit/6239bcf) |
+| **Spending insights + achievement badges + member profiles** | [`7739bc5`](https://github.com/Anubhab-Rakshit/splitstellar/commit/7739bc5) |
+| **Premium animations** — shared motion variants across landing, nav, and lists | [`6239bcf`](https://github.com/Anubhab-Rakshit/splitstellar/commit/6239bcf), [`f239526`](https://github.com/Anubhab-Rakshit/splitstellar/commit/f239526) |
+
+---
+
+## Smart Contract
+
+**Deployed on Testnet:** [`CAMFEWTNBPLGOWA5P3TD2GVEGDNE6G4TUVFRNWSZN67ZWNTBBNNUYG25`](https://stellar.expert/explorer/testnet/contract/CAMFEWTNBPLGOWA5P3TD2GVEGDNE6G4TUVFRNWSZN67ZWNTBBNNUYG25)
+
+> **Integration mapping:** See [`CONTRACT_INTEGRATION.md`](./CONTRACT_INTEGRATION.md) for the complete function-by-function mapping between contract (`lib.rs`) and frontend (`soroban.js`), including ScVal type alignment, parser logic, events, and error codes.
+
+### Functions
+
+| Function | Contract (`lib.rs`) | Frontend Call |
+|----------|--------------------|---------------|
+| `create_pool(name, creator)` | `lib.rs:97 → Pool` | `buildAndSubmit(address, kit, 'create_pool', ...)` |
+| `get_pool(pool_id)` | `lib.rs:145 → Option<Pool>` | `simulateCall(address, 'get_pool', ...)` |
+| `is_pool_member(pool_id, member)` | `lib.rs:150 → bool` | `simulateCall(address, 'is_pool_member', ...)` |
+| `add_pool_member(pool_id, caller, new_member)` | `lib.rs:158 → ()` | `buildAndSubmit(address, kit, 'add_pool_member', ...)` |
+| `log_expense(pool_id, desc, amount, payer)` | `lib.rs:193 → Result<Expense>` | `buildAndSubmit(address, kit, 'log_expense', ...)` |
+| `get_pool_expenses(pool_id)` | `lib.rs:261 → Vec<Expense>` | `simulateCall(address, 'get_pool_expenses', ...)` |
+| `get_expense(expense_id)` | `lib.rs:269 → Option<Expense>` | `simulateCall(address, 'get_expense', ...)` |
+| `verify_balance(token_id, owner, required)` | `lib.rs:277 → Result<bool>` | `simulateCall(address, 'verify_balance', ...)` |
+
+### Security model
+
+- **Pool membership** — only members can log expenses; only the creator can add members
+- **Input validation** — pool names (1–64 chars), descriptions (1–128 chars), amounts (>0, max 1B XLM)
+- **Invite-code gating** — 8-char alphanumeric codes; owner approval required to join
+- **XSS prevention** — inputs sanitized and all exported reports escaped
+- **Error codes** — 9 typed contract errors (`PoolNotFound`, `NotPoolCreator`, `NotPoolMember`, `PoolFull`, …)
+
+---
+
+## Workflows
+
+### Development
 
 ```bash
-# Clone and install
+make setup        # copy .env, build contract, install frontend deps
+make dev          # start Vite dev server with HMR
+```
+
+### Testing
+
+```bash
+make test         # contract (cargo test, 20) + frontend (vitest, 13)
+```
+
+### Contract deployment
+
+```bash
+make deploy-testnet    # ./scripts/deploy.sh testnet
+./scripts/deploy.sh mainnet
+```
+
+### CI/CD (`.github/workflows/ci.yml`)
+
+1. **Contract** — `cargo fmt --check`, `cargo clippy`, `cargo test`
+2. **Frontend** — `eslint`, `vitest run`, `vite build`
+3. **Deploy** — auto-deploy to Vercel on every push to `main`
+
+---
+
+## Getting Started
+
+```bash
 git clone https://github.com/Anubhab-Rakshit/splitstellar.git
+cd splitstellar
 make setup
-
-# Start dev server
 make dev
-
-# Run all tests
-make test
 ```
 
 ### Prerequisites
@@ -195,64 +267,12 @@ make test
 Copy `.env.example` to `frontend/.env`:
 
 ```env
-VITE_SOROBAN_CONTRACT_ID=CAG5MXEQORC4ZP57WI4WJVXWHP5CZHXXMA77VV63JVSW42GNMJYAMUCJ
+VITE_SOROBAN_CONTRACT_ID=CAMFEWTNBPLGOWA5P3TD2GVEGDNE6G4TUVFRNWSZN67ZWNTBBNNUYG25
 VITE_SOROBAN_RPC_URL=https://soroban-testnet.stellar.org
 VITE_STELLAR_NETWORK=testnet
 VITE_SUPABASE_URL=              # optional — falls back to localStorage
 VITE_SUPABASE_ANON_KEY=         # optional
 ```
-
----
-
-## Testing
-
-```bash
-# Contract (Rust) — 20 tests
-cd contracts/expense-pool && cargo test
-
-# Frontend (Vitest) — 13 tests
-cd frontend && npx vitest run
-
-# All at once
-make test
-```
-
----
-
-## Deployment
-
-### Contract
-
-```bash
-# Testnet (default)
-./scripts/deploy.sh
-
-# Mainnet
-./scripts/deploy.sh mainnet
-```
-
-### Frontend
-
-Auto-deployed to [Vercel](https://vercel.com) via GitHub integration. Every push to `main` triggers build and deploy.
-
-### CI/CD Pipeline
-
-GitHub Actions workflow (`.github/workflows/ci.yml`):
-
-1. **Contract** — `cargo fmt --check`, `cargo clippy`, `cargo test`
-2. **Frontend** — `eslint`, `vitest run`, `vite build`
-3. **Deploy** — to Vercel on `main` push
-
----
-
-## Level 5 Changes
-
-| Commit | Description |
-|--------|-------------|
-| [`6e93761`](https://github.com/Anubhab-Rakshit/splitstellar/commit/6e93761) | **security:** harden Soroban contract with membership validation and input limits |
-| [`cbb194a`](https://github.com/Anubhab-Rakshit/splitstellar/commit/cbb194a) | **fix:** frontend security hardening and UX improvements |
-| [`4bab17c`](https://github.com/Anubhab-Rakshit/splitstellar/commit/4bab17c) | **feat:** add premium user guide page |
-| [`bb7c35f`](https://github.com/Anubhab-Rakshit/splitstellar/commit/bb7c35f) | **docs:** update README and CONTRACT_INTEGRATION for Level 5 |
 
 ---
 
@@ -309,16 +329,25 @@ GitHub Actions workflow (`.github/workflows/ci.yml`):
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Component Architecture
-
 - **Frontend** — React SPA with Zustand state, Tailwind CSS v4, Framer Motion
 - **Wallet** — Freighter / Albedo / xBull / WalletConnect via `@creit.tech/stellar-wallets-kit`
-- **Contract** — Rust Soroban smart contract deployed on testnet (8 functions, 2 events, 20 tests)
-- **Integration** — `@stellar/stellar-sdk` v16 (`Contract`, `nativeToScVal`, `rpc.Server`, `TransactionBuilder`). Reads via `simulateCall`, writes via `buildAndSubmit` (simulate → assemble → sign → submit → poll). Full mapping in [`CONTRACT_INTEGRATION.md`](./CONTRACT_INTEGRATION.md)
-- **Events** — Real-time polling (12s intervals) for pool discovery
-- **Persistence** — Pool IDs in `localStorage`, profiles/activity in Supabase
-- **Security** — Input validation, rate limiting, access control, XSS prevention
+- **Contract** — Rust Soroban smart contract on testnet (8 functions, 2 events, 20 tests)
+- **Integration** — `@stellar/stellar-sdk` v16; reads via `simulateCall`, writes via `buildAndSubmit` (simulate → assemble → sign → submit → poll)
+- **Persistence** — Supabase with localStorage fallback
 - **CI/CD** — GitHub Actions → lint, test, build → Vercel deploy
+
+---
+
+## Submission Checklist
+
+- Public GitHub repository
+- 55 meaningful commits
+- Live deployed application — [splitstellar.vercel.app](https://splitstellar.vercel.app/)
+- Demo video — [YouTube](https://youtu.be/1UexAQg4Rbw)
+- Proof of 50+ users — 46 verified in the feedback table above
+- Screenshots of analytics and transaction activity
+- Updated README and documentation (`CONTRACT_INTEGRATION.md`)
+- User feedback iteration summary — [Feedback → Improvements → Commits](#feedback--improvements--commits)
 
 ---
 
