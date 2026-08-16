@@ -26,9 +26,9 @@ export default function Analytics() {
 
   if (!address) {
     return (
-      <div className="min-h-screen pt-24 sm:pt-40 px-6 flex flex-col items-center justify-center text-center">
-        <h1 className="text-4xl font-serif italic mb-4">Connect Wallet</h1>
-        <p className="text-sm font-mono text-[#666] dark:text-[#888]">Please connect your wallet to view analytics.</p>
+      <div className="min-h-screen pt-24 sm:pt-40 px-4 sm:px-6 flex flex-col items-center justify-center text-center">
+        <h1 className="text-3xl sm:text-4xl font-serif italic mb-4">Connect Wallet</h1>
+        <p className="text-xs sm:text-sm font-mono text-[#666] dark:text-[#888] max-w-md">Please connect your wallet to view analytics.</p>
       </div>
     );
   }

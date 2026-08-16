@@ -9,7 +9,8 @@ import { db, getPoolIdByInviteCode, ensurePoolInviteCode } from '../services/db'
 import { Loader2, Plus, ArrowRight, Link2, Copy, Check, Bell, UserPlus, CheckCircle, XCircle } from 'lucide-react';
 import { track } from '../services/analytics';
 
-const POLL_MS = 10000;
+const POLL_MS = 12000;
+const MAX_POLL_RETRIES = 3;
 
 function storageKey(address) {
   return `splitstellar_known_pools_${address}`;
@@ -102,8 +103,9 @@ export default function Dashboard() {
           eventCursorRef.current = id;
         }
       }
-    } catch {
-      /* silent */
+    } catch (err) {
+      // Silent fail for event polling - don't spam user with errors
+      console.debug('Event poll failed:', err.message);
     }
   }, [address]);
 
@@ -132,9 +134,17 @@ export default function Dashboard() {
 
   const handleJoinByCode = useCallback(async (input) => {
     if (!input || !address) return;
+    
+    // Validate invite code format (8 alphanumeric characters)
+    const sanitizedCode = input.trim().toUpperCase();
+    if (!/^[A-Z0-9]{8}$/.test(sanitizedCode)) {
+      triggerToast('Invalid invite code format (8 characters required)', 'error');
+      return;
+    }
+    
     setIsLookingUpCode(true);
     try {
-      const poolLookup = await getPoolIdByInviteCode(input);
+      const poolLookup = await getPoolIdByInviteCode(sanitizedCode);
       if (!poolLookup) {
         triggerToast('Invalid invite code', 'error');
         return;
@@ -175,12 +185,12 @@ export default function Dashboard() {
       }
 
       if (status === 'pending' || status === 'rejected') {
-        setJoinPoolInfo({ pool: poolData, inviteCode: input });
+        setJoinPoolInfo({ pool: poolData, inviteCode: sanitizedCode });
         setJoinRequestStatus(status);
         return;
       }
 
-      setJoinPoolInfo({ pool: poolData, inviteCode: input });
+      setJoinPoolInfo({ pool: poolData, inviteCode: sanitizedCode });
       setJoinRequestStatus(null);
     } catch {
       triggerToast('Failed to look up invite code', 'error');
@@ -270,13 +280,24 @@ export default function Dashboard() {
     await handleJoinByCode(joinCode.trim().toUpperCase());
   };
 
+  const sanitizeInput = (input) => {
+    return input.replace(/[<>]/g, '').trim();
+  };
+
   const handleCreatePool = async (e) => {
     e.preventDefault();
     if (!newPoolName.trim() || !address || !kit) return;
+    
+    const sanitizedName = sanitizeInput(newPoolName);
+    if (sanitizedName.length < 1 || sanitizedName.length > 64) {
+      triggerToast('Pool name must be 1-64 characters', 'error');
+      return;
+    }
+    
     try {
       setIsCreating(true);
       const pool = await buildAndSubmit(address, kit, 'create_pool', {
-        name: newPoolName.trim(),
+        name: sanitizedName,
         creator: address,
       });
       if (!pool) throw new Error('Pool creation returned empty');
@@ -287,10 +308,10 @@ export default function Dashboard() {
       setInviteCodes((prev) => ({ ...prev, [pool.id]: code }));
       setNewPoolName('');
       setSelectedPool(pool);
-      track('create_pool', { pool_id: pool.id, pool_name: newPoolName.trim(), wallet_address: address });
+      track('create_pool', { pool_id: pool.id, pool_name: sanitizedName, wallet_address: address });
       db.logActivity(address, 'create_pool', {
         pool_id: pool.id,
-        pool_name: newPoolName.trim(),
+        pool_name: sanitizedName,
         tx_hash: pool.txHash,
       });
       triggerToast(`Pool created — tx: ${pool.txHash?.slice(0, 12)}...`, 'success');
@@ -327,9 +348,9 @@ export default function Dashboard() {
 
   if (!address) {
     return (
-      <div className="min-h-screen pt-24 sm:pt-40 px-6 flex flex-col items-center justify-center text-center">
-        <h1 className="text-4xl font-serif italic mb-4">Awaiting Connection</h1>
-        <p className="text-sm font-mono text-[#666] dark:text-[#888]">
+      <div className="min-h-screen pt-24 sm:pt-40 px-4 sm:px-6 flex flex-col items-center justify-center text-center">
+        <h1 className="text-3xl sm:text-4xl font-serif italic mb-4">Awaiting Connection</h1>
+        <p className="text-xs sm:text-sm font-mono text-[#666] dark:text-[#888] max-w-md">
           Please connect your wallet to access the settlement engine.
         </p>
       </div>

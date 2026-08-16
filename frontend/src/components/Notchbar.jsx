@@ -21,7 +21,7 @@ export default function Notchbar() {
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.5 }}
-        className="flex items-center justify-between p-1.5 pl-6 pr-1.5 rounded-full border border-black dark:border-white bg-white dark:bg-black transition-colors duration-500 shadow-xl"
+        className="flex items-center justify-between p-1.5 pl-4 sm:pl-6 pr-1.5 rounded-full border border-black dark:border-white bg-white dark:bg-black transition-colors duration-500 shadow-xl"
       >
         <Link to="/" className="flex items-center gap-2 group">
           <span className="font-serif italic text-lg text-black dark:text-white transition-colors duration-500">SS.</span>
@@ -29,6 +29,7 @@ export default function Notchbar() {
 
         <div className="hidden md:flex items-center gap-6 px-4">
           <Link to="/" className={`text-[10px] font-mono uppercase tracking-widest transition-colors ${location.pathname === '/' ? 'text-black dark:text-white font-bold' : 'text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white'}`}>Home</Link>
+          <Link to="/guide" className={`text-[10px] font-mono uppercase tracking-widest transition-colors ${location.pathname === '/guide' ? 'text-black dark:text-white font-bold' : 'text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white'}`}>Guide</Link>
           <Link to="/dashboard" className={`text-[10px] font-mono uppercase tracking-widest transition-colors ${location.pathname === '/dashboard' ? 'text-black dark:text-white font-bold' : 'text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white'}`}>App</Link>
           {address && (
             <>
@@ -38,7 +39,7 @@ export default function Notchbar() {
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           {/* Mobile Menu Toggle */}
           <button 
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -59,14 +60,14 @@ export default function Notchbar() {
             <button 
               onClick={() => setWalletModalOpen(true)}
               disabled={isConnecting}
-              className="bg-black text-white dark:bg-white dark:text-black hover:opacity-80 px-4 md:px-6 py-2 rounded-full text-[10px] font-mono uppercase tracking-widest font-bold transition-all flex items-center gap-2"
+              className="bg-black text-white dark:bg-white dark:text-black hover:opacity-80 px-3 sm:px-4 md:px-6 py-2 rounded-full text-[10px] font-mono uppercase tracking-widest font-bold transition-all flex items-center gap-2"
             >
               {isConnecting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Connect"}
             </button>
           ) : (
-            <div className="flex items-center gap-2 md:gap-3 bg-[#F0F0F0] dark:bg-[#111] hover:bg-[#E5E5E5] dark:hover:bg-[#222] px-3 md:px-4 py-1.5 rounded-full border border-[#DDD] dark:border-[#333] transition-colors duration-500 group">
+            <div className="flex items-center gap-1 sm:gap-2 md:gap-3 bg-[#F0F0F0] dark:bg-[#111] hover:bg-[#E5E5E5] dark:hover:bg-[#222] px-2 sm:px-3 md:px-4 py-1.5 rounded-full border border-[#DDD] dark:border-[#333] transition-colors duration-500 group">
               {profileName ? (
-                <span className="text-[10px] font-mono uppercase text-black dark:text-white max-w-[60px] md:max-w-none truncate">{profileName}</span>
+                <span className="text-[10px] font-mono uppercase text-black dark:text-white max-w-[50px] sm:max-w-[60px] md:max-w-none truncate">{profileName}</span>
               ) : (
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-mono text-black dark:text-white">{balance ? `${parseFloat(balance).toFixed(1)} XLM` : "..."}</span>
@@ -87,9 +88,10 @@ export default function Notchbar() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="md:hidden absolute top-full left-4 right-4 mt-2 bg-white dark:bg-black border border-black dark:border-white rounded-2xl p-4 shadow-xl flex flex-col gap-4"
+            className="md:hidden absolute top-full left-2 sm:left-4 right-2 sm:right-4 mt-2 bg-white dark:bg-black border border-black dark:border-white rounded-2xl p-4 shadow-xl flex flex-col gap-4"
           >
             <Link onClick={() => setIsMenuOpen(false)} to="/" className={`text-xs font-mono uppercase tracking-widest transition-colors ${location.pathname === '/' ? 'text-black dark:text-white font-bold' : 'text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white'}`}>Home</Link>
+            <Link onClick={() => setIsMenuOpen(false)} to="/guide" className={`text-xs font-mono uppercase tracking-widest transition-colors ${location.pathname === '/guide' ? 'text-black dark:text-white font-bold' : 'text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white'}`}>Guide</Link>
             <Link onClick={() => setIsMenuOpen(false)} to="/dashboard" className={`text-xs font-mono uppercase tracking-widest transition-colors ${location.pathname === '/dashboard' ? 'text-black dark:text-white font-bold' : 'text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white'}`}>App</Link>
             {address && (
               <>

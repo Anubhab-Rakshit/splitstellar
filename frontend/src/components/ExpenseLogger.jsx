@@ -3,10 +3,13 @@ import { useStellarStore } from '../hooks/useStellar';
 import { simulateCall, buildAndSubmit } from '../services/soroban';
 import { triggerToast } from '../services/toast';
 import { db } from '../services/db';
-import { Loader2, Activity, Send } from 'lucide-react';
+import { Loader2, Activity, Send, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import SettleUp from './SettleUp';
 import { track } from '../services/analytics';
+
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 1000;
 
 export default function ExpenseLogger({ poolId, poolCreator }) {
   const { address, kit } = useStellarStore();
@@ -16,7 +19,10 @@ export default function ExpenseLogger({ poolId, poolCreator }) {
   const [expenses, setExpenses] = useState([]);
   const [loadingExpenses, setLoadingExpenses] = useState(true);
   const [isMember, setIsMember] = useState(false);
+  const [loadError, setLoadError] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
   const memberChecked = useRef(false);
+  const abortControllerRef = useRef(null);
 
   useEffect(() => {
     if (!address || memberChecked.current) return;
@@ -24,37 +30,92 @@ export default function ExpenseLogger({ poolId, poolCreator }) {
     db.isPoolMember(poolId, address).then(setIsMember).catch(() => {});
   }, [poolId, address]);
 
-  const fetchExpenses = useCallback(async () => {
+  const fetchExpenses = useCallback(async (isRetry = false) => {
     if (!poolId || !isMember) return;
+    
+    // Cancel any previous in-flight request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+    
     try {
       const data = await simulateCall(address, 'get_pool_expenses', {
         poolId,
       });
       setExpenses(data || []);
-    } catch {
-      /* poll failures are silent */
+      setLoadError(null);
+      setRetryCount(0);
+    } catch (err) {
+      if (err.name === 'AbortError') return; // Request was cancelled, ignore
+      
+      if (isRetry && retryCount < MAX_RETRIES) {
+        setRetryCount(prev => prev + 1);
+        // Exponential backoff
+        await new Promise(r => setTimeout(r, RETRY_DELAY_MS * (retryCount + 1)));
+        return fetchExpenses(true);
+      }
+      
+      setLoadError(err.message || 'Failed to load expenses');
+      // Only show toast on initial load failure, not on poll failures
+      if (!isRetry) {
+        triggerToast('Failed to load expenses from ledger', 'error');
+      }
     }
-  }, [poolId, address, isMember]);
+  }, [poolId, address, isMember, retryCount]);
+
+  const handleManualRetry = useCallback(() => {
+    setRetryCount(0);
+    setLoadError(null);
+    setLoadingExpenses(true);
+    fetchExpenses(true).finally(() => setLoadingExpenses(false));
+  }, [fetchExpenses]);
 
   useEffect(() => {
     if (!poolId || !isMember) return;
+    let cancelled = false;
+    
     const initialLoad = async () => {
       setLoadingExpenses(true);
       await fetchExpenses();
-      setLoadingExpenses(false);
+      if (!cancelled) setLoadingExpenses(false);
     };
-    const id = setInterval(() => fetchExpenses(), 8000);
+    
+    // Poll with longer interval to reduce load
+    const id = setInterval(() => fetchExpenses(), 12000);
     setTimeout(initialLoad, 0);
-    return () => clearInterval(id);
+    
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, [poolId, fetchExpenses, isMember]);
+
+  const sanitizeInput = (input) => {
+    return input.replace(/[<>]/g, '').trim();
+  };
 
   const handleLogExpense = async (e) => {
     e.preventDefault();
     if (!amount || !description || !address || !kit) return;
 
+    const sanitizedDescription = sanitizeInput(description);
+    if (sanitizedDescription.length < 1 || sanitizedDescription.length > 128) {
+      triggerToast('Description must be 1-128 characters', 'error');
+      return;
+    }
+
     const parsed = parseFloat(amount);
     if (isNaN(parsed) || parsed <= 0 || !Number.isFinite(parsed)) {
       triggerToast('Enter a valid positive amount', 'error');
+      return;
+    }
+
+    if (parsed > 1000000000) {
+      triggerToast('Amount too large (max 1 billion XLM)', 'error');
       return;
     }
 
@@ -64,19 +125,19 @@ export default function ExpenseLogger({ poolId, poolCreator }) {
     try {
       const newExpense = await buildAndSubmit(address, kit, 'log_expense', {
         poolId: Number(poolId),
-        description,
-        amount: Math.round(parseFloat(amount) * 1e7),
+        description: sanitizedDescription,
+        amount: Math.round(parsed * 1e7),
         payer: address,
       });
 
       setExpenses((prev) => [newExpense, ...prev]);
       setAmount('');
       setDescription('');
-      track('log_expense', { pool_id: Number(poolId), amount, description, wallet_address: address });
+      track('log_expense', { pool_id: Number(poolId), amount: parsed, description: sanitizedDescription, wallet_address: address });
       db.logActivity(address, 'log_expense', {
         pool_id: Number(poolId),
-        description,
-        amount: Math.round(parseFloat(amount) * 1e7),
+        description: sanitizedDescription,
+        amount: Math.round(parsed * 1e7),
         tx_hash: newExpense.txHash,
       });
       triggerToast(`Expense logged — tx: ${newExpense.txHash?.slice(0, 12)}...`, 'success');
@@ -169,8 +230,22 @@ export default function ExpenseLogger({ poolId, poolCreator }) {
         </div>
 
         {loadingExpenses ? (
-          <div className="flex justify-center p-12 border border-[#E5E5E5] dark:border-[#222]">
-            <Loader2 className="w-6 h-6 animate-spin text-[#666] dark:text-[#888]" />
+          <div className="flex flex-col items-center justify-center p-12 border border-[#E5E5E5] dark:border-[#222]">
+            <Loader2 className="w-6 h-6 animate-spin text-[#666] dark:text-[#888] mb-4" />
+            <p className="font-mono text-[10px] uppercase tracking-widest text-[#666] dark:text-[#888]">
+              Syncing with ledger...
+            </p>
+          </div>
+        ) : loadError ? (
+          <div className="p-8 border border-red-500/20 bg-red-50 dark:bg-red-950/10 text-center">
+            <p className="font-mono text-xs text-red-500 mb-4">{loadError}</p>
+            <button
+              onClick={handleManualRetry}
+              className="btn-secondary text-xs px-4 py-2 inline-flex items-center gap-2"
+            >
+              <RefreshCw className="w-3 h-3" />
+              Retry
+            </button>
           </div>
         ) : expenses.length === 0 ? (
           <div className="p-12 border border-[#E5E5E5] dark:border-[#222] text-center bg-[#F7F7F7] dark:bg-[#050505] transition-colors duration-500">

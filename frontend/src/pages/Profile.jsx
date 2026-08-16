@@ -76,9 +76,9 @@ export default function Profile() {
 
   if (!address) {
     return (
-      <div className="min-h-screen pt-24 sm:pt-40 px-6 flex flex-col items-center justify-center text-center">
-        <h1 className="text-4xl font-serif italic mb-4">Connect Wallet</h1>
-        <p className="text-sm font-mono text-[#666] dark:text-[#888]">Please connect your Stellar wallet to view your profile.</p>
+      <div className="min-h-screen pt-24 sm:pt-40 px-4 sm:px-6 flex flex-col items-center justify-center text-center">
+        <h1 className="text-3xl sm:text-4xl font-serif italic mb-4">Connect Wallet</h1>
+        <p className="text-xs sm:text-sm font-mono text-[#666] dark:text-[#888] max-w-md">Please connect your Stellar wallet to view your profile.</p>
       </div>
     );
   }
