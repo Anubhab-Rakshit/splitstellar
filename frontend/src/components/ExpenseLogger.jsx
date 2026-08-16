@@ -20,7 +20,6 @@ export default function ExpenseLogger({ poolId, poolCreator }) {
   const [loadingExpenses, setLoadingExpenses] = useState(true);
   const [isMember, setIsMember] = useState(false);
   const [loadError, setLoadError] = useState(null);
-  const [retryCount, setRetryCount] = useState(0);
   const memberChecked = useRef(false);
   const abortControllerRef = useRef(null);
 
@@ -30,7 +29,7 @@ export default function ExpenseLogger({ poolId, poolCreator }) {
     db.isPoolMember(poolId, address).then(setIsMember).catch(() => {});
   }, [poolId, address]);
 
-  const fetchExpenses = useCallback(async (isRetry = false) => {
+  const fetchExpensesWithRetry = useCallback(async (isRetry = false) => {
     if (!poolId || !isMember) return;
     
     // Cancel any previous in-flight request
@@ -39,37 +38,41 @@ export default function ExpenseLogger({ poolId, poolCreator }) {
     }
     abortControllerRef.current = new AbortController();
     
-    try {
-      const data = await simulateCall(address, 'get_pool_expenses', {
-        poolId,
-      });
-      setExpenses(data || []);
-      setLoadError(null);
-      setRetryCount(0);
-    } catch (err) {
-      if (err.name === 'AbortError') return; // Request was cancelled, ignore
-      
-      if (isRetry && retryCount < MAX_RETRIES) {
-        setRetryCount(prev => prev + 1);
-        // Exponential backoff
-        await new Promise(r => setTimeout(r, RETRY_DELAY_MS * (retryCount + 1)));
-        return fetchExpenses(true);
+    let currentRetryCount = isRetry ? 0 : 0;
+    
+    const attemptFetch = async () => {
+      try {
+        const data = await simulateCall(address, 'get_pool_expenses', {
+          poolId,
+        });
+        setExpenses(data || []);
+        setLoadError(null);
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+        
+        if (currentRetryCount < MAX_RETRIES) {
+          currentRetryCount += 1;
+          await new Promise(r => setTimeout(r, RETRY_DELAY_MS * currentRetryCount));
+          return attemptFetch();
+        }
+        
+        setLoadError(err.message || 'Failed to load expenses');
+        if (!isRetry) {
+          triggerToast('Failed to load expenses from ledger', 'error');
+        }
       }
-      
-      setLoadError(err.message || 'Failed to load expenses');
-      // Only show toast on initial load failure, not on poll failures
-      if (!isRetry) {
-        triggerToast('Failed to load expenses from ledger', 'error');
-      }
-    }
-  }, [poolId, address, isMember, retryCount]);
+    };
+    
+    await attemptFetch();
+  }, [poolId, address, isMember]);
+
+  const fetchExpenses = fetchExpensesWithRetry;
 
   const handleManualRetry = useCallback(() => {
-    setRetryCount(0);
     setLoadError(null);
     setLoadingExpenses(true);
-    fetchExpenses(true).finally(() => setLoadingExpenses(false));
-  }, [fetchExpenses]);
+    fetchExpensesWithRetry(true).finally(() => setLoadingExpenses(false));
+  }, [fetchExpensesWithRetry]);
 
   useEffect(() => {
     if (!poolId || !isMember) return;

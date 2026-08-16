@@ -10,7 +10,6 @@ import { Loader2, Plus, ArrowRight, Link2, Copy, Check, Bell, UserPlus, CheckCir
 import { track } from '../services/analytics';
 
 const POLL_MS = 12000;
-const MAX_POLL_RETRIES = 3;
 
 function storageKey(address) {
   return `splitstellar_known_pools_${address}`;

@@ -124,7 +124,7 @@ impl ExpensePoolContract {
         env.storage()
             .persistent()
             .set(&DataKey::PoolExpenses(count), &Vec::<Expense>::new(&env));
-        
+
         // Add creator as first member
         env.storage()
             .persistent()
@@ -153,12 +153,7 @@ impl ExpensePoolContract {
     }
 
     /// Add a member to a pool (only pool creator can do this).
-    pub fn add_pool_member(
-        env: Env,
-        pool_id: u64,
-        caller: Address,
-        new_member: Address,
-    ) {
+    pub fn add_pool_member(env: Env, pool_id: u64, caller: Address, new_member: Address) {
         caller.require_auth();
 
         let pool: Pool = env
@@ -310,11 +305,8 @@ impl ExpensePoolContract {
 
     /// Get all members of a pool.
     pub fn get_pool_members(env: Env, pool_id: u64) -> Vec<Address> {
-        let pool: Option<Pool> = env
-            .storage()
-            .persistent()
-            .get(&DataKey::Pool(pool_id));
-        
+        let pool: Option<Pool> = env.storage().persistent().get(&DataKey::Pool(pool_id));
+
         match pool {
             None => Vec::<Address>::new(&env),
             Some(_p) => {
