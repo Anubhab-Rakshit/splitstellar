@@ -3,11 +3,14 @@ import { motion } from 'framer-motion';
 import { getAll, getStats, clearAnalytics, syncAnalytics } from '../services/analytics';
 import { Activity, Users, BarChart3, Trash2 } from 'lucide-react';
 import { useStellarStore } from '../hooks/useStellar';
+import SpendingInsights from '../components/SpendingInsights';
+import { db } from '../services/db';
 
 export default function Analytics() {
   const { address } = useStellarStore();
   const [events, setEvents] = useState(() => getAll());
   const [filter, setFilter] = useState('');
+  const [expenses] = useState(() => db.getCachedExpenses());
 
   useEffect(() => {
     if (address) syncAnalytics().then(() => setEvents(getAll()));
@@ -73,6 +76,21 @@ export default function Analytics() {
               </div>
               <span className="font-mono text-4xl">{Object.keys(stats.byEvent).length}</span>
             </div>
+          </div>
+        )}
+
+        {expenses.length > 0 && (
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-serif italic">Spending Insights</h2>
+              <div className="flex items-center gap-2 px-3 py-1 border border-[#E5E5E5] dark:border-[#333] rounded-full transition-colors duration-500">
+                <BarChart3 className="w-3 h-3 text-[#666] dark:text-[#888]" />
+                <span className="text-[10px] font-mono uppercase tracking-widest text-[#666] dark:text-[#888]">
+                  {expenses.length} expenses
+                </span>
+              </div>
+            </div>
+            <SpendingInsights expenses={expenses} />
           </div>
         )}
 

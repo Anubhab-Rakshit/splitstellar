@@ -5,11 +5,15 @@ import { Copy, Check, Activity, ExternalLink, Edit2, Loader2 } from 'lucide-reac
 import { triggerToast } from '../services/toast';
 import { db } from '../services/db';
 import { track } from '../services/analytics';
+import MemberProfile from '../components/MemberProfile';
 
 export default function Profile() {
   const { address, balance, profileName, setProfileName } = useStellarStore();
   const [copied, setCopied] = useState(false);
   const [activities, setActivities] = useState(null);
+  const [expenses] = useState(() =>
+    address ? db.getCachedExpenses().filter(exp => exp.payer === address) : []
+  );
   
   const [isEditingName, setIsEditingName] = useState(false);
   const [editName, setEditName] = useState('');
@@ -147,6 +151,21 @@ export default function Profile() {
 
           </div>
         </div>
+
+        {expenses.length > 0 && (
+          <div className="mb-16">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-serif italic">Member Profile</h2>
+              <div className="flex items-center gap-2 px-3 py-1 border border-[#E5E5E5] dark:border-[#333] rounded-full transition-colors duration-500">
+                <Activity className="w-3 h-3 text-[#666] dark:text-[#888]" />
+                <span className="text-[10px] font-mono uppercase tracking-widest text-[#666] dark:text-[#888]">
+                  {expenses.length} expenses
+                </span>
+              </div>
+            </div>
+            <MemberProfile address={address} expenses={expenses} />
+          </div>
+        )}
 
         <div>
           <div className="flex items-center justify-between mb-8">
