@@ -13,6 +13,7 @@ import Landing from './pages/Landing';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import Analytics from './pages/Analytics';
+import Guide from './pages/Guide';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -48,6 +49,7 @@ function App() {
             <Route path="/dashboard" element={<ErrorBoundary fallback="dashboard"><Dashboard /></ErrorBoundary>} />
             <Route path="/profile" element={<ErrorBoundary fallback="profile"><Profile /></ErrorBoundary>} />
             <Route path="/analytics" element={<ErrorBoundary fallback="analytics"><Analytics /></ErrorBoundary>} />
+            <Route path="/guide" element={<ErrorBoundary fallback="guide"><Guide /></ErrorBoundary>} />
           </Routes>
         </SmoothScroll>
       )}
