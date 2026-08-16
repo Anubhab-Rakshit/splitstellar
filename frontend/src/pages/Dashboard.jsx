@@ -6,7 +6,7 @@ import ExpenseLogger from '../components/ExpenseLogger';
 import { simulateCall, buildAndSubmit, fetchEvents, convertEventTopics } from '../services/soroban';
 import { triggerToast } from '../services/toast';
 import { db, getPoolIdByInviteCode, ensurePoolInviteCode } from '../services/db';
-import { Loader2, Plus, ArrowRight, Link2, Copy, Check, Bell, UserPlus, CheckCircle, XCircle } from 'lucide-react';
+import { Loader2, Plus, ArrowRight, Link2, Copy, Check, Bell, UserPlus, CheckCircle, XCircle, Share2 } from 'lucide-react';
 import { track } from '../services/analytics';
 
 const POLL_MS = 12000;
@@ -48,8 +48,10 @@ export default function Dashboard() {
   const [pendingCount, setPendingCount] = useState(0);
   const [joinRequestStatus, setJoinRequestStatus] = useState(null);
   const [joinPoolInfo, setJoinPoolInfo] = useState(null);
+  const [poolMembers, setPoolMembers] = useState([]);
   const eventCursorRef = useRef(null);
   const processedCodeRef = useRef(null);
+  const pendingCodeRef = useRef(null);
 
   const fetchPoolById = useCallback(async (poolId) => {
     try {
@@ -245,19 +247,42 @@ export default function Dashboard() {
   }, [address, syncPools, pollEvents, syncPendingRequests]);
 
   useEffect(() => {
-    if (!address) return;
     const codeParam = searchParams.get('code');
-    if (codeParam && codeParam !== processedCodeRef.current) {
+    if (!codeParam) return;
+
+    if (!address) {
+      pendingCodeRef.current = codeParam;
+      return;
+    }
+
+    if (codeParam !== processedCodeRef.current) {
       processedCodeRef.current = codeParam;
+      pendingCodeRef.current = null;
       handleJoinByCode(codeParam);
     }
   }, [address, searchParams, handleJoinByCode]);
 
   useEffect(() => {
+    if (!address || pendingCodeRef.current) return;
     if (searchParams.has('pool') || searchParams.has('code')) {
       setSearchParams({}, { replace: true });
     }
-  }, [searchParams, setSearchParams]);
+  }, [address, searchParams, setSearchParams]);
+
+  useEffect(() => {
+    if (!selectedPool) return;
+    let cancelled = false;
+    const fetchMembers = async () => {
+      try {
+        const members = await db.getPoolMembers(selectedPool.id);
+        if (!cancelled) setPoolMembers(members);
+      } catch {
+        if (!cancelled) setPoolMembers([]);
+      }
+    };
+    fetchMembers();
+    return () => { cancelled = true; };
+  }, [selectedPool]);
 
   useEffect(() => {
     if (!selectedPool) return;
@@ -322,17 +347,42 @@ export default function Dashboard() {
     }
   };
 
-  const handleCopyInviteLink = async () => {
+  const getShareLink = useCallback(async () => {
     const code = await fetchInviteCode(selectedPool.id, selectedPool.name);
     if (!code) {
       triggerToast('Failed to get invite code', 'error');
-      return;
+      return null;
     }
-    const url = `${window.location.origin}/dashboard?code=${code}`;
+    return `${window.location.origin}/dashboard?code=${code}`;
+  }, [selectedPool, fetchInviteCode]);
+
+  const handleCopyInviteLink = async () => {
+    const url = await getShareLink();
+    if (!url) return;
     navigator.clipboard.writeText(url);
     setCopiedLink(true);
     triggerToast('Invite link copied', 'success');
     setTimeout(() => setCopiedLink(false), 2000);
+  };
+
+  const handleShareInviteLink = async () => {
+    const url = await getShareLink();
+    if (!url) return;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Join ${selectedPool.name} on SplitStellar`,
+          text: 'Join my expense pool on SplitStellar',
+          url,
+        });
+        triggerToast('Invite shared', 'success');
+      } catch {
+        // User cancelled share - do nothing
+      }
+    } else {
+      await handleCopyInviteLink();
+    }
   };
 
   const selectPoolAndClearJoin = (pool) => {
@@ -536,6 +586,13 @@ export default function Dashboard() {
                         <Copy className="w-5 h-5 text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white" />
                       )}
                     </button>
+                    <button
+                      onClick={handleShareInviteLink}
+                      className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors"
+                      title="Share invite link"
+                    >
+                      <Share2 className="w-5 h-5 text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white" />
+                    </button>
                   </div>
                   {inviteCodes[selectedPool.id] && (
                     <div className="mt-3 flex items-center gap-2">
@@ -599,6 +656,7 @@ export default function Dashboard() {
                   poolId={selectedPool.id}
                   poolName={selectedPool.name}
                   poolCreator={selectedPool.creator}
+                  members={poolMembers}
                 />
               </div>
             ) : (
