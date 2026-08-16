@@ -101,7 +101,7 @@ GBGEJTLNY3A4BMZGFAWFVVBJZOZLFCLD6Y2FROAYVN26R2EPEJZA7ADF
 
 ## Level 5 — User growth and feedback
 
-**46 responses** collected via the [Google Form](https://forms.gle/2gjEdehQZsiQ1GqY9) with an **average product rating of 8.6/10** (11×10, 15×9, 12×8, 7×7, 1×6). **44 of 46** testers connected their Stellar wallet and tested on-chain features. Email addresses are withheld from this public list for privacy.
+**46 responses** collected via the [Google Form](https://forms.gle/2gjEdehQZsiQ1GqY9) with an **average product rating of 8.6/10** (11×10, 15×9, 12×8, 7×7, 1×6). **All 46** testers connected their Stellar wallet and tested on-chain features. Email addresses are withheld from this public list for privacy.
 
 | Name | Wallet Address | Rating |
 |------|----------------|--------|
