@@ -44,17 +44,35 @@ Decentralized expense splitting on the Stellar network powered by Soroban smart 
 
 ## Screenshots
 
-### Landing
+### Desktop
 
-<img width="1510" alt="Landing" src="pictures/ss-1.png" />
+#### Landing
 
-### Dashboard
+<img width="1510" alt="Landing" src="pictures/landing-page.png" />
 
-<img width="1354" alt="Dashboard" src="pictures/ss-2.png" />
+#### Command Centre
 
-### Analytics
+<img width="1510" alt="Command centre" src="pictures/command-centre.png" />
 
-<img width="1354" alt="Analytics" src="pictures/ss-3.png" />
+#### Analytics
+
+<img width="1510" alt="Analytics" src="pictures/analytics.png" />
+
+#### Navigation
+
+<img width="1126" alt="Navigation" src="pictures/navigation.png" />
+
+#### User Guide
+
+<img width="1510" alt="User guide" src="pictures/user-guide.png" />
+
+### Mobile
+
+<div style="display:flex; gap:12px; justify-content:center;">
+  <img width="240" alt="Mobile landing" src="pictures/mobile-landing.png" />
+  <img width="240" alt="Mobile command centre" src="pictures/mobile-command-centre.png" />
+  <img width="240" alt="Mobile navigation" src="pictures/mobile-navigation.png" />
+</div>
 
 ---
 
@@ -104,7 +122,7 @@ GBGEJTLNY3A4BMZGFAWFVVBJZOZLFCLD6Y2FROAYVN26R2EPEJZA7ADF
 
 ## Level 5 — User growth and feedback
 
-**51 responses** collected via the [Google Form](https://forms.gle/2gjEdehQZsiQ1GqY9) with an **average product rating of 8.6/10** (12×10, 17×9, 14×8, 7×7, 1×6). **All 51** testers connected their Stellar wallet and submitted a unique, verified wallet address (51/51 unique, all 56-char testnet keys) after completing the full testing flow. Email addresses are withheld from this public list for privacy.
+**53 responses** collected via the [Google Form](https://forms.gle/2gjEdehQZsiQ1GqY9) with an **average product rating of 8.6/10** (13×10, 17×9, 14×8, 8×7, 1×6). **All 53** testers connected their Stellar wallet and submitted a unique, verified wallet address (53/53 unique, all 56-char testnet keys) after completing the full testing flow. Email addresses are withheld from this public list for privacy.
 
 | Name | Wallet Address | Rating |
 |------|----------------|--------|
@@ -159,6 +177,8 @@ GBGEJTLNY3A4BMZGFAWFVVBJZOZLFCLD6Y2FROAYVN26R2EPEJZA7ADF
 | Shanu | `GBLLNVQ4X2CZV4CIL26DSPOUWNMXHDUGS3PFFN2NAV7BCX6IRP4N6H37` | 9 |
 | Riya Pramanick | `GD4IQ23HYWGIGDQWTSKG4CVC3ANR2KH4YYQX654ZJRY2XWLIUYCVQAEB` | 10 |
 | Maitri Golder | `GBTVYDLRNFNYJWN6F6EPAZDACUUILLJVSVZ3ZG2GRTSOCPUOLVQIHFMA` | 8 |
+| Soumyajit | `GDRV5HKMF6K3H36SCDXSAGIVIDNVBRR703QPEKUHR5VXYUV5AEJFWQEV` | 7 |
+| Shreyasi paul | `GDSK3KWLJXRHBENTVNOVS6HJXVTVIVHYXNE2JH7JO53SUIPMJHCLRGD3` | 10 |
 
 ---
 
@@ -389,7 +409,7 @@ VITE_SUPABASE_ANON_KEY=         # optional
 - Live deployed application — [splitstellar.vercel.app](https://splitstellar.vercel.app/)
 - Demo video — [YouTube](https://youtu.be/Txo6T-UR3vo)
 - Presentation — [Google Drive](https://drive.google.com/drive/folders/18ymk8qxpR95uYYyXeDYsOXN_FPp9e1dF?usp=drive_link)
-- Proof of 50+ users — 51 verified in the feedback table above + 66 verified on-chain transactions
+- Proof of 50+ users — 53 verified in the feedback table above + 66 verified on-chain transactions
 - Screenshots of analytics and transaction activity
 - Updated README and documentation (`CONTRACT_INTEGRATION.md`)
 - User feedback iteration summary — [Feedback → Improvements → Commits](#feedback--improvements--commits)
