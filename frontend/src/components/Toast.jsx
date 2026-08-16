@@ -25,7 +25,7 @@ export default function ToastContainer() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
+    <div className="fixed bottom-[88px] sm:bottom-6 left-6 right-6 z-50 flex flex-col items-stretch sm:items-end gap-3">
       <AnimatePresence>
         {toasts.map(toast => {
           let Icon = AlertCircle;
@@ -48,7 +48,7 @@ export default function ToastContainer() {
               initial={{ opacity: 0, y: 50, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-              className={`flex items-start gap-3 p-4 rounded-xl border backdrop-blur-md shadow-2xl min-w-[300px] max-w-[400px] ${colorClass}`}
+              className={`flex items-start gap-3 p-4 rounded-xl border backdrop-blur-md shadow-2xl min-w-0 max-w-full sm:min-w-[300px] sm:max-w-[400px] ${colorClass}`}
             >
               <div className="mt-0.5">
                 <Icon className={`w-5 h-5 ${toast.type === 'loading' ? 'animate-spin' : ''}`} />

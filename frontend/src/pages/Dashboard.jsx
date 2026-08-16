@@ -426,7 +426,7 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           <div className="lg:col-span-4">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-wrap gap-2 items-center justify-between mb-6">
               <h2 className="text-2xl font-serif italic">Active Partitions</h2>
               <div className="flex items-center gap-2">
                 {pendingCount > 0 && (

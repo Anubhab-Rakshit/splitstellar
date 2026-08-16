@@ -100,7 +100,7 @@ export default function SettleUp({ expenses }) {
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       className="mt-12 border border-[#E5E5E5] dark:border-[#333] p-6 bg-[#F7F7F7] dark:bg-[#050505] transition-colors duration-500"
     >
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap gap-2 items-center justify-between mb-6">
         <motion.h3
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
@@ -208,7 +208,7 @@ export default function SettleUp({ expenses }) {
             <motion.div
               key={row.payer}
               variants={fadeUpItem}
-              className={`flex items-center justify-between p-4 bg-white dark:bg-black border border-[#E5E5E5] dark:border-[#222] transition-colors duration-300 ${settled.has(row.payer) ? 'border-emerald-500/50 dark:border-emerald-500/30' : ''}`}
+              className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-white dark:bg-black border border-[#E5E5E5] dark:border-[#222] transition-colors duration-300 ${settled.has(row.payer) ? 'border-emerald-500/50 dark:border-emerald-500/30' : ''}`}
             >
               <div className="flex items-center gap-3">
                 <motion.div
@@ -228,7 +228,7 @@ export default function SettleUp({ expenses }) {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex w-full sm:w-auto items-center justify-between sm:justify-end gap-3 flex-wrap">
                 <motion.span
                   initial={{ opacity: 0, x: 10 }}
                   animate={{ opacity: 1, x: 0 }}

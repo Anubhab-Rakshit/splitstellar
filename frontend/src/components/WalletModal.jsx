@@ -92,7 +92,7 @@ export default function WalletModal() {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="relative w-full max-w-md bg-white dark:bg-[#050505] border border-[#E5E5E5] dark:border-[#222] p-8 shadow-2xl transition-colors duration-500"
+            className="relative w-full max-w-md bg-white dark:bg-[#050505] border border-[#E5E5E5] dark:border-[#222] p-6 sm:p-8 shadow-2xl transition-colors duration-500 max-h-[calc(100vh-2rem)] overflow-y-auto custom-scrollbar data-lenis-prevent"
           >
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-2xl font-serif italic text-black dark:text-white transition-colors duration-500">Connect Wallet</h2>

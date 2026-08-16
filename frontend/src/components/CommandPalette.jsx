@@ -139,7 +139,7 @@ export default function CommandPalette() {
               initial={{ opacity: 0, scale: 0.95, y: -20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -20 }}
-              className="fixed top-[20%] left-1/2 -translate-x-1/2 z-50 w-full max-w-lg"
+              className="fixed top-[20%] left-1/2 -translate-x-1/2 z-50 w-[calc(100vw-2rem)] sm:w-full max-w-lg"
             >
               <Command className="bg-white dark:bg-[#111] border border-[#E5E5E5] dark:border-[#333] shadow-2xl" shouldFilter={false}>
                 <div className="flex items-center border-b border-[#E5E5E5] dark:border-[#333] px-4">

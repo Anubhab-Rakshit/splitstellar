@@ -38,6 +38,7 @@ export default function ExpenseLogger({ poolId, poolCreator, members = [] }) {
   const abortControllerRef = useRef(null);
   const categoryDropdownRef = useRef(null);
   const splitDropdownRef = useRef(null);
+  const localMetaRef = useRef({});
 
   // Undo/Redo history
   const [expenseHistory, setExpenseHistory] = useState([]);
@@ -63,6 +64,23 @@ export default function ExpenseLogger({ poolId, poolCreator, members = [] }) {
     db.isPoolMember(poolId, address).then(setIsMember).catch(() => {});
   }, [poolId, address]);
 
+  useEffect(() => {
+    const cached = db.getCachedExpenses();
+    const meta = {};
+    for (const exp of cached) {
+      if (String(exp.poolId) === String(poolId) && exp.id) {
+        meta[exp.id] = {
+          txHash: exp.txHash,
+          category: exp.category,
+          notes: exp.notes,
+          splitType: exp.splitType,
+          splitData: exp.splitData,
+        };
+      }
+    }
+    localMetaRef.current = meta;
+  }, [poolId]);
+
   const fetchExpensesWithRetry = useCallback(async (isRetry = false) => {
     if (!poolId || !isMember) return;
     
@@ -78,9 +96,13 @@ export default function ExpenseLogger({ poolId, poolCreator, members = [] }) {
         const data = await simulateCall(address, 'get_pool_expenses', {
           poolId,
         });
-        setExpenses(data || []);
+        const merged = (data || []).map((e) => ({
+          ...e,
+          ...(localMetaRef.current[e.id] || {}),
+        }));
+        setExpenses(merged);
         setLoadError(null);
-        db.cacheExpenses(poolId, data || []);
+        db.cacheExpenses(poolId, merged);
       } catch (err) {
         if (err.name === 'AbortError') return;
         
@@ -221,6 +243,16 @@ export default function ExpenseLogger({ poolId, poolCreator, members = [] }) {
         splitData: splitType !== 'equal' ? customSplitData : undefined,
       };
 
+      if (expenseWithMeta.id) {
+        localMetaRef.current[expenseWithMeta.id] = {
+          txHash: newExpense.txHash,
+          category,
+          notes: notes ? sanitizeInput(notes) : undefined,
+          splitType,
+          splitData: splitType !== 'equal' ? customSplitData : undefined,
+        };
+      }
+
       setExpenses((prev) => [expenseWithMeta, ...prev]);
       db.cacheExpenses(poolId, [expenseWithMeta, ...expenses]);
       
@@ -305,7 +337,7 @@ export default function ExpenseLogger({ poolId, poolCreator, members = [] }) {
         onSubmit={handleLogExpense}
         className="mb-12 border border-[#E5E5E5] dark:border-[#333] p-6 bg-[#F7F7F7] dark:bg-[#050505] transition-colors duration-500"
       >
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-wrap gap-2 items-center justify-between mb-6">
           <h3 className="font-serif italic text-xl">Log New Expense</h3>
           {canUndo && (
             <button
@@ -393,6 +425,7 @@ export default function ExpenseLogger({ poolId, poolCreator, members = [] }) {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   className="absolute z-50 top-full left-0 right-0 mt-2 bg-white dark:bg-[#111] border border-[#E5E5E5] dark:border-[#333] shadow-lg max-h-64 overflow-y-auto"
+                  data-lenis-prevent
                 >
                   {EXPENSE_CATEGORIES.map((cat) => (
                     <button
@@ -429,7 +462,8 @@ export default function ExpenseLogger({ poolId, poolCreator, members = [] }) {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="absolute z-50 top-full left-0 right-0 mt-2 bg-white dark:bg-[#111] border border-[#E5E5E5] dark:border-[#333] shadow-lg"
+                  className="absolute z-50 top-full left-0 right-0 mt-2 bg-white dark:bg-[#111] border border-[#E5E5E5] dark:border-[#333] shadow-lg max-h-64 overflow-y-auto"
+                  data-lenis-prevent
                 >
                   {SPLIT_TYPES.map((type) => (
                     <button
@@ -533,7 +567,7 @@ export default function ExpenseLogger({ poolId, poolCreator, members = [] }) {
       </form>
 
       <div>
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-wrap gap-2 items-center justify-between mb-6">
           <h3 className="font-serif italic text-xl">Immutable Ledger</h3>
           <div className="flex items-center gap-2">
             {expenses.length > 0 && (
