@@ -21,7 +21,9 @@ function BadgeCard({ badge, progress, earned }) {
           <span className="text-white dark:text-black text-xs">✓</span>
         </motion.div>
       )}
-      <div className="text-2xl mb-2">{badge.icon}</div>
+      <div className="mb-2 flex items-center justify-center">
+        <badge.icon className="w-6 h-6 text-black dark:text-white" strokeWidth={1.5} />
+      </div>
       <div className="font-mono text-xs text-black dark:text-white mb-1">{badge.name}</div>
       <div className="font-mono text-[10px] text-[#666] dark:text-[#888] mb-2">{badge.description}</div>
       {!earned && (
