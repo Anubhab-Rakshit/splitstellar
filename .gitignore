@@ -6,3 +6,6 @@ target/
 .DS_Store
 *.swp
 *.swo
+
+FEATURE_ROADMAP.md
+LEVEL4_IDEA.md
