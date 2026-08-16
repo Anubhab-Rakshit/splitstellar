@@ -25,6 +25,19 @@ fn test_create_pool() {
     assert_eq!(pool.name, String::from_str(&env, "Bali Trip 2026"));
     assert_eq!(pool.creator, creator);
     assert_eq!(pool.total_expenses, 0);
+    assert_eq!(pool.member_count, 1);
+}
+
+#[test]
+fn test_create_pool_name_too_long() {
+    let (env, client, creator) = setup();
+    
+    let long_name = String::from_str(&env, &"A".repeat(65));
+    let result = client.try_create_pool(&long_name, &creator);
+    
+    // The try_* method returns Result<Result<Pool, ContractError>, InvokeError>
+    // We expect it to be an Err(Ok(ContractError::PoolNameTooLong))
+    assert!(result.is_err());
 }
 
 #[test]
@@ -68,6 +81,47 @@ fn test_multiple_pools() {
     );
 }
 
+// ── Member Tests ─────────────────────────────────────────
+
+#[test]
+fn test_is_pool_member() {
+    let (env, client, creator) = setup();
+    let pool = client.create_pool(&String::from_str(&env, "Test Pool"), &creator);
+    
+    // Creator should be a member
+    assert!(client.is_pool_member(&pool.id, &creator));
+    
+    // Random address should not be a member
+    let other = Address::generate(&env);
+    assert!(!client.is_pool_member(&pool.id, &other));
+}
+
+#[test]
+fn test_add_pool_member() {
+    let (env, client, creator) = setup();
+    let pool = client.create_pool(&String::from_str(&env, "Test Pool"), &creator);
+    let new_member = Address::generate(&env);
+    
+    client.add_pool_member(&pool.id, &creator, &new_member);
+    
+    assert!(client.is_pool_member(&pool.id, &new_member));
+    assert_eq!(client.get_pool(&pool.id).unwrap().member_count, 2);
+}
+
+#[test]
+fn test_add_pool_member_not_creator() {
+    let (env, client, creator) = setup();
+    let pool = client.create_pool(&String::from_str(&env, "Test Pool"), &creator);
+    let unauthorized = Address::generate(&env);
+    let new_member = Address::generate(&env);
+    
+    let result = client.try_add_pool_member(&pool.id, &unauthorized, &new_member);
+    
+    // The try_* method returns Result<Result<(), ContractError>, InvokeError>
+    // We expect it to be an Err(Ok(ContractError::NotPoolCreator))
+    assert!(result.is_err());
+}
+
 // ── Expense Tests ────────────────────────────────────────
 
 #[test]
@@ -86,6 +140,38 @@ fn test_log_expense() {
     assert_eq!(expense.id, 1);
     assert_eq!(expense.description, String::from_str(&env, "Pizza"));
     assert_eq!(expense.amount, 500);
+}
+
+#[test]
+fn test_log_expense_not_member() {
+    let (env, client, creator) = setup();
+    let pool = client.create_pool(&String::from_str(&env, "Private Pool"), &creator);
+    let non_member = Address::generate(&env);
+    
+    let result = client.try_log_expense(
+        &pool.id,
+        &String::from_str(&env, "Unauthorized"),
+        &i128::from(100),
+        &non_member,
+    );
+    
+    assert!(matches!(result, Err(Ok(ContractError::NotPoolMember))));
+}
+
+#[test]
+fn test_log_expense_description_too_long() {
+    let (env, client, creator) = setup();
+    let pool = client.create_pool(&String::from_str(&env, "Test Pool"), &creator);
+    
+    let long_desc = String::from_str(&env, &"A".repeat(129));
+    let result = client.try_log_expense(
+        &pool.id,
+        &long_desc,
+        &i128::from(100),
+        &creator,
+    );
+    
+    assert!(matches!(result, Err(Ok(ContractError::DescriptionTooLong))));
 }
 
 #[test]

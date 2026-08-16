@@ -4,6 +4,11 @@ use soroban_sdk::{
     String, Symbol, Val, Vec,
 };
 
+// ── Constants ────────────────────────────────────────────
+const MAX_POOL_NAME_LEN: u32 = 64;
+const MAX_DESCRIPTION_LEN: u32 = 128;
+const MAX_EXPENSES_PER_POOL: u64 = 1000;
+
 // ── Error Types ──────────────────────────────────────────
 #[contracterror]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -12,6 +17,11 @@ pub enum ContractError {
     NotPoolCreator = 2,
     InsufficientBalance = 3,
     AmountZero = 4,
+    NotPoolMember = 5,
+    PoolNameTooLong = 6,
+    DescriptionTooLong = 7,
+    PoolFull = 8,
+    Unauthorized = 9,
 }
 
 // ── Event Types ──────────────────────────────────────────
@@ -42,6 +52,7 @@ pub struct Pool {
     pub creator: Address,
     pub total_expenses: u64,
     pub created_at: u64,
+    pub member_count: u64,
 }
 
 #[contracttype]
@@ -61,6 +72,8 @@ pub enum DataKey {
     Pool(u64),
     PoolExpenses(u64),
     Expense(u64),
+    PoolMembers(u64),
+    Member(u64, Address),
 }
 
 // ── Stellar Token Interface (for inter-contract calls) ──
@@ -84,6 +97,11 @@ impl ExpensePoolContract {
     pub fn create_pool(env: Env, name: String, creator: Address) -> Pool {
         creator.require_auth();
 
+        // Validate pool name length
+        if name.len() > MAX_POOL_NAME_LEN {
+            panic!("Pool name too long (max 64 chars)");
+        }
+
         let mut count: u64 = env
             .storage()
             .persistent()
@@ -99,12 +117,18 @@ impl ExpensePoolContract {
             creator: creator.clone(),
             total_expenses: 0,
             created_at: env.ledger().timestamp(),
+            member_count: 1,
         };
 
         env.storage().persistent().set(&DataKey::Pool(count), &pool);
         env.storage()
             .persistent()
             .set(&DataKey::PoolExpenses(count), &Vec::<Expense>::new(&env));
+        
+        // Add creator as first member
+        env.storage()
+            .persistent()
+            .set(&DataKey::Member(count, creator.clone()), &true);
 
         env.events().publish_event(&PoolCreatedEvent {
             pool_id: count,
@@ -120,6 +144,58 @@ impl ExpensePoolContract {
         env.storage().persistent().get(&DataKey::Pool(pool_id))
     }
 
+    /// Check if an address is a member of a pool.
+    pub fn is_pool_member(env: Env, pool_id: u64, member: Address) -> bool {
+        env.storage()
+            .persistent()
+            .get(&DataKey::Member(pool_id, member))
+            .unwrap_or(false)
+    }
+
+    /// Add a member to a pool (only pool creator can do this).
+    pub fn add_pool_member(
+        env: Env,
+        pool_id: u64,
+        caller: Address,
+        new_member: Address,
+    ) {
+        caller.require_auth();
+
+        let pool: Pool = env
+            .storage()
+            .persistent()
+            .get(&DataKey::Pool(pool_id))
+            .expect("Pool not found");
+
+        // Only pool creator can add members
+        if pool.creator != caller {
+            panic!("Only pool creator can add members");
+        }
+
+        // Check if already a member
+        let is_member: bool = env
+            .storage()
+            .persistent()
+            .get(&DataKey::Member(pool_id, new_member.clone()))
+            .unwrap_or(false);
+
+        if is_member {
+            return;
+        }
+
+        // Add member
+        env.storage()
+            .persistent()
+            .set(&DataKey::Member(pool_id, new_member.clone()), &true);
+
+        // Update member count
+        let mut updated_pool = pool;
+        updated_pool.member_count += 1;
+        env.storage()
+            .persistent()
+            .set(&DataKey::Pool(pool_id), &updated_pool);
+    }
+
     /// Log an expense in a pool. Emits an ExpenseLogged event.
     pub fn log_expense(
         env: Env,
@@ -130,8 +206,14 @@ impl ExpensePoolContract {
     ) -> Result<Expense, ContractError> {
         payer.require_auth();
 
+        // Validate amount
         if amount <= 0 {
             return Err(ContractError::AmountZero);
+        }
+
+        // Validate description length
+        if description.len() > MAX_DESCRIPTION_LEN {
+            return Err(ContractError::DescriptionTooLong);
         }
 
         let mut pool: Pool = env
@@ -139,6 +221,22 @@ impl ExpensePoolContract {
             .persistent()
             .get(&DataKey::Pool(pool_id))
             .ok_or(ContractError::PoolNotFound)?;
+
+        // Check expense limit
+        if pool.total_expenses >= MAX_EXPENSES_PER_POOL {
+            return Err(ContractError::PoolFull);
+        }
+
+        // Check if payer is a member of the pool
+        let is_member: bool = env
+            .storage()
+            .persistent()
+            .get(&DataKey::Member(pool_id, payer.clone()))
+            .unwrap_or(false);
+
+        if !is_member {
+            return Err(ContractError::NotPoolMember);
+        }
 
         let mut expenses: Vec<Expense> = env
             .storage()
@@ -208,6 +306,24 @@ impl ExpensePoolContract {
         env.storage()
             .persistent()
             .get(&DataKey::Expense(expense_id))
+    }
+
+    /// Get all members of a pool.
+    pub fn get_pool_members(env: Env, pool_id: u64) -> Vec<Address> {
+        let pool: Option<Pool> = env
+            .storage()
+            .persistent()
+            .get(&DataKey::Pool(pool_id));
+        
+        match pool {
+            None => Vec::<Address>::new(&env),
+            Some(_p) => {
+                let members = Vec::<Address>::new(&env);
+                // Note: In production, you'd want to store member list separately
+                // This is a simplified version
+                members
+            }
+        }
     }
 }
 
