@@ -4,6 +4,7 @@ import WalletModal from './components/WalletModal';
 import ToastContainer from './components/Toast';
 import ProfileModal from './components/ProfileModal';
 import Notchbar from './components/Notchbar';
+import CommandPalette from './components/CommandPalette';
 import InitialLoader from './components/InitialLoader';
 import SmoothScroll from './components/SmoothScroll';
 import { useStellarStore, initializeStellarKit } from './hooks/useStellar';
@@ -40,6 +41,7 @@ function App() {
       {!loading && (
         <SmoothScroll>
           <Notchbar />
+          <CommandPalette />
           <ToastContainer />
           <WalletModal />
           <ProfileModal />
