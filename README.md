@@ -4,6 +4,8 @@ Decentralized expense splitting on the Stellar network powered by Soroban smart 
 
 **Live demo:** [splitstellar.vercel.app](https://splitstellar.vercel.app/)
 
+**User Guide:** [View Guide](https://splitstellar.vercel.app/guide)
+
 **Youtube Link:** [View here](https://youtu.be/1UexAQg4Rbw)
 
 ---
@@ -47,13 +49,13 @@ stellar-project/
 ├── contracts/
 │   └── expense-pool/              # Soroban smart contract (Rust)
 │       └── src/
-│           ├── lib.rs              # 6 exported functions + contract events
-│           └── test.rs             # 14 unit tests
+│           ├── lib.rs              # 8 exported functions + contract events
+│           └── test.rs             # 20 unit tests
 ├── frontend/
 │   └── src/
 │       ├── components/             # WalletModal, ExpenseLogger, Toast, etc.
 │       ├── hooks/                  # useStellar (Zustand store + wallet kit)
-│       ├── pages/                  # Landing, Dashboard, Profile
+│       ├── pages/                  # Landing, Dashboard, Profile, Guide
 │       └── services/               # SorobanRPC client, Toast, DB
 ├── scripts/
 │   └── deploy.sh                   # Contract deployment (testnet/mainnet)
@@ -73,12 +75,14 @@ stellar-project/
 
 | Function | Contract (`lib.rs`) | ScVal Mapping (`soroban.js`) | Frontend Call | Parser |
 |----------|--------------------|------------------------------|---------------|--------|
-| `create_pool(name, creator)` | `lib.rs:84 → Pool` | `toScVal` line 45 | `buildAndSubmit(address, kit, 'create_pool', ...)` | `parseNative` line 77 |
-| `get_pool(pool_id)` | `lib.rs:119 → Option<Pool>` | `toScVal` line 57 | `simulateCall(address, 'get_pool', ...)` | `parseNative` line 77 |
-| `log_expense(pool_id, desc, amount, payer)` | `lib.rs:124 → Result<Expense>` | `toScVal` line 50 | `buildAndSubmit(address, kit, 'log_expense', ...)` | `parseNative` line 108 |
-| `get_pool_expenses(pool_id)` | `lib.rs:199 → Vec<Expense>` | `toScVal` line 57 | `simulateCall(address, 'get_pool_expenses', ...)` | `parseNative` line 88 |
-| `get_expense(expense_id)` | `lib.rs:207 → Option<Expense>` | `toScVal` line 60 | `simulateCall(address, 'get_expense', ...)` | `parseNative` line 97 |
-| `verify_balance(token_id, owner, required)` | `lib.rs:184 → Result<bool>` | `toScVal` line 62 | `simulateCall(address, 'verify_balance', ...)` | — |
+| `create_pool(name, creator)` | `lib.rs:97 → Pool` | `toScVal` line 45 | `buildAndSubmit(address, kit, 'create_pool', ...)` | `parseNative` line 77 |
+| `get_pool(pool_id)` | `lib.rs:145 → Option<Pool>` | `toScVal` line 57 | `simulateCall(address, 'get_pool', ...)` | `parseNative` line 77 |
+| `is_pool_member(pool_id, member)` | `lib.rs:150 → bool` | `toScVal` | `simulateCall(address, 'is_pool_member', ...)` | — |
+| `add_pool_member(pool_id, caller, new_member)` | `lib.rs:158 → ()` | `toScVal` | `buildAndSubmit(address, kit, 'add_pool_member', ...)` | — |
+| `log_expense(pool_id, desc, amount, payer)` | `lib.rs:193 → Result<Expense>` | `toScVal` line 50 | `buildAndSubmit(address, kit, 'log_expense', ...)` | `parseNative` line 108 |
+| `get_pool_expenses(pool_id)` | `lib.rs:261 → Vec<Expense>` | `toScVal` line 57 | `simulateCall(address, 'get_pool_expenses', ...)` | `parseNative` line 88 |
+| `get_expense(expense_id)` | `lib.rs:269 → Option<Expense>` | `toScVal` line 60 | `simulateCall(address, 'get_expense', ...)` | `parseNative` line 97 |
+| `verify_balance(token_id, owner, required)` | `lib.rs:277 → Result<bool>` | `toScVal` line 62 | `simulateCall(address, 'verify_balance', ...)` | — |
 
 > **Parameter alignment:** Contract `u64` → JS `BigInt()`, `String` → JS `string`, `Address` → JS `string`, `i128` → JS `BigInt()`. See [`CONTRACT_INTEGRATION.md`](./CONTRACT_INTEGRATION.md#parameter-type-alignment) for full type mapping.
 
@@ -90,6 +94,20 @@ stellar-project/
 | 2 | `NotPoolCreator` |
 | 3 | `InsufficientBalance` |
 | 4 | `AmountZero` |
+| 5 | `NotPoolMember` |
+| 6 | `PoolNameTooLong` |
+| 7 | `DescriptionTooLong` |
+| 8 | `PoolFull` |
+| 9 | `Unauthorized` |
+
+### Security Features (Level 5)
+
+- **Pool membership validation** — Only pool members can log expenses
+- **Input validation** — Pool names (1-64 chars), descriptions (1-128 chars), amounts (>0, max 1B XLM)
+- **Access control** — Only pool creator can add members
+- **Invite code validation** — 8-character alphanumeric codes with format validation
+- **Rate limiting** — Event polling with exponential backoff on errors
+- **Input sanitization** — XSS prevention on user inputs
 
 ### Inter-Contract Communication
 
@@ -189,7 +207,7 @@ VITE_SUPABASE_ANON_KEY=         # optional
 ## Testing
 
 ```bash
-# Contract (Rust) — 14 tests
+# Contract (Rust) — 20 tests
 cd contracts/expense-pool && cargo test
 
 # Frontend (Vitest) — 13 tests
@@ -230,25 +248,65 @@ GitHub Actions workflow (`.github/workflows/ci.yml`):
 ## Architecture
 
 ```
-┌──────────┐     ┌──────────────┐     ┌──────────────┐
-│  Browser │◄───►│  Vite + React │◄───►│ Soroban RPC  │
-│ (Wallet) │     │  (Vercel)    │     │  (Testnet)   │
-└──────────┘     └──────┬───────┘     └──────┬────────┘
-                        │                    │
-                        ▼                    ▼
-                 ┌────────────┐     ┌──────────────┐
-                 │  Supabase  │     │  Soroban     │
-                 │ (Profiles, │     │  Contract    │
-                 │  Activity) │     │  (Rust)      │
-                 └────────────┘     └──────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│                           Frontend (React / Vite)                        │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌────────────┐ │
+│  │   Dashboard   │  │   Expense    │  │   Settle Up   │  │   Guide    │ │
+│  │   (Pools)     │  │   Logger     │  │   Calculator  │  │   (Help)   │ │
+│  └───────┬───────┘  └───────┬──────┘  └───────┬──────┘  └────────────┘ │
+└──────────┼──────────────────┼─────────────────┼──────────────────────────┘
+           │                  │                 │
+           │    ┌─────────────┴─────────────────┘
+           │    │
+           ▼    ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                     Services Layer (soroban.js)                          │
+│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────────┐  │
+│  │  simulateCall()   │  │  buildAndSubmit() │  │  sendPayment()       │  │
+│  │  (Read ops)       │  │  (Write ops)      │  │  (Settlement)        │  │
+│  └────────┬─────────┘  └────────┬─────────┘  └──────────┬───────────┘  │
+└───────────┼─────────────────────┼───────────────────────┼───────────────┘
+            │                     │                       │
+            ▼                     ▼                       ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        Stellar Network                                   │
+│  ┌──────────────────────────────────────────────────────────────────┐  │
+│  │                    Soroban Contract (Rust)                        │  │
+│  │  ┌────────────────┐  ┌────────────────┐  ┌────────────────────┐ │  │
+│  │  │  create_pool    │  │  log_expense    │  │  verify_balance    │ │  │
+│  │  │  get_pool       │  │  get_expenses   │  │  is_pool_member    │ │  │
+│  │  │  add_member     │  │  get_expense    │  │                    │ │  │
+│  │  └────────────────┘  └────────────────┘  └────────────────────┘ │  │
+│  └──────────────────────────────────────────────────────────────────┘  │
+│                                                                          │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────────────┐  │
+│  │   XLM    │  │   USDC   │  │   EURC   │  │   Anchor Assets      │  │
+│  │ (Native) │  │ (Circle) │  │ (Circle) │  │   (MoneyGram, etc.)  │  │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────────────────┘  │
+│                                                                          │
+│                     + DEX (path payments for multi-currency)             │
+└─────────────────────────────────────────────────────────────────────────┘
+            │
+            ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        Persistence Layer                                  │
+│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────────┐  │
+│  │  Supabase         │  │  localStorage    │  │  Analytics           │  │
+│  │  (Profiles,       │  │  (Fallback)      │  │  (Events, Metrics)   │  │
+│  │   Pool Members)   │  │                  │  │                      │  │
+│  └──────────────────┘  └──────────────────┘  └──────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
-- **Frontend** — React SPA with Zustand state, Tailwind CSS, Framer Motion
-- **Wallet** — Freighter / Albedo / xBull via `@creit.tech/stellar-wallets-kit`
-- **Contract** — Rust Soroban smart contract deployed on testnet (6 functions, 2 events)
+### Component Architecture
+
+- **Frontend** — React SPA with Zustand state, Tailwind CSS v4, Framer Motion
+- **Wallet** — Freighter / Albedo / xBull / WalletConnect via `@creit.tech/stellar-wallets-kit`
+- **Contract** — Rust Soroban smart contract deployed on testnet (8 functions, 2 events, 20 tests)
 - **Integration** — `@stellar/stellar-sdk` v16 (`Contract`, `nativeToScVal`, `rpc.Server`, `TransactionBuilder`). Reads via `simulateCall`, writes via `buildAndSubmit` (simulate → assemble → sign → submit → poll). Full mapping in [`CONTRACT_INTEGRATION.md`](./CONTRACT_INTEGRATION.md)
-- **Events** — Real-time polling (8–10s intervals) for pool discovery
+- **Events** — Real-time polling (12s intervals) for pool discovery
 - **Persistence** — Pool IDs in `localStorage`, profiles/activity in Supabase
+- **Security** — Input validation, rate limiting, access control, XSS prevention
 - **CI/CD** — GitHub Actions → lint, test, build → Vercel deploy
 
 ---
