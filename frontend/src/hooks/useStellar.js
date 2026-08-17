@@ -84,7 +84,7 @@ export const hydrateWalletSession = async () => {
         useStellarStore.getState().setBalance(nativeBalance || '0');
       }
     }
-  } catch (e) {
+  } catch (_) {
     // No wallet was previously connected
   }
 };
