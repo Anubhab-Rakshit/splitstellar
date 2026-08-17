@@ -64,11 +64,9 @@ export const ensureProfile = async (walletAddress, alias = null) => {
 
 function generateInviteCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let code = '';
-  for (let i = 0; i < 8; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return code;
+  const randomValues = new Uint8Array(8);
+  crypto.getRandomValues(randomValues);
+  return Array.from(randomValues, (v) => chars[v % chars.length]).join('');
 }
 
 export const createExpensePool = async (name, createdByAddress) => {

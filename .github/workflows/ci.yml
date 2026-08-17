@@ -39,6 +39,13 @@ jobs:
         run: cargo test
         working-directory: contracts/expense-pool
 
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
+
+      - name: Audit dependencies
+        run: cargo audit
+        working-directory: contracts/expense-pool
+
   frontend:
     runs-on: ubuntu-latest
     defaults:
@@ -56,6 +63,9 @@ jobs:
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps
+
+      - name: Audit dependencies
+        run: npm audit --omit=dev --audit-level=high
 
       - name: Lint
         run: npm run lint
