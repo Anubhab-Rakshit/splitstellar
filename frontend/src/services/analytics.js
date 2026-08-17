@@ -117,12 +117,33 @@ export function clearAnalytics() {
   }).catch(() => {});
 }
 
-export function getInteractionData(days = 14) {
-  const events = load();
+export async function getInteractionData(days = 14) {
   const now = new Date();
-  const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+  const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000).toISOString();
 
-  const recent = events.filter((e) => new Date(e.timestamp) >= cutoff);
+  let rows = [];
+  try {
+    const { data, error } = await supabase
+      .from('analytics_events')
+      .select('event, properties, created_at')
+      .gte('created_at', cutoff)
+      .order('created_at', { ascending: true })
+      .limit(1000);
+
+    if (error) {
+      if (!isTableNotFound(error)) console.warn('analytics: interaction query failed', error);
+    } else if (data) {
+      rows = data;
+    }
+  } catch (_) { /* fallback to empty */ }
+
+  if (rows.length === 0) {
+    rows = load().filter((e) => new Date(e.timestamp) >= cutoff).map((e) => ({
+      event: e.event,
+      properties: e.properties,
+      created_at: e.timestamp,
+    }));
+  }
 
   const eventLabels = {
     wallet_connect: 'Wallet Connect',
@@ -150,8 +171,8 @@ export function getInteractionData(days = 14) {
     days_data.push({ key, label, total: 0, byEvent: {} });
   }
 
-  for (const e of recent) {
-    const dayKey = new Date(e.timestamp).toISOString().slice(0, 10);
+  for (const e of rows) {
+    const dayKey = new Date(e.created_at).toISOString().slice(0, 10);
     const bucket = days_data.find((d) => d.key === dayKey);
     if (bucket) {
       bucket.total += 1;
@@ -160,8 +181,8 @@ export function getInteractionData(days = 14) {
   }
 
   const uniqueByDay = {};
-  for (const e of recent) {
-    const dayKey = new Date(e.timestamp).toISOString().slice(0, 10);
+  for (const e of rows) {
+    const dayKey = new Date(e.created_at).toISOString().slice(0, 10);
     if (!uniqueByDay[dayKey]) uniqueByDay[dayKey] = new Set();
     if (e.properties?.wallet_address) uniqueByDay[dayKey].add(e.properties.wallet_address);
   }
@@ -169,7 +190,7 @@ export function getInteractionData(days = 14) {
     bucket.uniqueWallets = uniqueByDay[bucket.key]?.size || 0;
   }
 
-  const eventTypes = [...new Set(recent.map((e) => e.event))];
+  const eventTypes = [...new Set(rows.map((e) => e.event))];
   const maxTotal = Math.max(...days_data.map((d) => d.total), 1);
 
   return { days_data, eventTypes, eventLabels, eventColors, maxTotal };

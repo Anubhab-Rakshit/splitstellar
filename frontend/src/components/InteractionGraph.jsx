@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { getInteractionData } from '../services/analytics';
 
 const CHART = {
@@ -10,8 +10,16 @@ const CHART = {
   padLeft: 40,
 };
 
+const EMPTY = { days_data: [], eventTypes: [], eventLabels: {}, eventColors: {}, maxTotal: 1 };
+
 export default function InteractionGraph() {
-  const data = useMemo(() => getInteractionData(14), []);
+  const [data, setData] = useState(EMPTY);
+
+  useEffect(() => {
+    let active = true;
+    getInteractionData(14).then((d) => { if (active) setData(d); });
+    return () => { active = false; };
+  }, []);
   const { days_data, eventTypes, eventLabels, eventColors, maxTotal } = data;
 
   const plotW = CHART.width - CHART.padLeft - CHART.padRight;
@@ -54,30 +62,18 @@ export default function InteractionGraph() {
         style={{ minWidth: 480 }}
       >
         {[...Array(yTicks + 1)].map((_, i) => {
-          const val = i * yStep;
-          const y = CHART.padTop + plotH - (val / (yStep * yTicks)) * plotH;
+          const y = CHART.padTop + plotH - (i / yTicks) * plotH;
           return (
-            <g key={i}>
-              <line
-                x1={CHART.padLeft}
-                y1={y}
-                x2={CHART.width - CHART.padRight}
-                y2={y}
-                stroke="currentColor"
-                className="text-[#E5E5E5] dark:text-[#222]"
-                strokeWidth="1"
-              />
-              <text
-                x={CHART.padLeft - 8}
-                y={y + 4}
-                textAnchor="end"
-                className="fill-[#999] dark:text-[#666]"
-                fontSize="10"
-                fontFamily="monospace"
-              >
-                {val}
-              </text>
-            </g>
+            <line
+              key={i}
+              x1={CHART.padLeft}
+              y1={y}
+              x2={CHART.width - CHART.padRight}
+              y2={y}
+              stroke="currentColor"
+              className="text-[#E5E5E5] dark:text-[#222]"
+              strokeWidth="1"
+            />
           );
         })}
 
@@ -119,19 +115,6 @@ export default function InteractionGraph() {
             >
               {b.label}
             </text>
-            {i % 3 === 0 && b.total > 0 && (
-              <text
-                x={b.x + barW / 2}
-                y={CHART.padTop + plotH - (b.total / (yStep * yTicks)) * plotH - 6}
-                textAnchor="middle"
-                className="fill-[#333] dark:fill-[#ccc]"
-                fontSize="9"
-                fontFamily="monospace"
-                fontWeight="600"
-              >
-                {b.total}
-              </text>
-            )}
           </g>
         ))}
 
