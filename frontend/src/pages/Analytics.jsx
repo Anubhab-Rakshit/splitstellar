@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getAll, getStats, clearAnalytics, syncAnalytics } from '../services/analytics';
-import { Activity, Users, BarChart3, Trash2 } from 'lucide-react';
+import { Activity, Users, BarChart3, Trash2, TrendingUp, X } from 'lucide-react';
 import { useStellarStore } from '../hooks/useStellar';
+import InteractionGraph from '../components/InteractionGraph';
 
 export default function Analytics() {
   const { address } = useStellarStore();
   const [events, setEvents] = useState(() => getAll());
   const [filter, setFilter] = useState('');
+  const [showGraph, setShowGraph] = useState(false);
 
   useEffect(() => {
     if (address) syncAnalytics().then(() => setEvents(getAll()));
@@ -45,9 +47,18 @@ export default function Analytics() {
             <h1 className="text-4xl sm:text-5xl md:text-7xl font-serif italic tracking-tight mb-4">Analytics</h1>
             <p className="font-mono text-sm text-[#666] dark:text-[#888]">Event tracking and usage metrics.</p>
           </div>
-          <button onClick={handleClear} className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full" title="Clear data">
-            <Trash2 className="w-4 h-4 text-[#666] dark:text-[#888]" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowGraph(true)}
+              className="flex items-center gap-2 px-4 py-2 border border-[#E5E5E5] dark:border-[#333] hover:border-black dark:hover:border-white font-mono text-[10px] uppercase tracking-widest text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white transition-colors"
+            >
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">User Interaction Graph</span>
+            </button>
+            <button onClick={handleClear} className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full" title="Clear data">
+              <Trash2 className="w-4 h-4 text-[#666] dark:text-[#888]" />
+            </button>
+          </div>
         </div>
 
         {stats && (
@@ -105,6 +116,62 @@ export default function Analytics() {
           )}
         </div>
       </motion.div>
+
+      <AnimatePresence>
+        {showGraph && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/80 backdrop-blur-md"
+              onClick={() => setShowGraph(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="relative w-full max-w-3xl bg-white dark:bg-black border border-[#E5E5E5] dark:border-[#222] p-6 sm:p-8"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl sm:text-3xl font-serif italic tracking-tight">User Interaction</h2>
+                  <p className="font-mono text-[10px] uppercase tracking-widest text-[#666] dark:text-[#888] mt-1">Last 14 days</p>
+                </div>
+                <button
+                  onClick={() => setShowGraph(false)}
+                  className="p-2 hover:bg-black/5 dark:hover:bg-white/10"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <InteractionGraph />
+
+              <div className="mt-6 flex flex-wrap gap-4">
+                {[
+                  { color: '#22c55e', label: 'Wallet Connect' },
+                  { color: '#3b82f6', label: 'Create Pool' },
+                  { color: '#a855f7', label: 'Join Request' },
+                  { color: '#f59e0b', label: 'Log Expense' },
+                  { color: '#ef4444', label: 'Settle Payment' },
+                  { color: '#06b6d4', label: 'Update Profile' },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: item.color }} />
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-[#666] dark:text-[#888]">{item.label}</span>
+                  </div>
+                ))}
+                <div className="flex items-center gap-2">
+                  <span className="w-4 border-t-2 border-dashed border-[#06b6d4]" />
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-[#666] dark:text-[#888]">Unique Wallets</span>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
