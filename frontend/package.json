@@ -52,5 +52,10 @@
     "vite": "^8.0.12",
     "vite-plugin-node-polyfills": "^0.28.0",
     "vitest": "^4.1.9"
+  },
+  "overrides": {
+    "@trezor/connect-plugin-stellar": {
+      "@stellar/stellar-sdk": "$@stellar/stellar-sdk"
+    }
   }
 }
