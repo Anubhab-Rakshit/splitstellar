@@ -27,7 +27,12 @@ export const useStellarStore = create((set) => ({
   setWalletModalOpen: (isOpen) => set({ isWalletModalOpen: isOpen }),
   setProfileName: (name) => set({ profileName: name }),
   toggleTheme: () => set((state) => ({ theme: state.theme === 'dark' ? 'light' : 'dark' })),
-  disconnect: () => set({ address: null, balance: null, profileName: null, error: null }),
+  disconnect: () => {
+    if (kitInstance) {
+      kitInstance.disconnect().catch(() => {});
+    }
+    set({ address: null, balance: null, profileName: null, error: null });
+  },
 }));
 
 export const WALLETCONNECT_PROJECT_ID = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID;
@@ -64,4 +69,22 @@ export const initializeStellarKit = () => {
     useStellarStore.getState().setKit(StellarWalletsKit);
   }
   return kitInstance;
+};
+
+export const hydrateWalletSession = async () => {
+  try {
+    const kit = StellarWalletsKit;
+    const { address } = await kit.getAddress();
+    if (address) {
+      useStellarStore.getState().setAddress(address);
+      const res = await fetch(`https://horizon-testnet.stellar.org/accounts/${address}`);
+      if (res.ok) {
+        const data = await res.json();
+        const nativeBalance = data.balances?.find((b) => b.asset_type === 'native')?.balance;
+        useStellarStore.getState().setBalance(nativeBalance || '0');
+      }
+    }
+  } catch {
+    // No wallet was previously connected
+  }
 };

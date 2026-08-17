@@ -62,8 +62,7 @@ export default function CommandPalette() {
         break;
       case 'disconnect':
         if (address) {
-          useStellarStore.getState().setAddress(null);
-          useStellarStore.getState().setKit(null);
+          useStellarStore.getState().disconnect();
         }
         break;
       case 'copy':
