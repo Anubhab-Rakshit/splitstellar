@@ -421,6 +421,28 @@ GBGEJTLNY3A4BMZGFAWFVVBJZOZLFCLD6Y2FROAYVN26R2EPEJZA7ADF
 | [`a8a8c0b7…afdf37`](https://stellar.expert/explorer/testnet/tx/a8a8c0b7cc65b0462bc7875a30cfd209bbd62e5bc319c807c9624cfa94afdf37) | [`87e7da49…c9d07f`](https://stellar.expert/explorer/testnet/tx/87e7da494027db998d9721105ec861a4353ba9d23c079147fc4e4cab30c9d07f) | [`5f1e0502…65045a`](https://stellar.expert/explorer/testnet/tx/5f1e0502822a77717d4bce2b7ab0c9ad1d5abf98a64860bbd5e3db867865045a) | [`320bb70a…b7bea0`](https://stellar.expert/explorer/testnet/tx/320bb70a591e7c2060ee1b06eef17fe652e9e20afbe8b14346f84d1fc6b7bea0) | [`f1bc7f43…227bcb`](https://stellar.expert/explorer/testnet/tx/f1bc7f43b7b1969ecee0ab2141a63ce3981aa74bce8810ad3fd84e3cfc227bcb) | [`9941edab…ba78fb`](https://stellar.expert/explorer/testnet/tx/9941edab82a61fe760cc9d1f5de36738bd932e559ec612f0722eadc521ba78fb) |
 | [`785b95b3…8380a2`](https://stellar.expert/explorer/testnet/tx/785b95b30c49e6616ec72dafed074cc543ddca20fd8bc256d7871ec8958380a2) | [`d650a62e…3758ce`](https://stellar.expert/explorer/testnet/tx/d650a62e60054280f713eda9f0fc6b7e8a1d136435ce5b741365a8f3533758ce) | [`2a301174…da42ce`](https://stellar.expert/explorer/testnet/tx/2a301174395451e34e4047091c080ed4e858a497e48f07ed7ba6932b45da42ce) | [`961a2364…4dc173`](https://stellar.expert/explorer/testnet/tx/961a2364b44188095017352f6b8243bd728081fcc296733b147a28d5ac4dc173) | [`ddac636c…bb6caa`](https://stellar.expert/explorer/testnet/tx/ddac636cd4dd9633f141c0d227c5983786ee99146ffd25db0a9a10b74bbb6caa) | [`27586fee…bc4466`](https://stellar.expert/explorer/testnet/tx/27586fee617516b139ff275b941f72fa1413490804aa0c2eabb258bee8bc4466) |
 | [`b42829ef…cc2d08`](https://stellar.expert/explorer/testnet/tx/b42829ef28429b3c8cac9256b7551969997b09a0e966477df9447801c5cc2d08) | [`0bf3b8b5…766af7`](https://stellar.expert/explorer/testnet/tx/0bf3b8b59ad3d1c4b0a115a9549f0fbed06125e305b3e49a15b6627d14766af7) | [`bd2786c5…a651db`](https://stellar.expert/explorer/testnet/tx/bd2786c59688e4ccea41d6709a6fabd8b66724737c7be1de0108ccc0e9a651db) | [`40b22449…ad72c7`](https://stellar.expert/explorer/testnet/tx/40b224494704210cac0d38026c7f51582dc19a2f1fcc39dba1a13c4955ad72c7) | [`6a196b75…bf0987`](https://stellar.expert/explorer/testnet/tx/6a196b759ba6b527bf39ebb87663ed8af108e39a013b50e7b82fd5a6b5bf0987) | [`e90e85ee…75ebd3`](https://stellar.expert/explorer/testnet/tx/e90e85ee7decf321f2a596679bda54a30bae5ac50fdcfd9bf32817032b75ebd3) |
+### Transaction Screenshots
+
+Verified on-chain transactions captured from Stellar Expert explorer.
+
+<table>
+  <tr>
+    <td><img src="pictures/transactions/tx-ss-1.png" width="100%" alt="Transaction 1" /></td>
+    <td><img src="pictures/transactions/tx-ss-2.png" width="100%" alt="Transaction 2" /></td>
+    <td><img src="pictures/transactions/tx-ss-3.png" width="100%" alt="Transaction 3" /></td>
+  </tr>
+  <tr>
+    <td><img src="pictures/transactions/tx-ss-4.png" width="100%" alt="Transaction 4" /></td>
+    <td><img src="pictures/transactions/tx-ss-5.png" width="100%" alt="Transaction 5" /></td>
+    <td><img src="pictures/transactions/tx-ss-6.png" width="100%" alt="Transaction 6" /></td>
+  </tr>
+  <tr>
+    <td><img src="pictures/transactions/tx-ss-7.png" width="100%" alt="Transaction 7" /></td>
+    <td><img src="pictures/transactions/tx-ss-8.png" width="100%" alt="Transaction 8" /></td>
+    <td><img src="pictures/transactions/tx-ss-9.png" width="100%" alt="Transaction 9" /></td>
+  </tr>
+</table>
+
 ### Feedback → Improvements → Commits
 
 Every actionable theme raised by Level 5 testers was matched to a shipped fix.
