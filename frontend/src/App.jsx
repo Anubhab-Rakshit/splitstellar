@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Analytics as VercelAnalytics } from '@vercel/analytics/react';
 import WalletModal from './components/WalletModal';
 import ToastContainer from './components/Toast';
 import ProfileModal from './components/ProfileModal';
@@ -7,7 +8,7 @@ import Notchbar from './components/Notchbar';
 import CommandPalette from './components/CommandPalette';
 import InitialLoader from './components/InitialLoader';
 import SmoothScroll from './components/SmoothScroll';
-import { useStellarStore, initializeStellarKit } from './hooks/useStellar';
+import { useStellarStore, initializeStellarKit, hydrateWalletSession } from './hooks/useStellar';
 
 import ErrorBoundary from './components/ErrorBoundary';
 import Landing from './pages/Landing';
@@ -22,6 +23,7 @@ function App() {
 
   useEffect(() => {
     initializeStellarKit();
+    hydrateWalletSession();
   }, []);
 
   useEffect(() => {
@@ -36,6 +38,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <VercelAnalytics />
       {loading && <InitialLoader onComplete={() => setLoading(false)} />}
       
       {!loading && (
