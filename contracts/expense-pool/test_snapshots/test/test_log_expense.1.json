@@ -16,7 +16,7 @@
               "function_name": "create_pool",
               "args": [
                 {
-                  "string": "Team Lunch"
+                  "string": "Test Pool"
                 },
                 {
                   "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
@@ -81,6 +81,9 @@
                   },
                   {
                     "u64": "1"
+                  },
+                  {
+                    "u64": "1"
                   }
                 ]
               },
@@ -136,6 +139,33 @@
                     }
                   }
                 ]
+              }
+            }
+          },
+          "ext": "v0"
+        },
+        "live_until": 4095
+      },
+      {
+        "entry": {
+          "last_modified_ledger_seq": 0,
+          "data": {
+            "contract_data": {
+              "ext": "v0",
+              "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM",
+              "key": {
+                "vec": [
+                  {
+                    "symbol": "ExpenseCount"
+                  },
+                  {
+                    "u64": "1"
+                  }
+                ]
+              },
+              "durability": "persistent",
+              "val": {
+                "u64": "1"
               }
             }
           },
@@ -219,6 +249,14 @@
                   },
                   {
                     "key": {
+                      "symbol": "is_active"
+                    },
+                    "val": {
+                      "bool": true
+                    }
+                  },
+                  {
+                    "key": {
                       "symbol": "member_count"
                     },
                     "val": {
@@ -230,7 +268,7 @@
                       "symbol": "name"
                     },
                     "val": {
-                      "string": "Team Lunch"
+                      "string": "Test Pool"
                     }
                   },
                   {
@@ -239,6 +277,14 @@
                     },
                     "val": {
                       "u64": "1"
+                    }
+                  },
+                  {
+                    "key": {
+                      "symbol": "total_settlements"
+                    },
+                    "val": {
+                      "u64": "0"
                     }
                   }
                 ]
@@ -283,7 +329,7 @@
               "key": {
                 "vec": [
                   {
-                    "symbol": "PoolExpenses"
+                    "symbol": "PoolMembers"
                   },
                   {
                     "u64": "1"
@@ -294,58 +340,36 @@
               "val": {
                 "vec": [
                   {
-                    "map": [
-                      {
-                        "key": {
-                          "symbol": "amount"
-                        },
-                        "val": {
-                          "i128": "500"
-                        }
-                      },
-                      {
-                        "key": {
-                          "symbol": "created_at"
-                        },
-                        "val": {
-                          "u64": "0"
-                        }
-                      },
-                      {
-                        "key": {
-                          "symbol": "description"
-                        },
-                        "val": {
-                          "string": "Pizza"
-                        }
-                      },
-                      {
-                        "key": {
-                          "symbol": "id"
-                        },
-                        "val": {
-                          "u64": "1"
-                        }
-                      },
-                      {
-                        "key": {
-                          "symbol": "payer"
-                        },
-                        "val": {
-                          "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
-                        }
-                      },
-                      {
-                        "key": {
-                          "symbol": "pool_id"
-                        },
-                        "val": {
-                          "u64": "1"
-                        }
-                      }
-                    ]
+                    "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
                   }
                 ]
+              }
+            }
+          },
+          "ext": "v0"
+        },
+        "live_until": 4095
+      },
+      {
+        "entry": {
+          "last_modified_ledger_seq": 0,
+          "data": {
+            "contract_data": {
+              "ext": "v0",
+              "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM",
+              "key": {
+                "vec": [
+                  {
+                    "symbol": "SettlementCount"
+                  },
+                  {
+                    "u64": "1"
+                  }
+                ]
+              },
+              "durability": "persistent",
+              "val": {
+                "u64": "0"
               }
             }
           },
