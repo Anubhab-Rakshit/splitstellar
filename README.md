@@ -63,6 +63,29 @@
 
 ---
 
+## Contract v2 — What Changed
+
+The contract was completely rewritten to address Level 5 judge feedback on scalability and contract logic. **13 functions, 6 events, 15 typed errors, 44 tests.**
+
+| Change | Before (v1) | After (v2) | Why |
+|--------|-------------|------------|-----|
+| **Storage model** | `Vec<Expense>` blob per pool | Individual `Expense(pool_id, index)` entries | O(1) writes — no vector reallocation on every expense |
+| **Error handling** | `panic!()` + `expect()` | `Result<_, ContractError>` everywhere | Gas-efficient, typed errors, no unwinding |
+| **Pagination** | `get_pool_expenses` returned all | `get_pool_expenses(pool_id, offset, limit)` with `MAX_PAGE_SIZE=100` | Scales to 1000+ expenses without response bloat |
+| **Settlement tracking** | Off-chain only | `record_settlement()` + `get_pool_settlements()` on-chain | Immutable settlement ledger |
+| **Pool lifecycle** | No archival or rename | `archive_pool()` + `update_pool_name()` | Pools can be deactivated or rebranded |
+| **Member management** | `get_pool_members` returned empty | Full on-chain `Member(pool_id, address)` + `get_pool_members()` | Trustless membership verification |
+| **Expense ID scope** | Global IDs (collision risk) | Pool-scoped IDs via `get_expense(pool_id, expense_id)` | Safe across multiple pools |
+
+### Quick Links — Contract
+
+| | | |
+|---|---|---|
+| [📦 Functions (13)](#functions-13) | [📡 Events (6)](#events-6) | [🔒 Security model](#security-model-1) |
+| [🧪 44 tests](./contracts/expense-pool/src/test.rs) | [📋 CONTRACT_INTEGRATION.md](./CONTRACT_INTEGRATION.md) | [🔗 Deployed contract](https://stellar.expert/explorer/testnet/contract/CDEQF4RFNEXOH2JCI3QGPGBNCZQMRWUQACW522L6OPMSRVT4EBQUNTHJ) |
+
+---
+
 ## Screenshots
 
 ### Desktop
@@ -208,34 +231,43 @@ flowchart LR
 
 > **Integration mapping:** See [`CONTRACT_INTEGRATION.md`](./CONTRACT_INTEGRATION.md) for the complete function-by-function mapping between contract (`lib.rs`) and frontend (`soroban.js`), including ScVal type alignment, parser logic, events, and error codes.
 
-### Functions (9)
+### Functions (13)
 
-| Function | Contract (`lib.rs`) | Frontend Call |
-|----------|--------------------|---------------|
-| `create_pool(name, creator)` | `lib.rs:97 → Pool` | `buildAndSubmit(address, kit, 'create_pool', ...)` |
-| `get_pool(pool_id)` | `lib.rs:143 → Option<Pool>` | `simulateCall(address, 'get_pool', ...)` |
-| `is_pool_member(pool_id, member)` | `lib.rs:148 → bool` | `simulateCall(address, 'is_pool_member', ...)` |
-| `add_pool_member(pool_id, caller, new_member)` | `lib.rs:156 → ()` | `buildAndSubmit(address, kit, 'add_pool_member', ...)` |
-| `log_expense(pool_id, desc, amount, payer)` | `lib.rs:195 → Result<Expense>` | `buildAndSubmit(address, kit, 'log_expense', ...)` |
-| `get_pool_expenses(pool_id)` | `lib.rs:292 → Vec<Expense>` | `simulateCall(address, 'get_pool_expenses', ...)` |
-| `get_expense(expense_id)` | `lib.rs:300 → Option<Expense>` | `simulateCall(address, 'get_expense', ...)` |
-| `verify_balance(token_id, owner, required)` | `lib.rs:277 → Result<bool>` | `simulateCall(address, 'verify_balance', ...)` |
-| `get_pool_members(pool_id)` | `lib.rs:307 → Vec<Address>` | — (reserved; membership UI reads `db.getPoolMembers`) |
+| Function | Purpose | Auth |
+|----------|---------|------|
+| `create_pool(name, creator)` | Create a new expense pool | `creator.require_auth()` |
+| `get_pool(pool_id)` | Read pool metadata | read-only |
+| `is_pool_member(pool_id, member)` | Check membership | read-only |
+| `add_pool_member(pool_id, caller, new_member)` | Add member to pool | creator-only |
+| `get_pool_members(pool_id)` | List all members | read-only |
+| `log_expense(pool_id, desc, amount, payer)` | Log an expense on-chain | member-only |
+| `get_pool_expenses(pool_id, offset, limit)` | Paginated expense list | read-only |
+| `get_expense(pool_id, expense_id)` | Read single expense | read-only |
+| `verify_balance(token_id, owner, required)` | Cross-contract balance check | cross-contract |
+| `record_settlement(pool_id, from, to, amount, caller)` | Record a settlement on-chain | member-only |
+| `get_pool_settlements(pool_id, offset, limit)` | Paginated settlement list | read-only |
+| `archive_pool(pool_id, caller)` | Deactivate a pool | creator-only |
+| `update_pool_name(pool_id, new_name, caller)` | Rename a pool | creator-only |
 
-### Events (2)
+### Events (6)
 
 | Event | Emitted by |
 |-------|------------|
 | `PoolCreatedEvent` | `create_pool` |
+| `MemberAddedEvent` | `add_pool_member` |
 | `ExpenseLoggedEvent` | `log_expense` |
+| `SettlementRecordedEvent` | `record_settlement` |
+| `PoolArchivedEvent` | `archive_pool` |
+| `PoolUpdatedEvent` | `update_pool_name` |
 
 ### Security model
 
-- **Pool membership** — only members can log expenses; only the creator can add members
-- **Input validation** — pool names (1–64 chars), descriptions (1–128 chars), amounts (>0, max 1B XLM)
+- **Pool membership** — only members can log expenses and record settlements; only the creator can add members, archive, or rename
+- **Input validation** — pool names (1–64 chars), descriptions (1–128 chars), amounts (>0, max 1B XLM), max 1000 expenses/pool, max 500 settlements/pool
+- **Typed errors** — 15 `ContractError` variants, zero `panic!()` calls
 - **Invite-code gating** — 8-char alphanumeric codes; owner approval required to join
 - **XSS prevention** — inputs sanitized and all exported reports escaped
-- **Error codes** — 9 typed contract errors (`PoolNotFound`, `NotPoolCreator`, `NotPoolMember`, `PoolFull`, …)
+- **Pagination** — `MAX_PAGE_SIZE = 100` prevents unbounded responses
 
 ---
 
@@ -467,6 +499,7 @@ Iterated directly from the feedback loop above:
 
 | Feature | Commit |
 |---------|--------|
+| **Contract v2 rewrite** — 13 functions, pagination, settlement tracking, pool archival, typed errors, 44 tests | [`25870c0`](https://github.com/Anubhab-Rakshit/splitstellar/commit/25870c0) |
 | **Command palette** — ⌘K fuzzy search over pages and actions (cmdk + fuse.js) | [`abfbfe5`](https://github.com/Anubhab-Rakshit/splitstellar/commit/abfbfe5) |
 | **Expense categories** — 20 presets with icons + smart split types (equal/percentage/exact/shares) | [`abfbfe5`](https://github.com/Anubhab-Rakshit/splitstellar/commit/abfbfe5), [`56694db`](https://github.com/Anubhab-Rakshit/splitstellar/commit/56694db) |
 | **Expense notes + undo/redo** — last-5 action history on the ledger | [`56694db`](https://github.com/Anubhab-Rakshit/splitstellar/commit/56694db) |
