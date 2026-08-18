@@ -116,8 +116,8 @@ export default function Profile() {
               </form>
             ) : (
               <div className="flex items-center gap-5 group w-full">
-                <div className="hidden sm:flex w-16 h-16 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-emerald-400 via-teal-500 to-teal-700 flex items-center justify-center shrink-0 shadow-lg shadow-teal-500/20">
-                  <span className="font-serif italic text-2xl md:text-4xl text-white">
+                <div className="hidden sm:flex w-16 h-16 md:w-24 md:h-24 rounded-full hairline-card flex items-center justify-center shrink-0">
+                  <span className="font-serif italic text-2xl md:text-4xl text-black dark:text-white drop-shadow-md">
                     {(profileName || 'A').charAt(0).toUpperCase()}
                   </span>
                 </div>
@@ -131,7 +131,7 @@ export default function Profile() {
             )}
           </div>
           
-          <div className="flex flex-col sm:flex-row sm:items-center gap-6 border-y border-[#E5E5E5] dark:border-[#222] py-6 transition-colors duration-500">
+          <div className="glass-card flex flex-col sm:flex-row sm:items-center gap-6 py-6 transition-colors duration-500 mt-8">
             
             <div className="flex-1">
               <span className="block text-[10px] font-mono uppercase tracking-widest text-[#666] dark:text-[#888] mb-2">Wallet Address</span>
@@ -139,7 +139,7 @@ export default function Profile() {
                 <span className="font-mono text-sm sm:text-base break-all">{address}</span>
                 <button 
                   onClick={handleCopy}
-                  className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-md transition-colors"
+                  className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors"
                   title="Copy Address"
                 >
                   {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
@@ -147,7 +147,7 @@ export default function Profile() {
               </div>
             </div>
 
-            <div className="w-full sm:w-[1px] h-[1px] sm:h-12 bg-[#E5E5E5] dark:bg-[#222] transition-colors duration-500" />
+            <div className="w-full sm:w-[1px] h-[1px] sm:h-12 bg-black/10 dark:bg-white/10 transition-colors duration-500" />
 
             <div className="flex-1 sm:text-right">
               <span className="block text-[10px] font-mono uppercase tracking-widest text-[#666] dark:text-[#888] mb-2">Available Balance (Testnet)</span>
@@ -174,32 +174,32 @@ export default function Profile() {
           </div>
 
           {activities === null ? (
-            <div className="border border-[#E5E5E5] dark:border-[#222] bg-white dark:bg-black transition-colors duration-500 p-6 text-center">
+            <div className="glass-card p-6 text-center">
               <p className="text-sm font-mono text-[#666] dark:text-[#888] animate-pulse">Loading activity...</p>
             </div>
           ) : activities.length === 0 ? (
-            <div className="border border-[#E5E5E5] dark:border-[#222] bg-white dark:bg-black transition-colors duration-500 p-6 text-center">
+            <div className="glass-card p-6 text-center">
               <p className="text-sm font-mono text-[#666] dark:text-[#888]">No recent activity yet.</p>
             </div>
           ) : (
-          <div className="border border-[#E5E5E5] dark:border-[#222] bg-white dark:bg-black transition-colors duration-500">
+          <div className="glass-card p-0 overflow-hidden">
             {activities.map((act, index) => (
               <div 
                 key={act.id} 
-                className={`flex items-center justify-between p-6 ${index !== activities.length - 1 ? 'border-b border-[#E5E5E5] dark:border-[#222]' : ''} transition-colors duration-500 hover:bg-black/5 dark:hover:bg-white/5`}
+                className={`flex flex-col sm:flex-row sm:items-center justify-between p-6 ${index !== activities.length - 1 ? 'border-b border-black/5 dark:border-white/5' : ''} transition-colors duration-500 hover:bg-black/5 dark:hover:bg-white/5 gap-4 sm:gap-0`}
               >
-                <div className="flex items-center gap-6">
-                  <div className="hidden sm:block font-mono text-[10px] text-[#666] dark:text-[#888]">{act.timestamp ? new Date(act.timestamp).toLocaleString() : ''}</div>
-                    <div>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 w-full">
+                  <div className="font-mono text-[10px] text-[#666] dark:text-[#888] shrink-0">{act.timestamp ? new Date(act.timestamp).toLocaleString() : ''}</div>
+                    <div className="flex-1">
                       <div className="font-mono text-xs uppercase tracking-wider mb-1">{act.type.replace('_', ' ')}</div>
-                      <div className="font-mono text-[10px] text-[#666] dark:text-[#888] flex items-center gap-1">
-                        {act.details?.pool_name || act.details?.description || ''}
+                      <div className="font-mono text-[10px] text-[#666] dark:text-[#888] flex flex-wrap items-center gap-1">
+                        <span className="truncate max-w-[200px] sm:max-w-[300px] block">{act.details?.pool_name || act.details?.description || ''}</span>
                         {act.details?.tx_hash && (
                           <a
                             href={`https://stellar.expert/explorer/testnet/tx/${act.details.tx_hash}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-blue-500 hover:text-blue-400"
+                            className="inline-flex items-center gap-1 text-blue-500 hover:text-blue-400 shrink-0 ml-2"
                           >
                             tx <ExternalLink className="w-2.5 h-2.5" />
                           </a>

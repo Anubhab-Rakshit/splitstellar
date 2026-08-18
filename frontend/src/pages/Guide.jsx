@@ -5,6 +5,7 @@ import {
   Wallet, Users, Receipt, ArrowRightLeft, Shield, Globe, Zap, Lock,
   ChevronRight, ChevronDown, ExternalLink, FileCode, Database, Layers,
 } from 'lucide-react';
+import StaggeredText from '../components/StaggeredText';
 
 const features = [
   {
@@ -110,7 +111,7 @@ function AccordionItem({ title, content, index, isOpen, onToggle }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay: index * 0.05 }}
-      className="border border-[#E5E5E5] dark:border-[#222] bg-white dark:bg-black transition-colors duration-500"
+      className="hairline-card transition-colors duration-500 mb-3"
     >
       <button
         onClick={onToggle}
@@ -156,7 +157,7 @@ function FAQItem({ q, a, index, isOpen, onToggle }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay: index * 0.05 }}
-      className="border border-[#E5E5E5] dark:border-[#222] bg-white dark:bg-black transition-colors duration-500"
+      className="hairline-card transition-colors duration-500 mb-3"
     >
       <button
         onClick={onToggle}
@@ -200,7 +201,7 @@ export default function Guide() {
   const [openFaq, setOpenFaq] = useState(null);
 
   return (
-    <div className="min-h-screen bg-[#F7F7F7] dark:bg-black overflow-hidden relative selection:bg-black dark:selection:bg-white selection:text-white dark:selection:text-black">
+    <div className="min-h-screen bg-transparent overflow-hidden relative selection:bg-black dark:selection:bg-white selection:text-white dark:selection:text-black">
 
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12 relative z-10 pt-24 sm:pt-32 pb-20 sm:pb-32">
 
@@ -217,10 +218,16 @@ export default function Guide() {
               </span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl md:text-7xl font-serif italic tracking-tight mb-6 sm:mb-8">
-              Split expenses.<br />
-              <span className="opacity-50">Settle instantly.</span>
-            </h1>
+            <StaggeredText 
+              text="Split expenses." 
+              className="text-4xl sm:text-5xl md:text-7xl font-serif italic tracking-tight mb-2" 
+              delay={0.1}
+            />
+            <StaggeredText 
+              text="Settle instantly." 
+              className="text-4xl sm:text-5xl md:text-7xl font-serif italic tracking-tight mb-6 sm:mb-8 text-black/50 dark:text-white/50" 
+              delay={0.3}
+            />
 
             <p className="text-sm sm:text-lg font-mono text-[#666] dark:text-[#888] max-w-2xl mb-8 sm:mb-12 leading-relaxed">
               SplitStellar enables cryptographic certainty for group expenses.
@@ -270,7 +277,7 @@ export default function Guide() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-50px' }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="border border-[#E5E5E5] dark:border-[#222] bg-white dark:bg-[#050505] p-6 sm:p-8 transition-colors duration-500"
+                className="glass-card transition-colors duration-500"
               >
                 <div className="flex items-start gap-4 sm:gap-6">
                   <div className="flex-shrink-0">
@@ -320,7 +327,7 @@ export default function Guide() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.08 }}
-                className="border border-[#E5E5E5] dark:border-[#222] bg-[#F7F7F7] dark:bg-[#050505] p-5 transition-colors duration-500 group hover:border-black dark:hover:border-white"
+                className="hairline-card p-5 transition-colors duration-500 group"
               >
                 <div className="flex items-center gap-2 mb-2">
                   <fn.icon className="w-3.5 h-3.5 text-[#666] dark:text-[#888] group-hover:text-black dark:group-hover:text-white transition-colors" />
@@ -361,7 +368,7 @@ export default function Guide() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-50px' }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="border border-[#E5E5E5] dark:border-[#222] p-6 bg-[#F7F7F7] dark:bg-[#050505] transition-colors duration-500"
+                className="glass-card p-6 transition-colors duration-500"
               >
                 <div className="flex items-center gap-3 mb-3">
                   <feature.icon className="w-4 h-4 text-black dark:text-white" />
@@ -443,7 +450,7 @@ export default function Guide() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="border border-[#E5E5E5] dark:border-[#222] bg-white dark:bg-[#050505] p-8 sm:p-12 text-center transition-colors duration-500"
+            className="glass-card p-8 sm:p-12 text-center transition-colors duration-500"
           >
             <div className="w-16 h-[1px] bg-black dark:bg-white mb-6 mx-auto" />
             <h2 className="text-3xl sm:text-4xl font-serif italic text-black dark:text-white mb-4">

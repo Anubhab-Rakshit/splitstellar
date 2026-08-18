@@ -82,12 +82,7 @@ export default function InteractionGraph() {
             axisLine={{ stroke: '#E5E5E5' }}
             tickLine={false}
           />
-          <YAxis
-            allowDecimals={false}
-            tick={{ fontSize: 10, fontFamily: 'monospace', fill: '#999' }}
-            axisLine={false}
-            tickLine={false}
-          />
+          <YAxis hide />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0,0,0,0.03)' }} />
           {eventTypes.map((evt) => (
             <Bar

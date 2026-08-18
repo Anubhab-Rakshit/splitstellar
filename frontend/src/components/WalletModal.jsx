@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStellarStore, WALLETCONNECT_PROJECT_ID } from '../hooks/useStellar';
 import { X, Anchor, Cloud, Zap, Link2, ExternalLink, AlertTriangle } from 'lucide-react';
@@ -22,6 +22,16 @@ const WALLETS = [
 export default function WalletModal() {
   const { isWalletModalOpen, setWalletModalOpen, kit, setConnecting } = useStellarStore();
   const [notInstalledWallet, setNotInstalledWallet] = useState(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isWalletModalOpen) {
+        setWalletModalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isWalletModalOpen, setWalletModalOpen]);
 
   const isMobile = useMemo(() =>
     /Mobi|Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
@@ -86,7 +96,12 @@ export default function WalletModal() {
   return (
     <AnimatePresence>
       {isWalletModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div 
+          role="dialog" 
+          aria-modal="true" 
+          aria-labelledby="wallet-modal-title"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        >
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -96,16 +111,28 @@ export default function WalletModal() {
           />
           
           <motion.div
-            initial={{ scale: 0.95, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+            drag={isMobile ? "y" : false}
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={0.2}
+            onDragEnd={(e, info) => {
+              if (info.offset.y > 100) setWalletModalOpen(false);
+            }}
+            initial={isMobile ? { y: '100%', opacity: 1 } : { scale: 0.95, opacity: 0, y: 20 }}
+            animate={isMobile ? { y: 0, opacity: 1 } : { scale: 1, opacity: 1, y: 0 }}
+            exit={isMobile ? { y: '100%', opacity: 1 } : { scale: 0.95, opacity: 0, y: 20 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="relative w-full max-w-md bg-white dark:bg-[#050505] border border-[#E5E5E5] dark:border-[#222] p-6 sm:p-8 shadow-2xl transition-colors duration-500 max-h-[calc(100vh-2rem)] overflow-y-auto custom-scrollbar data-lenis-prevent"
+            className={`relative w-full bg-white dark:bg-black/90 backdrop-blur-xl border border-black/10 dark:border-white/10 p-6 sm:p-8 shadow-[0_0_40px_rgba(0,0,0,0.1)] dark:shadow-[0_0_40px_rgba(255,255,255,0.05)] transition-colors duration-500 overflow-y-auto custom-scrollbar data-lenis-prevent ${
+              isMobile ? 'fixed bottom-0 rounded-t-[2rem] pb-10 max-h-[90vh] z-50' : 'max-w-md max-h-[calc(100vh-2rem)] rounded-3xl'
+            }`}
           >
+            {isMobile && (
+              <div className="w-12 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mb-6" />
+            )}
             <div className="flex justify-between items-center mb-8">
-              <h2 className="text-2xl font-serif italic text-black dark:text-white transition-colors duration-500">Connect Wallet</h2>
+              <h2 id="wallet-modal-title" className="text-2xl font-serif italic text-black dark:text-white transition-colors duration-500">Connect Wallet</h2>
               <button 
                 onClick={() => setWalletModalOpen(false)}
+                aria-label="Close wallet modal"
                 className="text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white transition-colors"
               >
                 <X className="w-5 h-5" />

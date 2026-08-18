@@ -63,11 +63,14 @@ function toScVal(method, args) {
     case 'get_pool':
       return [nativeToScVal(BigInt(args.poolId), { type: 'u64' })];
     case 'get_pool_expenses':
-      return [
-        nativeToScVal(BigInt(args.poolId), { type: 'u64' }),
-        nativeToScVal(BigInt(args.offset || 0), { type: 'u64' }),
-        nativeToScVal(BigInt(args.limit || 50), { type: 'u64' }),
-      ];
+      if (args.offset !== undefined || args.limit !== undefined) {
+        return [
+          nativeToScVal(BigInt(args.poolId), { type: 'u64' }),
+          nativeToScVal(BigInt(args.offset || 0), { type: 'u64' }),
+          nativeToScVal(BigInt(args.limit || 50), { type: 'u64' }),
+        ];
+      }
+      return [nativeToScVal(BigInt(args.poolId), { type: 'u64' })];
     case 'get_expense':
       return [
         nativeToScVal(BigInt(args.poolId), { type: 'u64' }),

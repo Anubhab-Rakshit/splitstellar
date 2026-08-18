@@ -8,8 +8,8 @@ function BadgeCard({ badge, progress, earned }) {
   return (
     <motion.div
       variants={scaleReveal}
-      whileHover={{ scale: 1.05 }}
-      className={`relative p-4 border ${earned ? 'border-black dark:border-white' : 'border-[#E5E5E5] dark:border-[#333]'} bg-white dark:bg-black transition-colors duration-300`}
+      whileHover={{ y: -5 }}
+      className={`relative p-4 hairline-card ${earned ? 'border-black/20 dark:border-white/20' : 'opacity-70'} transition-all duration-300`}
     >
       {earned && (
         <motion.div
@@ -47,13 +47,16 @@ function BadgeCard({ badge, progress, earned }) {
 
 function MemberStat({ icon: Icon, label, value }) {
   return (
-    <div className="flex items-center gap-3 p-3 bg-[#F7F7F7] dark:bg-[#111]">
-      <Icon className="w-4 h-4 text-[#666] dark:text-[#888]" />
+    <motion.div 
+      whileHover={{ scale: 1.02 }}
+      className="flex items-center gap-3 p-4 hairline-card"
+    >
+      <Icon className="w-5 h-5 text-black dark:text-white opacity-50" />
       <div>
-        <div className="font-mono text-[10px] text-[#666] dark:text-[#888]">{label}</div>
-        <div className="font-mono text-xs text-black dark:text-white">{value}</div>
+        <div className="font-mono text-[10px] text-[#666] dark:text-[#888] mb-0.5">{label}</div>
+        <div className="font-mono text-sm sm:text-base text-black dark:text-white font-semibold">{value}</div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -103,11 +106,11 @@ export default function MemberProfile({ address, expenses }) {
 
   if (!stats) {
     return (
-      <div className="p-8 border border-[#E5E5E5] dark:border-[#222] text-center">
-        <p className="font-mono text-xs text-[#666] dark:text-[#888]">
-          Log an expense to unlock your stats and achievements.
-        </p>
-      </div>
+    <div className="glass-card p-8 text-center">
+      <p className="font-mono text-xs text-[#666] dark:text-[#888]">
+        Log an expense to unlock your stats and achievements.
+      </p>
+    </div>
     );
   }
 
@@ -148,11 +151,11 @@ export default function MemberProfile({ address, expenses }) {
       {/* Badges Section */}
       <motion.div
         variants={fadeUpItem}
-        className="p-6 border border-[#E5E5E5] dark:border-[#333] bg-white dark:bg-black"
+        className="glass-card p-6"
       >
         <h3 className="font-serif italic text-lg mb-4">Achievements</h3>
-        <div className="flex items-center gap-2 mb-4">
-          <div className="flex items-center gap-2 px-3 py-1 border border-[#E5E5E5] dark:border-[#333] rounded-full">
+        <div className="flex items-center gap-2 mb-6">
+          <div className="flex items-center gap-2 px-3 py-1 hairline-card rounded-full border-transparent">
             <Trophy className="w-3 h-3 text-amber-500" />
             <span className="text-[10px] font-mono uppercase tracking-widest text-[#666] dark:text-[#888]">
               {stats.earnedBadges.length} / {getAllBadges().length} earned

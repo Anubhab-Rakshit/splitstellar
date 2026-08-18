@@ -8,7 +8,7 @@ export default function InitialLoader({ onComplete }) {
     // Elegant quick loader
     const timer = setTimeout(() => {
       setIsVisible(false);
-      onComplete(); // Instant snap to the app, no slow crossfade
+      setTimeout(onComplete, 800); // Wait for exit animation to finish before unmounting
     }, 2200);
     return () => clearTimeout(timer);
   }, [onComplete]);
@@ -18,8 +18,9 @@ export default function InitialLoader({ onComplete }) {
       {isVisible && (
         <motion.div
           key="loader"
-          exit={{ display: "none" }} // Snaps instantly away
-          className="fixed inset-0 z-[100] bg-white dark:bg-black flex flex-col items-center justify-center overflow-hidden"
+          initial={{ opacity: 1 }}
+          exit={{ y: "-100%", opacity: 0, transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1] } }} 
+          className="fixed inset-0 z-[100] bg-[#F7F7F7] dark:bg-black flex flex-col items-center justify-center overflow-hidden"
         >
           <div className="overflow-hidden">
             <motion.h1

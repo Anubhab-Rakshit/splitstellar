@@ -53,7 +53,7 @@
 | 🚀 Live demo | [splitstellar.vercel.app](https://splitstellar.vercel.app/) |
 | 🎬 Demo video | [YouTube](https://youtu.be/Txo6T-UR3vo) |
 | 📖 User guide | [splitstellar.vercel.app/guide](https://splitstellar.vercel.app/guide) |
-| ⛓️ Testnet contract | [`CAG5MXEQORC4ZP57WI4WJVXWHP5CZHXXMA77VV63JVSW42GNMJYAMUCJ`](https://stellar.expert/explorer/testnet/contract/CAG5MXEQORC4ZP57WI4WJVXWHP5CZHXXMA77VV63JVSW42GNMJYAMUCJ) |
+| ⛓️ Testnet contract | [`CDEQF4RFNEXOH2JCI3QGPGBNCZQMRWUQACW522L6OPMSRVT4EBQUNTHJ`](https://stellar.expert/explorer/testnet/contract/CDEQF4RFNEXOH2JCI3QGPGBNCZQMRWUQACW522L6OPMSRVT4EBQUNTHJ) |
 | 🧩 Integration map | [`CONTRACT_INTEGRATION.md`](./CONTRACT_INTEGRATION.md) |
 | 🏗️ Architecture deep-dive | [`ARCHITECTURE.md`](./ARCHITECTURE.md) |
 | 🗺️ Feature roadmap | [`FEATURE_ROADMAP.md`](./FEATURE_ROADMAP.md) |
@@ -204,7 +204,7 @@ flowchart LR
 
 ## Smart Contract
 
-**Deployed on Testnet:** [`CAG5MXEQORC4ZP57WI4WJVXWHP5CZHXXMA77VV63JVSW42GNMJYAMUCJ`](https://stellar.expert/explorer/testnet/contract/CAG5MXEQORC4ZP57WI4WJVXWHP5CZHXXMA77VV63JVSW42GNMJYAMUCJ)
+**Deployed on Testnet:** [`CDEQF4RFNEXOH2JCI3QGPGBNCZQMRWUQACW522L6OPMSRVT4EBQUNTHJ`](https://stellar.expert/explorer/testnet/contract/CDEQF4RFNEXOH2JCI3QGPGBNCZQMRWUQACW522L6OPMSRVT4EBQUNTHJ)
 
 > **Integration mapping:** See [`CONTRACT_INTEGRATION.md`](./CONTRACT_INTEGRATION.md) for the complete function-by-function mapping between contract (`lib.rs`) and frontend (`soroban.js`), including ScVal type alignment, parser logic, events, and error codes.
 
@@ -544,7 +544,7 @@ make dev
 Copy `.env.example` to `frontend/.env`:
 
 ```env
-VITE_SOROBAN_CONTRACT_ID=CAG5MXEQORC4ZP57WI4WJVXWHP5CZHXXMA77VV63JVSW42GNMJYAMUCJ
+VITE_SOROBAN_CONTRACT_ID=CDEQF4RFNEXOH2JCI3QGPGBNCZQMRWUQACW522L6OPMSRVT4EBQUNTHJ
 VITE_SOROBAN_RPC_URL=https://soroban-testnet.stellar.org
 VITE_STELLAR_NETWORK=testnet
 VITE_SUPABASE_URL=              # optional — falls back to localStorage

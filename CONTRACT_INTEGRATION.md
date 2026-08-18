@@ -5,7 +5,7 @@
 | Property | Value |
 |----------|-------|
 | Network | **Testnet** (`Test SDF Network ; September 2015`) |
-| Contract ID | `CAG5MXEQORC4ZP57WI4WJVXWHP5CZHXXMA77VV63JVSW42GNMJYAMUCJ` |
+| Contract ID | `CDEQF4RFNEXOH2JCI3QGPGBNCZQMRWUQACW522L6OPMSRVT4EBQUNTHJ` |
 | RPC URL | `https://soroban-testnet.stellar.org` |
 
 ## SDK

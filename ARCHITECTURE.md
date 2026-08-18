@@ -34,7 +34,7 @@ flowchart TB
 
     subgraph stellar["Stellar Testnet"]
         RPC[RPC — soroban-testnet.stellar.org]
-        CT[ExpensePool Contract — CAG5MXEQORC4ZP57WI4WJVXWHP5CZHXXMA77VV63JVSW42GNMJYAMUCJ]
+        CT[ExpensePool Contract — CDEQF4RFNEXOH2JCI3QGPGBNCZQMRWUQACW522L6OPMSRVT4EBQUNTHJ]
     end
 
     subgraph persist["Persistence"]
@@ -81,7 +81,7 @@ flowchart TB
 │       ├── Cargo.toml
 │       └── src/
 │           ├── lib.rs        # Soroban contract (storage, functions, events, errors)
-│           └── test.rs       # 20 contract unit tests
+│           └── test.rs       # 44 contract unit tests
 ├── frontend/
 │   ├── .env.example
 │   ├── index.html
@@ -225,38 +225,48 @@ sequenceDiagram
 | `DataKey` | Value |
 |-----------|-------|
 | `PoolCount` | `u64` — running pool counter |
-| `Pool(u64)` | `Pool { id, name, creator, total_expenses, created_at, member_count }` |
-| `PoolExpenses(u64)` | `Vec<Expense>` per pool |
-| `Expense(u64)` | `Expense { id, pool_id, description, amount, payer, created_at }` |
-| `PoolMembers(u64)` | member list per pool |
-| `Member(u64, Address)` | membership flag per pool/address |
+| `Pool(u64)` | `Pool { id, name, creator, total_expenses, created_at, member_count, is_active }` |
+| `Expense(pool_id, index)` | `Expense { pool_id, id, description, amount, payer, split_among, created_at, settled }` — individual entries, O(1) writes |
+| `ExpenseCount(u64)` | `u64` — running expense counter per pool |
+| `PoolMembers(u64)` | `Vec<Address>` — member list per pool |
+| `Member(u64, Address)` | `bool` — fast membership lookup |
+| `Settlement(pool_id, index)` | `SettlementRecord { pool_id, id, from, to, amount, timestamp }` |
+| `SettlementCount(u64)` | `u64` — running settlement counter per pool |
 
-Constants: `MAX_POOL_NAME_LEN = 64`, `MAX_DESCRIPTION_LEN = 128`, `MAX_EXPENSES_PER_POOL = 1000`.
+Constants: `MAX_POOL_NAME_LEN = 64`, `MAX_DESCRIPTION_LEN = 128`, `MAX_EXPENSES_PER_POOL = 1000`, `DEFAULT_PAGE_SIZE = 50`, `MAX_PAGE_SIZE = 100`, `MAX_SETTLEMENTS = 500`.
 
 ### 5.2 Contract functions
 
 | Function | Signature | Auth |
 |----------|-----------|------|
-| `create_pool` | `(env, name: String, creator: Address) -> Pool` | `creator.require_auth()` |
-| `get_pool` | `(env, pool_id: u64) -> Option<Pool>` | read |
-| `is_pool_member` | `(env, pool_id: u64, member: Address) -> bool` | read |
-| `add_pool_member` | `(env, pool_id, caller, new_member) -> ()` | `caller.require_auth()` |
-| `log_expense` | `(env, pool_id, description, amount, payer) -> Result<Expense>` | `payer.require_auth()` |
+| `create_pool` | `(env, name, creator) -> Result<Pool>` | `creator.require_auth()` |
+| `get_pool` | `(env, pool_id) -> Result<Pool>` | read |
+| `is_pool_member` | `(env, pool_id, member) -> bool` | read |
+| `add_pool_member` | `(env, pool_id, caller, new_member) -> Result<()>` | `caller.require_auth()` + creator-only |
+| `get_pool_members` | `(env, pool_id) -> Result<Vec<Address>>` | read |
+| `log_expense` | `(env, pool_id, description, amount, payer) -> Result<Expense>` | `payer.require_auth()` + member check |
 | `verify_balance` | `(env, token_id, owner, required) -> Result<bool>` | cross-contract |
-| `get_pool_expenses` | `(env, pool_id) -> Vec<Expense>` | read |
-| `get_expense` | `(env, expense_id) -> Option<Expense>` | read |
-| `get_pool_members` | `(env, pool_id) -> Vec<Address>` | read |
+| `get_pool_expenses` | `(env, pool_id, offset, limit) -> Result<Vec<Expense>>` | read (paginated) |
+| `get_expense` | `(env, pool_id, expense_id) -> Result<Expense>` | read |
+| `record_settlement` | `(env, pool_id, from, to, amount, caller) -> Result<SettlementRecord>` | `caller.require_auth()` + member check |
+| `get_pool_settlements` | `(env, pool_id, offset, limit) -> Result<Vec<SettlementRecord>>` | read (paginated) |
+| `archive_pool` | `(env, pool_id, caller) -> Result<()>` | `caller.require_auth()` + creator-only |
+| `update_pool_name` | `(env, pool_id, new_name, caller) -> Result<()>` | `caller.require_auth()` + creator-only |
 
 ### 5.3 Events
 
 - `PoolCreatedEvent { pool_id, name, creator }`
+- `MemberAddedEvent { pool_id, member }`
 - `ExpenseLoggedEvent { expense_id, pool_id, description, amount, payer }`
+- `SettlementRecordedEvent { settlement_id, pool_id, from, to, amount }`
+- `PoolArchivedEvent { pool_id }`
+- `PoolUpdatedEvent { pool_id, new_name }`
 
 Consumed by `fetchEvents()` for the live on-chain ledger.
 
 ### 5.4 Errors
 
-9 typed errors: `PoolNotFound`, `NotPoolCreator`, `InsufficientBalance`, `AmountZero`, `NotPoolMember`, `PoolNameTooLong`, `DescriptionTooLong`, `PoolFull`, `Unauthorized`.
+15 typed errors: `PoolNotFound`, `NotPoolCreator`, `InsufficientBalance`, `AmountZero`, `NotPoolMember`, `PoolNameTooLong`, `DescriptionTooLong`, `PoolFull`, `Unauthorized`, `PoolArchived`, `AlreadyMember`, `InvalidPagination`, `SettlementsFull`, `MembersFull`, `ExpenseNotFound`.
 
 ### 5.5 Inter-contract calls
 
@@ -414,11 +424,12 @@ flowchart LR
 
 ## 9. Security Model
 
-- **Contract-level auth** — `require_auth()` on `create_pool`, `add_pool_member`, `log_expense`; only members can log, only the creator adds members.
+- **Contract-level auth** — `require_auth()` on `create_pool`, `add_pool_member`, `log_expense`, `record_settlement`, `archive_pool`, `update_pool_name`; only members can log, only the creator adds members/archives/updates.
 - **Invite-code gating** — 8-char codes (`ABCDEFGHJKLMNPQRSTUVWXYZ23456789`); joining requires owner approval.
-- **Input validation** — pool names ≤64, descriptions ≤128, amounts > 0 and ≤ 1B XLM, max 1000 expenses/pool.
+- **Input validation** — pool names ≤64, descriptions ≤128, amounts > 0 and ≤ 1B XLM, max 1000 expenses/pool, max 500 settlements/pool.
 - **XSS / CSV-injection** — user input sanitized; exported CSV/HTML escapes `= + - @` and HTML entities.
 - **Balance checks** — `verify_balance` invokes the token contract before settlement.
+- **Pool lifecycle** — `archive_pool` prevents further expenses; `update_pool_name` allows creator renaming.
 
 ---
 
@@ -436,7 +447,7 @@ flowchart TB
     D[GitHub Pages deploy] --> LIVE[Live demo — splitstellar.vercel.app]
 ```
 
-**Contract job** — `cargo fmt --check`, `cargo clippy -D warnings`, `cargo test` (20 tests), with Cargo caching.
+**Contract job** — `cargo fmt --check`, `cargo clippy -D warnings`, `cargo test` (44 tests), with Cargo caching.
 
 **Frontend job** — `npm install --legacy-peer-deps`, `eslint`, `vitest run` (13 tests), `vite build` (env injected via GitHub vars with defaults), artifact upload.
 
@@ -450,7 +461,7 @@ flowchart TB
 
 | Layer | Tooling | Coverage |
 |-------|---------|----------|
-| Contract | `cargo test` | 20 unit tests in `test.rs` (create, membership, expenses, validation, errors) |
+| Contract | `cargo test` | 44 unit tests in `test.rs` (create, membership, expenses, validation, errors, settlements, archival, pagination) |
 | Frontend services | Vitest + jsdom | 13 tests (`db.test.js`, `toast.test.js`) |
 | Lint | ESLint (flat config) | full `src/` |
 | Build gate | `vite build` | production bundle + contract env |

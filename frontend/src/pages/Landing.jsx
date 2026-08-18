@@ -7,58 +7,64 @@ import {
   fadeUpItem, 
 } from '../services/animations';
 import { Zap, Shield, Globe, ChevronRight } from 'lucide-react';
+import CornerAnchors from '../components/CornerAnchors';
+import StaggeredText from '../components/StaggeredText';
+import Magnetic from '../components/Magnetic';
+import ScrollMarquee from '../components/ScrollMarquee';
+import Odometer from '../components/Odometer';
 
-function AnimatedCounter({ value, label, delay = 0 }) {
+function AnimatedCounter({ value, label, delay = 0, isNumber = false }) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-50px' });
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
 
   return (
     <motion.div
       ref={ref}
       initial={{ opacity: 0, y: 20 }}
-      animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] }}
-      className="text-center"
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+      transition={{ duration: 0.6, delay }}
+      className="flex flex-col gap-2"
     >
-      <motion.div
-        initial={{ opacity: 0, scale: 0.5 }}
-        animate={isInView ? { opacity: 1, scale: 1 } : {}}
-        transition={{ duration: 0.8, delay: delay + 0.2, ease: [0.16, 1, 0.3, 1] }}
-        className="text-4xl md:text-5xl font-serif italic text-black dark:text-white mb-2"
-      >
-        {value}
-      </motion.div>
-      <div className="font-mono text-[10px] uppercase tracking-widest text-[#666] dark:text-[#888]">
+      <span className="font-serif italic text-4xl sm:text-5xl lg:text-6xl text-black dark:text-white flex">
+        {isNumber && isInView ? (
+          <Odometer value={value.replace(/[^0-9.]/g, '')} prefix={value.replace(/[0-9.]/g, '')} />
+        ) : (
+          value
+        )}
+      </span>
+      <span className="font-mono text-[10px] uppercase tracking-widest text-[#666] dark:text-[#888]">
         {label}
-      </div>
+      </span>
     </motion.div>
   );
 }
 
 function FeatureCard({ icon: Icon, title, description, index }) {
   return (
-    <motion.div
-      variants={fadeUpItem}
-      whileHover={{ y: -8, transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] } }}
-      className="relative group"
-    >
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-transparent group-hover:from-[#F7F7F7] group-hover:to-white dark:group-hover:from-[#111] dark:group-hover:to-black transition-all duration-500 rounded-lg" />
-      <div className="relative p-8 border-t border-[#CCC] dark:border-[#333]">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: index * 0.1 }}
-          className="w-12 h-12 mb-6 flex items-center justify-center border border-[#E5E5E5] dark:border-[#333] group-hover:border-black dark:group-hover:border-white transition-colors duration-300"
-        >
-          <Icon className="w-5 h-5 text-black dark:text-white" />
-        </motion.div>
-        <h3 className="text-xl font-serif italic text-black dark:text-white mb-3">{title}</h3>
-        <p className="text-xs font-mono text-[#666] dark:text-[#888] leading-relaxed">
-          {description}
-        </p>
-      </div>
-    </motion.div>
+    <Magnetic strength={0.05} className="h-full">
+      <motion.div
+        variants={fadeUpItem}
+        whileHover={{ y: -8, transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] } }}
+        className="relative group glass-card p-8 h-full"
+      >
+        <CornerAnchors />
+        <div className="relative z-10">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
+            className="w-12 h-12 mb-6 flex items-center justify-center border border-[#E5E5E5] dark:border-[#222] group-hover:border-black dark:group-hover:border-white transition-colors duration-300 rounded-none"
+          >
+            <Icon className="w-5 h-5 text-black dark:text-white" />
+          </motion.div>
+          <h3 className="text-xl font-serif italic text-black dark:text-white mb-3">{title}</h3>
+          <p className="text-xs font-mono text-[#666] dark:text-[#888] leading-relaxed">
+            {description}
+          </p>
+        </div>
+      </motion.div>
+    </Magnetic>
   );
 }
 
@@ -74,12 +80,12 @@ export default function Landing() {
   ];
 
   return (
-    <motion.div 
-      variants={pageVariants}
-      initial="initial"
-      animate="animate"
-      exit="exit"
-      className="min-h-screen bg-[#F7F7F7] dark:bg-black overflow-hidden relative selection:bg-black dark:selection:bg-white selection:text-white dark:selection:text-black"
+    <motion.div
+      initial={{ opacity: 0, filter: 'blur(10px)' }}
+      animate={{ opacity: 1, filter: 'blur(0px)' }}
+      exit={{ opacity: 0, filter: 'blur(10px)' }}
+      transition={{ duration: 0.8 }}
+      className="min-h-screen bg-transparent overflow-hidden relative selection:bg-black dark:selection:bg-white selection:text-white dark:selection:text-black"
     >
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 relative z-10 pt-20 sm:pt-32 pb-20 sm:pb-32">
         
@@ -100,24 +106,31 @@ export default function Landing() {
                   transition={{ duration: 1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
                   className="h-[1px] bg-black dark:bg-white mb-8"
                 />
+                <StaggeredText 
+                  text="SplitStellar." 
+                  className="text-xl sm:text-2xl font-mono uppercase tracking-widest text-black/50 dark:text-white/50 mb-6" 
+                  delay={0.1} 
+                />
                 
-                <motion.h1 
+                {/* Mask-Revealed Kinetic Typography */}
+                <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                  className="text-4xl sm:text-[5.5rem] lg:text-[7rem] font-serif italic leading-[1] sm:leading-[0.9] text-black dark:text-white mb-6 sm:mb-10"
+                  transition={{ duration: 1, delay: 0.3 }}
+                  className="relative mb-8 sm:mb-12 group cursor-default"
                 >
-                  The standard <br/>
-                  <motion.span 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 0.5 }}
-                    transition={{ duration: 1, delay: 0.8 }}
-                    className="not-italic"
-                  >
-                    for settlement.
-                  </motion.span>
-                </motion.h1>
-                
+                  <h1 className="text-6xl sm:text-7xl lg:text-9xl font-serif italic tracking-tighter leading-[0.9] text-black dark:text-white transition-opacity duration-500 group-hover:opacity-0 relative z-10">
+                    The standard for settlement.
+                  </h1>
+                  
+                  {/* The revealed layer */}
+                  <div className="absolute inset-0 z-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none flex items-center">
+                    <h1 className="text-6xl sm:text-7xl lg:text-9xl font-serif italic tracking-tighter leading-[0.9] bg-clip-text text-transparent bg-gradient-to-r from-emerald-500 via-blue-500 to-emerald-500 bg-[length:200%_auto] animate-[gradient-shift_8s_ease_infinite]">
+                      The standard for settlement.
+                    </h1>
+                  </div>
+                </motion.div>
+
                 <motion.p 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -144,9 +157,9 @@ export default function Landing() {
                       </motion.span>
                     </span>
                   </Link>
-                  <a href="https://github.com" target="_blank" rel="noreferrer" className="font-mono text-xs uppercase tracking-widest text-[#666] dark:text-text-secondary hover:text-black dark:hover:text-white transition-colors border-b border-transparent hover:border-black dark:hover:border-white pb-1">
+                  <Link to="/guide" className="font-mono text-xs uppercase tracking-widest text-[#666] dark:text-text-secondary hover:text-black dark:hover:text-white transition-colors border-b border-transparent hover:border-black dark:hover:border-white pb-1">
                     Read Manifesto
-                  </a>
+                  </Link>
                 </motion.div>
               </motion.div>
             </div>
@@ -157,7 +170,7 @@ export default function Landing() {
                 initial={{ opacity: 0, x: 30, scale: 0.95 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
                 transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.6 }}
-                className="border border-[#E5E5E5] dark:border-[#222222] bg-white dark:bg-[#050505] p-8 relative overflow-hidden"
+                className="glass-card p-8 relative overflow-hidden"
               >
                 {/* Animated gradient background */}
                 <motion.div
@@ -226,12 +239,21 @@ export default function Landing() {
 
           </div>
         </section>
+        
+        {/* SCROLL MARQUEE */}
+        <section className="py-12 border-b border-[#E5E5E5] dark:border-[#222222] overflow-hidden -mx-4 sm:-mx-6 lg:-mx-12">
+          <ScrollMarquee 
+            text="CRYPTOGRAPHIC CERTAINTY • SUB-SECOND FINALITY • BORDERLESS • " 
+            velocity={-2} 
+            className="text-[12vw] font-serif italic tracking-tighter text-black/5 dark:text-white/5 uppercase select-none" 
+          />
+        </section>
 
         {/* STATS SECTION */}
         <section ref={statsRef} className="py-24 border-b border-[#E5E5E5] dark:border-[#222222]">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <AnimatedCounter value="< 1s" label="Settlement Time" delay={0} />
-            <AnimatedCounter value="$0" label="Platform Fees" delay={0.1} />
+            <AnimatedCounter value="$0" label="Platform Fees" delay={0.1} isNumber={true} />
             <AnimatedCounter value="24/7" label="Network Uptime" delay={0.2} />
             <AnimatedCounter value="∞" label="Scalability" delay={0.3} />
           </div>
@@ -294,15 +316,17 @@ export default function Landing() {
             <p className="font-mono text-sm text-[#666] dark:text-[#888] mb-8 max-w-md mx-auto">
               Join the future of expense settlement. Cryptographic, instant, global.
             </p>
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Link to="/dashboard" className="btn-primary inline-flex items-center gap-2">
-                Get Started
-                <ChevronRight className="w-4 h-4" />
-              </Link>
-            </motion.div>
+            <Magnetic strength={0.1}>
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Link to="/dashboard" className="btn-primary inline-flex items-center gap-2">
+                  Get Started
+                  <ChevronRight className="w-4 h-4" />
+                </Link>
+              </motion.div>
+            </Magnetic>
           </motion.div>
         </section>
 

@@ -17,13 +17,17 @@ This checklist records security controls verified against the current source tre
 | Control | Status | Implementation evidence |
 |---------|--------|------------------------|
 | Wallet-based authentication | Implemented | `@creit.tech/stellar-wallets-kit` connects to Freighter, Albedo, xBull, or WalletConnect. No passwords, no server sessions, no JWTs. Address is the sole identity. |
-| Contract write authorization | Implemented | `require_auth()` enforced on `create_pool` (lib.rs:98), `add_pool_member` (lib.rs:157), and `log_expense` (lib.rs:202). No unsigned state transitions. |
-| Creator-only pool management | Implemented | `add_pool_member` checks `pool.creator != caller` (lib.rs:166) and returns error for non-creators. |
-| Member-only expense logging | Implemented | `log_expense` verifies `is_pool_member` (lib.rs:226-233) before allowing expense writes. |
-| Pool name length validation | Implemented | `MAX_POOL_NAME_LEN = 64` enforced on-chain (lib.rs:8, 101-103). Client-side: `sanitizeInput()` + length check (Dashboard.jsx:307-318). |
-| Expense description validation | Implemented | `MAX_DESCRIPTION_LEN = 128` enforced on-chain (lib.rs:9, 210-212). Client-side: `sanitizeInput()` + length check (ExpenseLogger.jsx:173-184). |
-| Expense amount validation | Implemented | On-chain: `amount <= 0` returns `ContractError::AmountZero` (lib.rs:205-207). Client-side: NaN, `<=0`, `!isFinite`, max 1B XLM checks (ExpenseLogger.jsx:187-204). |
-| Pool expense cap | Implemented | `MAX_EXPENSES_PER_POOL = 1000` enforced on-chain (lib.rs:10, 221-223). Prevents unbounded storage growth. |
+| Contract write authorization | Implemented | `require_auth()` enforced on `create_pool`, `add_pool_member`, `log_expense`, `record_settlement`, `archive_pool`, `update_pool_name`. No unsigned state transitions. |
+| Creator-only pool management | Implemented | `add_pool_member`, `archive_pool`, `update_pool_name` check `pool.creator != caller` and return `ContractError::NotPoolCreator`. |
+| Member-only expense logging | Implemented | `log_expense` verifies `is_pool_member` via `Member(pool_id, address)` key before allowing expense writes. |
+| Pool name length validation | Implemented | `MAX_POOL_NAME_LEN = 64` enforced on-chain. Client-side: `sanitizeInput()` + length check. |
+| Expense description validation | Implemented | `MAX_DESCRIPTION_LEN = 128` enforced on-chain. Client-side: `sanitizeInput()` + length check. |
+| Expense amount validation | Implemented | On-chain: `amount <= 0` returns `ContractError::AmountZero`. Client-side: NaN, `<=0`, `!isFinite`, max 1B XLM checks. |
+| Pool expense cap | Implemented | `MAX_EXPENSES_PER_POOL = 1000` enforced on-chain. Prevents unbounded storage growth per pool. |
+| Settlement tracking | Implemented | `record_settlement` records on-chain settlement with amount and participants. `get_pool_settlements` paginated retrieval. |
+| Pool archival | Implemented | `archive_pool` sets `is_active = false`, preventing further expense logging by members. |
+| Pool name update | Implemented | `update_pool_name` allows creator to rename pools with length validation. |
+| Pagination | Implemented | `get_pool_expenses` and `get_pool_settlements` support `offset`/`limit` pagination with `MAX_PAGE_SIZE = 100`. |
 | Overflow protection | Implemented | `overflow-checks = true` in release profile (Cargo.toml:19). Arithmetic overflow panics in debug and release. |
 | Client-side input sanitization | Implemented | `sanitizeInput()` strips `<>` characters (ExpenseLogger.jsx:173-175, Dashboard.jsx:307-309). Applied to pool names, expense descriptions, and notes. |
 | CSV injection prevention | Implemented | `escapeHtml()` escapes special characters; cells starting with `=`, `+`, `-`, `@`, `\t`, `\r` are prefixed with `'` (export.js:31-33). |
@@ -53,13 +57,16 @@ SplitStellar uses wallet addresses as the sole form of identity. There are no pa
 
 All state-mutating contract functions require cryptographic authorization from the caller:
 
-| Function | Auth check | Line |
-|----------|-----------|------|
-| `create_pool` | `creator.require_auth()` | lib.rs:98 |
-| `add_pool_member` | `caller.require_auth()` | lib.rs:157 |
-| `log_expense` | `payer.require_auth()` | lib.rs:202 |
+| Function | Auth check |
+|----------|-----------|
+| `create_pool` | `creator.require_auth()` |
+| `add_pool_member` | `caller.require_auth()` + creator-only check |
+| `log_expense` | `payer.require_auth()` + member check |
+| `record_settlement` | `caller.require_auth()` + member check |
+| `archive_pool` | `caller.require_auth()` + creator-only check |
+| `update_pool_name` | `caller.require_auth()` + creator-only check |
 
-Read-only functions (`get_pool`, `get_pool_expenses`, `get_expense`, `get_pool_members`, `is_pool_member`, `verify_balance`) do not require auth — this is correct as they expose no private state.
+Read-only functions (`get_pool`, `get_pool_expenses`, `get_expense`, `get_pool_members`, `is_pool_member`, `verify_balance`, `get_pool_settlements`) do not require auth — this is correct as they expose no private state.
 
 ### Pool-level access control
 
@@ -71,32 +78,45 @@ Read-only functions (`get_pool`, `get_pool_expenses`, `get_expense`, `get_pool_m
 
 ### Input validation on-chain
 
-| Validation | Enforced at | Error type |
-|-----------|-------------|------------|
-| Pool name length > 64 | lib.rs:101-103 | `panic!()` |
-| Expense description length > 128 | lib.rs:210-212 | `ContractError::DescriptionTooLong` |
-| Expense amount <= 0 | lib.rs:205-207 | `ContractError::AmountZero` |
-| Pool full (>= 1000 expenses) | lib.rs:221-223 | `ContractError::PoolFull` |
-| Caller not pool member | lib.rs:226-233 | `ContractError::NotPoolMember` |
-| Caller not pool creator | lib.rs:166-168 | `panic!()` |
-| Pool not found | lib.rs:159-163, 214-218 | `expect("Pool not found")` / `ContractError::PoolNotFound` |
+All errors return typed `ContractError` variants (no `panic!()` calls):
+
+| Validation | Error type |
+|-----------|------------|
+| Pool name length > 64 | `ContractError::PoolNameTooLong` |
+| Expense description length > 128 | `ContractError::DescriptionTooLong` |
+| Expense amount <= 0 | `ContractError::AmountZero` |
+| Pool full (>= 1000 expenses) | `ContractError::PoolFull` |
+| Caller not pool member | `ContractError::NotPoolMember` |
+| Caller not pool creator | `ContractError::NotPoolCreator` |
+| Pool not found | `ContractError::PoolNotFound` |
+| Pool archived | `ContractError::PoolArchived` |
+| Already a member | `ContractError::AlreadyMember` |
+| Invalid pagination | `ContractError::InvalidPagination` |
+| Settlements full | `ContractError::SettlementsFull` |
+| Members full | `ContractError::MembersFull` |
+| Unauthorized | `ContractError::Unauthorized` |
 
 ### Storage safety
 
-- `overflow-checks = true` in release profile (Cargo.toml:19) prevents arithmetic overflow on `pool.total_expenses += 1` and `pool.member_count += 1`.
-- `panic = "abort"` in release profile (Cargo.toml:23) prevents unwinding.
-- `MAX_EXPENSES_PER_POOL = 1000` caps the `Vec<Expense>` growth per pool (lib.rs:10, 221-223).
+- `overflow-checks = true` in release profile prevents arithmetic overflow on counters.
+- `panic = "abort"` in release profile prevents unwinding.
+- Individual `Expense(pool_id, index)` entries instead of `Vec<Expense>` — O(1) writes, no vector reallocation.
+- `MAX_PAGE_SIZE = 100` caps pagination response size.
 - Pool IDs are sequential `u64` values, making enumeration trivial on-chain (by design for testnet).
 
 ### Events for audit trail
 
-Two events are emitted for off-chain indexing:
-- `PoolCreatedEvent` (lib.rs:28-34): Emitted on pool creation with `pool_id`, `name`, and `creator`.
-- `ExpenseLoggedEvent` (lib.rs:36-44): Emitted on expense logging with `expense_id`, `pool_id`, `description`, `amount`, and `payer`.
+Six events emitted for off-chain indexing:
+- `PoolCreatedEvent`: Emitted on pool creation with `pool_id`, `name`, and `creator`.
+- `MemberAddedEvent`: Emitted when a member is added to a pool.
+- `ExpenseLoggedEvent`: Emitted on expense logging with `expense_id`, `pool_id`, `description`, `amount`, and `payer`.
+- `SettlementRecordedEvent`: Emitted when a settlement is recorded on-chain.
+- `PoolArchivedEvent`: Emitted when a pool is archived.
+- `PoolUpdatedEvent`: Emitted when a pool name is updated.
 
 ### Test coverage
 
-- `contracts/expense-pool/src/test.rs` (365 lines): 20 tests covering pool creation, name length, membership, unauthorized access, expense logging, amount validation, description length, pool not found, expense not found, balance verification, and multiple pools.
+- `contracts/expense-pool/src/test.rs`: 44 tests covering pool creation, name length, membership, unauthorized access, expense logging, amount validation, description length, pool not found, expense not found, balance verification, multiple pools, settlement recording, pool archival, pool name updates, pagination, and error variants.
 - Tests use `env.mock_all_auths()` (standard for Soroban unit tests) — authorization is verified by code review rather than test execution.
 
 ## Input validation and data protection
@@ -231,12 +251,9 @@ These items are acknowledged gaps in the current testnet MVP. They do not block 
 | # | Limitation | Severity | Impact | Recommended fix |
 |---|-----------|----------|--------|----------------|
 | 1 | Supabase RLS not configured | HIGH | Any client can read/write all Supabase tables | Add RLS policies to every table; require authenticated reads |
-| 2 | Contract uses `panic!()` for some errors | MEDIUM | `create_pool` and `add_pool_member` panic instead of returning `ContractError`, consuming all gas | Return typed errors: `ContractError::PoolNameTooLong`, `ContractError::NotPoolCreator` |
-| 3 | Soroban SDK is pre-release (27.0.0-rc.1) | MEDIUM | Release candidate may have undiscovered bugs | Pin to stable release when available |
-| 4 | No Content-Security-Policy headers | LOW | No defense-in-depth against XSS or data injection | Add CSP via `vercel.json` or `_headers` |
-| 5 | `get_pool_members` returns empty Vec | LOW | On-chain member enumeration not functional; must use Supabase | Acceptable for MVP; document limitation |
-| 6 | `console.error` in production | LOW | Error details visible in browser console | Remove or gate behind dev mode |
-| 7 | `frontend/.gitignore` missing `.env` | LOW | Relies on root `.gitignore` to protect `.env` | Add `.env` to `frontend/.gitignore` as defense-in-depth |
+| 2 | Soroban SDK is pre-release (27.0.0-rc.1) | MEDIUM | Release candidate may have undiscovered bugs | Pin to stable release when available |
+| 3 | No Content-Security-Policy headers | LOW | No defense-in-depth against XSS or data injection | Add CSP via `vercel.json` or `_headers` |
+| 4 | `console.error` in production | LOW | Error details visible in browser console | Remove or gate behind dev mode |
 
 ## Mainnet release gates
 
@@ -245,12 +262,10 @@ These items are **not** marked complete. They are required before moving from te
 | Gate | Required action |
 |------|----------------|
 | Supabase RLS | Configure Row Level Security on all tables: profiles, expenses, pool_members, join_requests, activities, analytics_events |
-| Contract error handling | Replace `panic!()` with proper `ContractError` returns for gas efficiency and consistent UX |
 | Stable SDK | Pin `soroban-sdk` to stable release (not RC) |
 | CSP headers | Add Content-Security-Policy via `vercel.json` headers config |
 | Independent review | Perform smart contract and frontend security audit before handling mainnet value |
 | Secret rotation | Rotate Supabase anon key if it was exposed beyond intended scope |
-| `.env` defense-in-depth | Add `.env` to `frontend/.gitignore` |
 
 ## Verification commands
 

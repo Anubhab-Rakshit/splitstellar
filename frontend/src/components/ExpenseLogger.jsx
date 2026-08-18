@@ -14,6 +14,7 @@ import {
   SPLIT_TYPES,
   getCategoryById,
 } from '../services/categories';
+import { sanitizeInput } from '../utils/sanitize';
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 1000;
@@ -93,11 +94,20 @@ export default function ExpenseLogger({ poolId, poolCreator, members = [] }) {
     
     const attemptFetch = async () => {
       try {
-        const data = await simulateCall(address, 'get_pool_expenses', {
-          poolId,
-          offset: 0,
-          limit: 100,
-        });
+        let data;
+        try {
+          data = await simulateCall(address, 'get_pool_expenses', {
+            poolId,
+            offset: 0,
+            limit: 100,
+          });
+        } catch (paramErr) {
+          if (paramErr.message?.includes('MismatchingParameterLen') || paramErr.message?.includes('UnexpectedSize')) {
+            data = await simulateCall(address, 'get_pool_expenses', { poolId });
+          } else {
+            throw paramErr;
+          }
+        }
         const merged = (data || []).map((e) => ({
           ...e,
           ...(localMetaRef.current[e.id] || {}),
@@ -172,9 +182,6 @@ export default function ExpenseLogger({ poolId, poolCreator, members = [] }) {
     };
   }, [poolId, fetchExpenses, isMember]);
 
-  const sanitizeInput = (input) => {
-    return input.replace(/[<>]/g, '').trim();
-  };
 
   const handleLogExpense = async (e) => {
     e.preventDefault();

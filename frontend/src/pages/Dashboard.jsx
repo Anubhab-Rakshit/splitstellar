@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useSearchParams } from 'react-router-dom';
 import { useStellarStore } from '../hooks/useStellar';
 import ExpenseLogger from '../components/ExpenseLogger';
 import { simulateCall, buildAndSubmit, fetchEvents, convertEventTopics } from '../services/soroban';
 import { triggerToast } from '../services/toast';
+import StaggeredText from '../components/StaggeredText';
 import { db, getPoolIdByInviteCode, ensurePoolInviteCode } from '../services/db';
 import { Loader2, Plus, ArrowRight, Link2, Copy, Check, Bell, UserPlus, CheckCircle, XCircle, Share2 } from 'lucide-react';
-import { track } from '../services/analytics';
+import { sanitizeInput } from '../utils/sanitize';
 
 const POLL_MS = 12000;
 
@@ -304,9 +305,6 @@ export default function Dashboard() {
     await handleJoinByCode(joinCode.trim().toUpperCase());
   };
 
-  const sanitizeInput = (input) => {
-    return input.replace(/[<>]/g, '').trim();
-  };
 
   const handleCreatePool = async (e) => {
     e.preventDefault();
@@ -409,271 +407,240 @@ export default function Dashboard() {
   const showJoinRequestUI = joinPoolInfo && !selectedPool;
 
   return (
-    <div className="min-h-screen pt-24 sm:pt-40 pb-20 sm:pb-32 px-6 lg:px-12 max-w-[1200px] mx-auto">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-      >
-        <div className="mb-16">
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-serif italic tracking-tight mb-4">
-            Command Center
-          </h1>
-          <p className="font-mono text-sm text-[#666] dark:text-[#888]">
-            Manage cryptographic expense partitions.
-          </p>
-        </div>
+    <div className="min-h-screen pt-24 sm:pt-40 pb-20 sm:pb-32 px-6 lg:px-12 max-w-[1400px] mx-auto">
+      <AnimatePresence mode="wait">
+        {selectedPool ? (
+          <motion.div
+            key="detail-view"
+            layoutId={`pool-card-${selectedPool.id}`}
+            initial={{ opacity: 0, scale: 0.95, borderRadius: 32 }}
+            animate={{ opacity: 1, scale: 1, borderRadius: 0 }}
+            exit={{ opacity: 0, scale: 0.95, borderRadius: 32 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed inset-0 z-50 bg-[#FAFAFA] dark:bg-[#0A0A0A] overflow-y-auto custom-scrollbar"
+            data-lenis-prevent
+          >
+            <div className="max-w-[1200px] mx-auto pt-24 px-6 lg:px-12 pb-32">
+              <button 
+                onClick={() => setSelectedPool(null)}
+                className="mb-8 font-mono text-xs uppercase tracking-widest text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white transition-colors flex items-center gap-2"
+                onMouseEnter={() => import('../services/AudioEngine').then(m => m.audio.playTick())}
+              >
+                ← Back to Dashboard
+              </button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          <div className="lg:col-span-4">
-            <div className="flex flex-wrap gap-2 items-center justify-between mb-6">
-              <h2 className="text-2xl font-serif italic">Active Partitions</h2>
-              <div className="flex items-center gap-2">
-                {pendingCount > 0 && (
-                  <span className="flex items-center gap-1 px-2 py-0.5 border border-amber-500/30 rounded-full">
-                    <Bell className="w-3 h-3 text-amber-500" />
-                    <span className="text-[9px] font-mono text-amber-500">{pendingCount}</span>
+              <div className="border-b border-[#E5E5E5] dark:border-[#222] pb-6 mb-6 sm:mb-8 transition-colors duration-500 flex justify-between items-end flex-wrap gap-4">
+                <div>
+                  <span className="block font-mono text-[10px] uppercase tracking-widest text-[#666] dark:text-[#888] mb-2">
+                    Partition View
                   </span>
-                )}
+                  <motion.h2 layoutId={`pool-title-${selectedPool.id}`} className="text-3xl sm:text-5xl font-serif italic">
+                    {selectedPool.name}
+                  </motion.h2>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleCopyInviteLink}
+                    className="p-3 bg-white dark:bg-[#111] border border-[#E5E5E5] dark:border-[#333] hover:border-black dark:hover:border-white transition-colors"
+                    title="Copy invite link"
+                  >
+                    {copiedLink ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                  </button>
+                  <button
+                    onClick={handleShareInviteLink}
+                    className="p-3 bg-white dark:bg-[#111] border border-[#E5E5E5] dark:border-[#333] hover:border-black dark:hover:border-white transition-colors"
+                    title="Share invite link"
+                  >
+                    <Share2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {inviteCodes[selectedPool.id] && (
+                <div className="mb-8 p-4 bg-[#F7F7F7] dark:bg-[#111] border border-[#E5E5E5] dark:border-[#333] flex items-center gap-4">
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-[#666] dark:text-[#888]">
+                    Invite Code
+                  </span>
+                  <code className="font-mono text-sm tracking-wider flex-1">
+                    {inviteCodes[selectedPool.id]}
+                  </code>
+                </div>
+              )}
+
+              {filteredPendingRequests.length > 0 && (
+                <div className="mb-8 border border-amber-500/20 bg-amber-50/50 dark:bg-amber-950/10 p-4 sm:p-6">
+                  <h3 className="font-serif italic text-lg mb-4 flex items-center gap-2">
+                    <UserPlus className="w-4 h-4" />
+                    Pending Join Requests
+                    <span className="px-2 py-0.5 text-[9px] font-mono border border-amber-500/30 rounded-full text-amber-500">
+                      {filteredPendingRequests.length}
+                    </span>
+                  </h3>
+                  <div className="space-y-3">
+                    {filteredPendingRequests.map((req) => (
+                      <div key={req.id} className="flex items-center justify-between p-3 border border-[#E5E5E5] dark:border-[#333] bg-white dark:bg-black">
+                        <div className="font-mono text-xs text-[#666] dark:text-[#888]">
+                          {req.requester_address?.substring(0, 12)}...
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => handleApproveRequest(req)} className="p-2 text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-950/30">
+                            <CheckCircle className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => handleRejectRequest(req)} className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30">
+                            <XCircle className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <ExpenseLogger
+                poolId={selectedPool.id}
+                poolName={selectedPool.name}
+                poolCreator={selectedPool.creator}
+                members={poolMembers}
+              />
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="grid-view"
+            initial={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <div className="mb-16">
+              <StaggeredText 
+                text="Command Center" 
+                className="text-4xl sm:text-5xl md:text-7xl font-serif italic tracking-tight mb-4" 
+              />
+              <div className="flex items-center gap-4">
+                <p className="font-mono text-sm text-[#666] dark:text-[#888]">
+                  Manage cryptographic expense partitions.
+                </p>
                 <span className="flex items-center gap-1 px-2 py-0.5 border border-emerald-500/30 rounded-full">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-[9px] font-mono uppercase tracking-widest text-emerald-500">
-                    Live
-                  </span>
+                  <span className="text-[9px] font-mono uppercase tracking-widest text-emerald-500">Live</span>
                 </span>
               </div>
             </div>
 
-            <form onSubmit={handleCreatePool} className="mb-4">
-              <div className="flex items-center border border-[#E5E5E5] dark:border-[#333] transition-colors duration-500 bg-white dark:bg-black group">
-                <input
-                  type="text"
-                  placeholder="NEW PARTITION NAME"
-                  value={newPoolName}
-                  onChange={(e) => setNewPoolName(e.target.value)}
-                  className="flex-1 bg-transparent border-none outline-none p-4 font-mono text-xs text-black dark:text-white uppercase placeholder:text-[#666] dark:text-[#888]"
-                  required
-                />
-                <button
-                  type="submit"
-                  disabled={isCreating || !kit}
-                  className="p-4 border-l border-[#E5E5E5] dark:border-[#333] hover:bg-[#F7F7F7] dark:hover:bg-[#111] transition-colors text-black dark:text-white disabled:opacity-50"
-                >
-                  {isCreating ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Plus className="w-4 h-4" />
-                  )}
-                </button>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[200px]">
+              
+              {/* ACTION WIDGET: CREATE */}
+              <div className="glass-card flex flex-col justify-between p-6 col-span-1 lg:col-span-2 group">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-[#666] dark:text-[#888]">
+                  Initialize Partition
+                </span>
+                <form onSubmit={handleCreatePool} className="mt-4">
+                  <div className="flex items-end border-b border-[#E5E5E5] dark:border-[#333] pb-2 group-focus-within:border-black dark:group-focus-within:border-white transition-colors">
+                    <input
+                      type="text"
+                      placeholder="ENTER NAME..."
+                      value={newPoolName}
+                      onChange={(e) => setNewPoolName(e.target.value)}
+                      className="flex-1 bg-transparent border-none outline-none font-serif italic text-2xl sm:text-3xl text-black dark:text-white placeholder:text-[#ccc] dark:placeholder:text-[#444]"
+                      required
+                    />
+                    <button
+                      type="submit"
+                      disabled={isCreating || !kit}
+                      className="mb-1 text-black dark:text-white disabled:opacity-50"
+                      onMouseEnter={() => import('../services/AudioEngine').then(m => m.audio.playTick())}
+                    >
+                      {isCreating ? <Loader2 className="w-6 h-6 animate-spin" /> : <ArrowRight className="w-6 h-6" />}
+                    </button>
+                  </div>
+                </form>
               </div>
-            </form>
 
-            <form onSubmit={handleJoinSubmit} className="mb-8">
-              <div className="flex items-center border border-[#E5E5E5] dark:border-[#333] transition-colors duration-500 bg-white dark:bg-black group">
-                <input
-                  type="text"
-                  placeholder="INVITE CODE OR PARTITION ID"
-                  value={joinCode}
-                  onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                  className="flex-1 bg-transparent border-none outline-none p-4 font-mono text-xs text-black dark:text-white uppercase placeholder:text-[#666] dark:text-[#888]"
-                />
-                <button
-                  type="submit"
-                  disabled={isLookingUpCode || !kit}
-                  className="p-4 border-l border-[#E5E5E5] dark:border-[#333] hover:bg-[#F7F7F7] dark:hover:bg-[#111] transition-colors text-black dark:text-white disabled:opacity-50"
-                >
-                  {isLookingUpCode ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Link2 className="w-4 h-4" />
-                  )}
-                </button>
+              {/* ACTION WIDGET: JOIN */}
+              <div className="glass-card flex flex-col justify-between p-6 group">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-[#666] dark:text-[#888]">
+                  Join via Code
+                </span>
+                <form onSubmit={handleJoinSubmit} className="mt-4">
+                  <div className="flex flex-col gap-4">
+                    <input
+                      type="text"
+                      placeholder="PASTE CODE"
+                      value={joinCode}
+                      onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                      className="w-full bg-transparent border-b border-[#E5E5E5] dark:border-[#333] outline-none font-mono text-sm py-2 text-black dark:text-white placeholder:text-[#ccc] dark:placeholder:text-[#444]"
+                    />
+                    <button
+                      type="submit"
+                      disabled={isLookingUpCode || !kit}
+                      className="w-full py-3 bg-black dark:bg-white text-white dark:text-black font-mono text-[10px] uppercase tracking-widest"
+                      onMouseEnter={() => import('../services/AudioEngine').then(m => m.audio.playTick())}
+                    >
+                      {isLookingUpCode ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Join'}
+                    </button>
+                  </div>
+                </form>
               </div>
-            </form>
 
-            <div className="space-y-4">
+              {/* POOL WIDGETS */}
               {loadingPools ? (
-                <div className="flex justify-center p-12 border border-[#E5E5E5] dark:border-[#222]">
-                  <Loader2 className="w-6 h-6 animate-spin text-[#666] dark:text-[#888]" />
+                <div className="glass-card flex flex-col items-center justify-center col-span-1 md:col-span-2 lg:col-span-3">
+                  <Loader2 className="w-8 h-8 animate-spin text-[#666] dark:text-[#888]" />
                 </div>
               ) : pools.length === 0 ? (
-                <div className="p-6 border border-[#E5E5E5] dark:border-[#222] text-center transition-colors duration-500">
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-[#666] dark:text-[#888]">
-                    No Partitions Found
+                <div className="glass-card flex flex-col items-center justify-center text-center p-8 col-span-1 md:col-span-2 lg:col-span-3">
+                  <div className="w-16 h-[1px] bg-black/20 dark:bg-white/20 mb-6" />
+                  <p className="font-mono text-xs uppercase tracking-widest text-[#666] dark:text-[#888]">
+                    No Active Partitions
                   </p>
                 </div>
               ) : (
                 pools.map((pool) => (
-                  <button
+                  <motion.div
                     key={pool.id}
+                    layoutId={`pool-card-${pool.id}`}
                     onClick={() => selectPoolAndClearJoin(pool)}
-                    className={`w-full text-left p-4 sm:p-6 border transition-all duration-300 ${
-                      selectedPool?.id === pool.id
-                        ? 'border-black dark:border-white bg-[#F7F7F7] dark:bg-[#111]'
-                        : 'border-[#E5E5E5] dark:border-[#222] hover:border-[#CCC] dark:hover:border-[#444] bg-white dark:bg-black'
-                    }`}
+                    onMouseEnter={() => import('../services/AudioEngine').then(m => m.audio.playTick())}
+                    className="glass-card cursor-pointer p-6 flex flex-col justify-between hover:bg-black/5 dark:hover:bg-white/5 transition-colors group"
                   >
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-serif italic text-xl">
-                        {pool.name}
+                    <div className="flex justify-between items-start">
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-[#666] dark:text-[#888]">
+                        ID: {pool.id}
                       </span>
-                      <ArrowRight
-                        className={`w-4 h-4 transition-transform duration-300 ${selectedPool?.id === pool.id ? 'translate-x-1' : ''}`}
-                      />
+                      <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                     </div>
-                    <div className="font-mono text-[10px] text-[#666] dark:text-[#888] break-all">
-                      ID: {pool.id}
-                    </div>
-                  </button>
+                    <motion.h3 layoutId={`pool-title-${pool.id}`} className="text-2xl font-serif italic text-black dark:text-white line-clamp-2">
+                      {pool.name}
+                    </motion.h3>
+                  </motion.div>
                 ))
               )}
-            </div>
-            <button
-              onClick={() => syncPools(true)}
-              className="mt-4 w-full p-3 border border-dashed border-[#E5E5E5] dark:border-[#333] font-mono text-[10px] uppercase tracking-widest text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white hover:border-black dark:hover:border-white transition-colors"
-            >
-              {loadingPools ? (
-                <Loader2 className="w-3 h-3 animate-spin mx-auto" />
-              ) : (
-                'Scan On-Chain for My Pools'
-              )}
-            </button>
-          </div>
 
-          <div className="lg:col-span-8">
-            {showJoinRequestUI ? (
-              <div className="border border-[#E5E5E5] dark:border-[#222] bg-white dark:bg-black p-8 text-center transition-colors duration-500">
-                <div className="w-16 h-[1px] bg-black dark:bg-white mb-6 mx-auto" />
-                <h3 className="font-serif italic text-2xl mb-2">Private Pool</h3>
-                <p className="font-mono text-[10px] uppercase tracking-widest text-[#666] dark:text-[#888] mb-6">
-                  You need access to this pool
-                </p>
-                {joinRequestStatus === 'pending' ? (
-                  <div className="inline-flex items-center gap-2 px-4 py-2 border border-amber-500/30 rounded-full">
-                    <Loader2 className="w-4 h-4 animate-spin text-amber-500" />
-                    <span className="font-mono text-xs text-amber-500">Request pending approval</span>
-                  </div>
-                ) : joinRequestStatus === 'rejected' ? (
-                  <div className="inline-flex items-center gap-2 px-4 py-2 border border-red-500/30 rounded-full">
-                    <XCircle className="w-4 h-4 text-red-500" />
-                    <span className="font-mono text-xs text-red-500">Request was rejected</span>
-                  </div>
-                ) : (
-                  <button onClick={handleRequestJoin} className="btn-primary inline-flex items-center gap-2">
-                    <UserPlus className="w-4 h-4" />
-                    Request to Join
-                  </button>
-                )}
-              </div>
-            ) : selectedPool ? (
-              <div className="border border-[#E5E5E5] dark:border-[#222] bg-white dark:bg-[#030303] p-4 sm:p-8 transition-colors duration-500 overflow-x-hidden">
-                <div className="border-b border-[#E5E5E5] dark:border-[#222] pb-6 mb-6 sm:mb-8 transition-colors duration-500">
-                  <span className="block font-mono text-[10px] uppercase tracking-widest text-[#666] dark:text-[#888] mb-2">
-                    Partition View
-                  </span>
-                  <div className="flex items-center gap-4 flex-wrap">
-                    <h2 className="text-2xl sm:text-4xl font-serif italic">
-                      {selectedPool.name}
-                    </h2>
-                    <button
-                      onClick={handleCopyInviteLink}
-                      className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors"
-                      title="Copy invite link"
-                    >
-                      {copiedLink ? (
-                        <Check className="w-5 h-5 text-emerald-500" />
-                      ) : (
-                        <Copy className="w-5 h-5 text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white" />
-                      )}
-                    </button>
-                    <button
-                      onClick={handleShareInviteLink}
-                      className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors"
-                      title="Share invite link"
-                    >
-                      <Share2 className="w-5 h-5 text-[#666] dark:text-[#888] hover:text-black dark:hover:text-white" />
-                    </button>
-                  </div>
-                  {inviteCodes[selectedPool.id] && (
-                    <div className="mt-3 flex items-center gap-2">
-                      <span className="font-mono text-[10px] uppercase tracking-widest text-[#666] dark:text-[#888]">
-                        Invite Code:
-                      </span>
-                      <code className="font-mono text-xs px-2 py-0.5 bg-[#F7F7F7] dark:bg-[#111] border border-[#E5E5E5] dark:border-[#333] tracking-wider">
-                        {inviteCodes[selectedPool.id]}
-                      </code>
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(inviteCodes[selectedPool.id]);
-                          triggerToast('Code copied', 'success');
-                        }}
-                        className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded transition-colors"
-                      >
-                        <Copy className="w-3 h-3 text-[#666] dark:text-[#888]" />
-                      </button>
+              {showJoinRequestUI && (
+                <div className="glass-card p-6 col-span-1 md:col-span-2 lg:col-span-3 border-amber-500/30">
+                  <h3 className="font-serif italic text-2xl mb-2">Private Pool</h3>
+                  <p className="font-mono text-xs text-[#666] dark:text-[#888] mb-6">
+                    You need access to join this pool.
+                  </p>
+                  {joinRequestStatus === 'pending' ? (
+                    <div className="font-mono text-xs text-amber-500 flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin" /> Request Pending
                     </div>
+                  ) : joinRequestStatus === 'rejected' ? (
+                    <div className="font-mono text-xs text-red-500">Request Rejected</div>
+                  ) : (
+                    <button onClick={handleRequestJoin} className="btn-primary">
+                      Request Access
+                    </button>
                   )}
                 </div>
+              )}
 
-                {filteredPendingRequests.length > 0 && (
-                  <div className="mb-8 border border-amber-500/20 bg-amber-50/50 dark:bg-amber-950/10 p-4 sm:p-6">
-                    <h3 className="font-serif italic text-lg mb-4 flex items-center gap-2">
-                      <UserPlus className="w-4 h-4" />
-                      Pending Join Requests
-                      <span className="px-2 py-0.5 text-[9px] font-mono border border-amber-500/30 rounded-full text-amber-500">
-                        {filteredPendingRequests.length}
-                      </span>
-                    </h3>
-                    <div className="space-y-3">
-                      {filteredPendingRequests.map((req) => (
-                        <div key={req.id} className="flex items-center justify-between p-3 border border-[#E5E5E5] dark:border-[#333] bg-white dark:bg-black">
-                          <div className="font-mono text-xs text-[#666] dark:text-[#888]">
-                            {req.requester_address?.substring(0, 12)}...
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => handleApproveRequest(req)}
-                              className="p-2 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 rounded transition-colors text-emerald-600 dark:text-emerald-400"
-                              title="Approve"
-                            >
-                              <CheckCircle className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleRejectRequest(req)}
-                              className="p-2 hover:bg-red-50 dark:hover:bg-red-950/30 rounded transition-colors text-red-600 dark:text-red-400"
-                              title="Reject"
-                            >
-                              <XCircle className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <ExpenseLogger
-                  poolId={selectedPool.id}
-                  poolName={selectedPool.name}
-                  poolCreator={selectedPool.creator}
-                  members={poolMembers}
-                />
-              </div>
-            ) : (
-              <div className="h-full min-h-[400px] border border-[#E5E5E5] dark:border-[#222] bg-white dark:bg-black flex flex-col items-center justify-center p-8 text-center transition-colors duration-500">
-                <div className="w-16 h-[1px] bg-black dark:bg-white mb-6" />
-                <h3 className="font-serif italic text-2xl mb-2">
-                  Select a Partition
-                </h3>
-                <p className="font-mono text-[10px] uppercase tracking-widest text-[#666] dark:text-[#888]">
-                  Initialize a new ledger partition or select an existing one to
-                  begin cryptographic settlement.
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
