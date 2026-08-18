@@ -16,7 +16,6 @@ import {
   Copy,
   LogOut,
   ExternalLink,
-  X,
 } from 'lucide-react';
 import { useStellarStore } from '../hooks/useStellar';
 

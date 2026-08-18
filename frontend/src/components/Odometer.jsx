@@ -1,28 +1,25 @@
-import { motion, useSpring, useTransform } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { motion, useSpring, useTransform, useMotionValue } from 'framer-motion';
+import { useEffect } from 'react';
 
-function NumberColumn({ digit, delta }) {
-  const [position, setPosition] = useState(0);
+function NumberColumn({ digit }) {
+  const value = parseInt(digit, 10);
 
-  // Smoothly spring to the new digit
-  const springValue = useSpring(position, {
+  // Use MotionValue instead of useState + useEffect
+  const motionValue = useMotionValue(isNaN(value) ? 0 : value);
+
+  const springValue = useSpring(motionValue, {
     damping: 30,
     stiffness: 200,
     mass: 0.8,
   });
 
   useEffect(() => {
-    // If delta is positive (going up), we animate up.
-    // If it's a completely new number, we just set the target digit.
-    setPosition(parseInt(digit, 10) || 0);
-  }, [digit]);
+    motionValue.set(isNaN(value) ? 0 : value);
+  }, [value, motionValue]);
 
-  // Each digit in the column is 1em high.
-  // We move the column up by (value * 1em).
   const y = useTransform(springValue, (val) => `-${val}em`);
 
-  if (isNaN(parseInt(digit, 10))) {
-    // It's a comma or period
+  if (isNaN(value)) {
     return <span className="inline-block opacity-70">{digit}</span>;
   }
 
@@ -43,8 +40,7 @@ function NumberColumn({ digit, delta }) {
 }
 
 export default function Odometer({ value, prefix = '', suffix = '', className = '' }) {
-  // Format the value into a string, e.g., "1,234.56"
-  const formattedValue = typeof value === 'number' 
+  const formattedValue = typeof value === 'number'
     ? new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)
     : value.toString();
 

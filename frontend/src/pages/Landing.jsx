@@ -2,7 +2,6 @@ import { motion, useInView } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useRef } from 'react';
 import { 
-  pageVariants, 
   staggerContainer, 
   fadeUpItem, 
 } from '../services/animations';

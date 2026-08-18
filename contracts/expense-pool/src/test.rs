@@ -43,10 +43,7 @@ fn test_create_pool_name_too_long() {
     let long_name = String::from_str(&env, &"A".repeat(65));
     let result = client.try_create_pool(&long_name, &creator);
 
-    assert!(matches!(
-        result,
-        Err(Ok(ContractError::PoolNameTooLong))
-    ));
+    assert!(matches!(result, Err(Ok(ContractError::PoolNameTooLong))));
 }
 
 #[test]
@@ -131,10 +128,7 @@ fn test_add_pool_member_not_creator() {
 
     let result = client.try_add_pool_member(&pool.id, &unauthorized, &new_member);
 
-    assert!(matches!(
-        result,
-        Err(Ok(ContractError::NotPoolCreator))
-    ));
+    assert!(matches!(result, Err(Ok(ContractError::NotPoolCreator))));
 }
 
 #[test]
@@ -219,10 +213,7 @@ fn test_log_expense_description_too_long() {
     let long_desc = String::from_str(&env, &"A".repeat(129));
     let result = client.try_log_expense(&pool.id, &long_desc, &i128::from(100), &creator);
 
-    assert!(matches!(
-        result,
-        Err(Ok(ContractError::DescriptionTooLong))
-    ));
+    assert!(matches!(result, Err(Ok(ContractError::DescriptionTooLong))));
 }
 
 #[test]
@@ -327,12 +318,7 @@ fn test_get_pool_expenses_pagination() {
 
     for i in 0..5 {
         let desc = String::from_str(&env, "Exp");
-        client.log_expense(
-            &pool.id,
-            &desc,
-            &i128::from(i * 100 + 100),
-            &creator,
-        );
+        client.log_expense(&pool.id, &desc, &i128::from(i * 100 + 100), &creator);
     }
 
     let page1 = client.get_pool_expenses(&pool.id, &0, &2);
@@ -551,10 +537,7 @@ fn test_update_pool_name_too_long() {
 
     let long_name = String::from_str(&env, &"X".repeat(65));
     let result = client.try_update_pool_name(&pool.id, &creator, &long_name);
-    assert!(matches!(
-        result,
-        Err(Ok(ContractError::PoolNameTooLong))
-    ));
+    assert!(matches!(result, Err(Ok(ContractError::PoolNameTooLong))));
 }
 
 #[test]

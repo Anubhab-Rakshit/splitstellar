@@ -612,8 +612,10 @@ impl ExpensePoolContract {
             .persistent()
             .set(&DataKey::Pool(pool_id), &pool);
 
-        env.events()
-            .publish_event(&PoolUpdatedEvent { pool_id, name: new_name });
+        env.events().publish_event(&PoolUpdatedEvent {
+            pool_id,
+            name: new_name,
+        });
 
         Ok(pool)
     }

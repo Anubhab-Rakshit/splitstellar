@@ -5,9 +5,10 @@ import { useStellarStore } from '../hooks/useStellar';
 import ExpenseLogger from '../components/ExpenseLogger';
 import { simulateCall, buildAndSubmit, fetchEvents, convertEventTopics } from '../services/soroban';
 import { triggerToast } from '../services/toast';
+import { track } from '../services/analytics';
 import StaggeredText from '../components/StaggeredText';
 import { db, getPoolIdByInviteCode, ensurePoolInviteCode } from '../services/db';
-import { Loader2, Plus, ArrowRight, Link2, Copy, Check, Bell, UserPlus, CheckCircle, XCircle, Share2 } from 'lucide-react';
+import { Loader2, ArrowRight, Copy, Check, UserPlus, CheckCircle, XCircle, Share2 } from 'lucide-react';
 import { sanitizeInput } from '../utils/sanitize';
 
 const POLL_MS = 12000;
@@ -46,7 +47,6 @@ export default function Dashboard() {
   const [inviteCodes, setInviteCodes] = useState({});
   const inviteCodeCache = useRef({});
   const [pendingRequests, setPendingRequests] = useState([]);
-  const [pendingCount, setPendingCount] = useState(0);
   const [joinRequestStatus, setJoinRequestStatus] = useState(null);
   const [joinPoolInfo, setJoinPoolInfo] = useState(null);
   const [poolMembers, setPoolMembers] = useState([]);
@@ -117,7 +117,6 @@ export default function Dashboard() {
       const ownedPoolIds = pools.filter(p => p.creator === address).map(p => p.id);
       const requests = await db.getPendingRequests(address, ownedPoolIds);
       setPendingRequests(requests);
-      setPendingCount(requests.length);
     } catch {
       /* silent */
     }

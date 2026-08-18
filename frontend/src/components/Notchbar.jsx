@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
 import { LogOut, Loader2, Sun, Moon, Menu, X, ChevronRight } from 'lucide-react';
 import { useStellarStore } from '../hooks/useStellar';
@@ -10,8 +10,6 @@ export default function Notchbar() {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const { scrollY } = useScroll();
-  const navBlur = useTransform(scrollY, [0, 100], [0, 10]);
 
   useEffect(() => {
     const handleScroll = () => {

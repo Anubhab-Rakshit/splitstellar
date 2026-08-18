@@ -34,7 +34,7 @@ export default function CanvasFluidBackground() {
         this.friction = 0.95;
       }
 
-      update(isDark) {
+      update(_isDark) {
         // Pseudo-noise flow field calculation based on position and time
         const scale = 0.003;
         const angle = Math.sin(this.x * scale + zoff) * Math.cos(this.y * scale + zoff) * Math.PI * 2;

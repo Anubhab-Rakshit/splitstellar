@@ -38,7 +38,7 @@ class AudioEngine {
 
       osc.start(this.audioCtx.currentTime);
       osc.stop(this.audioCtx.currentTime + 0.06);
-    } catch (e) {
+    } catch {
       // Ignore audio errors
     }
   }
@@ -71,7 +71,7 @@ class AudioEngine {
       playTone(523.25, 0, 0.4);    // C5
       playTone(659.25, 0.05, 0.4); // E5
       playTone(783.99, 0.1, 0.6);  // G5
-    } catch (e) {
+    } catch {
       // Ignore audio errors
     }
   }
