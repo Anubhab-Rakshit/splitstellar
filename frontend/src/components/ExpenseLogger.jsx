@@ -95,6 +95,8 @@ export default function ExpenseLogger({ poolId, poolCreator, members = [] }) {
       try {
         const data = await simulateCall(address, 'get_pool_expenses', {
           poolId,
+          offset: 0,
+          limit: 100,
         });
         const merged = (data || []).map((e) => ({
           ...e,

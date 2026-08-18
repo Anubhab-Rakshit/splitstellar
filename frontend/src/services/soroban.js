@@ -54,11 +54,43 @@ function toScVal(method, args) {
         nativeToScVal(BigInt(args.amount), { type: 'i128' }),
         nativeToScVal(args.payer, { type: 'address' }),
       ];
+    case 'add_pool_member':
+      return [
+        nativeToScVal(BigInt(args.poolId), { type: 'u64' }),
+        nativeToScVal(args.caller, { type: 'address' }),
+        nativeToScVal(args.newMember, { type: 'address' }),
+      ];
     case 'get_pool':
-    case 'get_pool_expenses':
       return [nativeToScVal(BigInt(args.poolId), { type: 'u64' })];
+    case 'get_pool_expenses':
+      return [
+        nativeToScVal(BigInt(args.poolId), { type: 'u64' }),
+        nativeToScVal(BigInt(args.offset || 0), { type: 'u64' }),
+        nativeToScVal(BigInt(args.limit || 50), { type: 'u64' }),
+      ];
     case 'get_expense':
-      return [nativeToScVal(BigInt(args.expenseId), { type: 'u64' })];
+      return [
+        nativeToScVal(BigInt(args.poolId), { type: 'u64' }),
+        nativeToScVal(BigInt(args.expenseId), { type: 'u64' }),
+      ];
+    case 'record_settlement':
+      return [
+        nativeToScVal(BigInt(args.poolId), { type: 'u64' }),
+        nativeToScVal(args.from, { type: 'address' }),
+        nativeToScVal(args.to, { type: 'address' }),
+        nativeToScVal(BigInt(args.amount), { type: 'i128' }),
+      ];
+    case 'archive_pool':
+      return [
+        nativeToScVal(BigInt(args.poolId), { type: 'u64' }),
+        nativeToScVal(args.caller, { type: 'address' }),
+      ];
+    case 'update_pool_name':
+      return [
+        nativeToScVal(BigInt(args.poolId), { type: 'u64' }),
+        nativeToScVal(args.caller, { type: 'address' }),
+        nativeToScVal(args.newName, { type: 'string' }),
+      ];
     case 'verify_balance':
       return [
         nativeToScVal(args.tokenId, { type: 'address' }),
@@ -79,49 +111,52 @@ function parseNative(method, native) {
     return n;
   };
 
+  const parsePool = (p) => p
+    ? {
+      id: normalize(p.pool_id ?? p.id),
+      name: p.name,
+      creator: p.creator,
+      total_expenses: normalize(p.total_expenses ?? 0),
+      total_settlements: normalize(p.total_settlements ?? 0),
+      created_at: normalize(p.created_at ?? 0),
+      member_count: normalize(p.member_count ?? 1),
+      is_active: p.is_active ?? true,
+    }
+    : null;
+
+  const parseExpense = (e) => ({
+    id: normalize(e.expense_id ?? e.id),
+    pool_id: normalize(e.pool_id),
+    description: e.description,
+    amount: normalize(e.amount),
+    payer: e.payer,
+    created_at: normalize(e.created_at),
+  });
+
+  const parseSettlement = (s) => ({
+    id: normalize(s.settlement_id ?? s.id),
+    pool_id: normalize(s.pool_id),
+    from: s.from,
+    to: s.to,
+    amount: normalize(s.amount),
+    created_at: normalize(s.created_at),
+  });
+
   switch (method) {
     case 'get_pool':
     case 'create_pool':
-      return native
-        ? {
-            id: normalize(native.pool_id ?? native.id),
-            name: native.name,
-            creator: native.creator,
-            total_expenses: normalize(native.total_expenses ?? 0),
-            created_at: normalize(native.created_at ?? 0),
-          }
-        : null;
+    case 'archive_pool':
+    case 'update_pool_name':
+      return parsePool(native);
     case 'get_pool_expenses':
-      return (Array.isArray(native) ? native : []).map((e) => ({
-        id: normalize(e.expense_id ?? e.id),
-        pool_id: normalize(e.pool_id),
-        description: e.description,
-        amount: normalize(e.amount),
-        payer: e.payer,
-        created_at: normalize(e.created_at),
-      }));
+      return (Array.isArray(native) ? native : []).map(parseExpense);
     case 'get_expense':
-      return native
-        ? {
-            id: normalize(native.expense_id ?? native.id),
-            pool_id: normalize(native.pool_id),
-            description: native.description,
-            amount: normalize(native.amount),
-            payer: native.payer,
-            created_at: normalize(native.created_at),
-          }
-        : null;
     case 'log_expense':
-      return native
-        ? {
-            id: normalize(native.expense_id ?? native.id),
-            pool_id: normalize(native.pool_id),
-            description: native.description,
-            amount: normalize(native.amount),
-            payer: native.payer,
-            created_at: normalize(native.created_at),
-          }
-        : null;
+      return native ? parseExpense(native) : null;
+    case 'record_settlement':
+      return native ? parseSettlement(native) : null;
+    case 'get_pool_settlements':
+      return (Array.isArray(native) ? native : []).map(parseSettlement);
     default:
       return native;
   }
