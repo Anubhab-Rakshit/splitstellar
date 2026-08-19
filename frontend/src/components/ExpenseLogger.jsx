@@ -19,15 +19,20 @@ import { sanitizeInput } from '../utils/sanitize';
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 1000;
 
-export default function ExpenseLogger({ poolId, poolCreator, members = [] }) {
+export default function ExpenseLogger({ poolId, poolCreator, members = [], draftAmount, draftDesc }) {
   const { address, kit } = useStellarStore();
-  const [amount, setAmount] = useState('');
-  const [description, setDescription] = useState('');
+  const [amount, setAmount] = useState(draftAmount || '');
+  const [description, setDescription] = useState(draftDesc || '');
   const [notes, setNotes] = useState('');
   const [category, setCategory] = useState('food');
   const [splitType, setSplitType] = useState('equal');
   const [currency, setCurrency] = useState('XLM');
   const [customSplitData, setCustomSplitData] = useState({});
+
+  useEffect(() => {
+    if (draftAmount) setAmount(draftAmount);
+    if (draftDesc) setDescription(draftDesc);
+  }, [draftAmount, draftDesc]);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [showSplitDropdown, setShowSplitDropdown] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);

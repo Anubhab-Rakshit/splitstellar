@@ -47,9 +47,36 @@ export default function CommandPalette() {
     fuse.setCollection(COMMANDS);
   }, []);
 
+  const nlpRegex = /^(?:split|log|add|pay)\s+(?:(?:\$|xlm)?\s*)?(\d+(?:\.\d+)?)(?:\s*(?:xlm|usd))?\s+for\s+(.*?)(?:\s+with\s+(.*))?$/i;
+
   const filteredCommands = useMemo(() => {
-    if (!search) return COMMANDS;
-    return fuse.search(search).map((r) => r.item);
+    let results = [];
+    if (!search) {
+      results = COMMANDS;
+    } else {
+      results = fuse.search(search).map((r) => r.item);
+    }
+
+    // NLP Parsing
+    const match = search.trim().match(nlpRegex);
+    if (match) {
+      const amount = match[1];
+      const description = match[2];
+      
+      const nlpCommand = {
+        id: 'nlp-magic-draft',
+        name: `⚡ Magic Draft: ${amount} XLM for "${description}"`,
+        description: 'Auto-fill expense form using Natural Language',
+        category: 'Magic AI',
+        icon: Plus,
+        action: 'magic-draft',
+        payload: { amount, description }
+      };
+      // Inject at the very top
+      results = [nlpCommand, ...results];
+    }
+
+    return results;
   }, [search]);
 
   const handleWalletAction = useCallback((action) => {
@@ -104,6 +131,9 @@ export default function CommandPalette() {
         break;
       case 'wallet':
         handleWalletAction(command.walletAction);
+        break;
+      case 'magic-draft':
+        navigate(`/dashboard?draftAmount=${encodeURIComponent(command.payload.amount)}&draftDesc=${encodeURIComponent(command.payload.description)}`);
         break;
       default:
         break;

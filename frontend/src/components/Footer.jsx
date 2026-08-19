@@ -1,5 +1,6 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
+import KineticText from './KineticText';
 
 export default function Footer() {
   const containerRef = useRef(null);
@@ -63,11 +64,12 @@ export default function Footer() {
       {/* Massive Typography at the very bottom */}
       <motion.div 
         style={{ y, opacity }}
-        className="absolute bottom-0 left-0 w-full flex justify-center translate-y-[20%] pointer-events-none"
+        className="absolute bottom-0 left-0 w-full flex justify-center translate-y-[20%] z-20"
       >
-        <span className="text-[20vw] font-serif italic font-bold tracking-tighter leading-none text-white opacity-10 select-none">
-          STELLAR
-        </span>
+        <KineticText 
+          text="STELLAR" 
+          className="text-[20vw] font-serif italic font-bold tracking-tighter leading-none text-white opacity-10 select-none cursor-default" 
+        />
       </motion.div>
     </footer>
   );

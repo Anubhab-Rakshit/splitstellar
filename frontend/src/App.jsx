@@ -20,6 +20,7 @@ import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import Analytics from './pages/Analytics';
 import Guide from './pages/Guide';
+import PageTransition from './components/PageTransition';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -53,10 +54,6 @@ function App() {
 
   const handleLoadingComplete = () => {
     setLoading(false);
-    setTimeout(() => {
-      const mainEl = document.getElementById('main-content');
-      if (mainEl) mainEl.focus();
-    }, 100);
   };
 
   return (
@@ -66,7 +63,7 @@ function App() {
       {/* Skip-to-content link for accessibility */}
       <a 
         href="#main-content" 
-        className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-4 focus:left-4 focus:p-4 focus:bg-white focus:text-black font-mono text-xs uppercase tracking-widest border border-black shadow-2xl outline-none"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-white text-black px-4 py-2 z-[9999] rounded"
       >
         Skip to content
       </a>
@@ -86,13 +83,15 @@ function App() {
 
           <main id="main-content" role="main" tabIndex="-1" className="relative z-10 outline-none">
             <AnimatePresence mode="wait" onExitComplete={() => window.scrollTo(0, 0)}>
-              <Routes location={location} key={location.pathname}>
-                <Route path="/" element={<ErrorBoundary fallback="landing"><Landing /></ErrorBoundary>} />
-                <Route path="/dashboard" element={<ErrorBoundary fallback="dashboard"><Dashboard /></ErrorBoundary>} />
-                <Route path="/profile" element={<ErrorBoundary fallback="profile"><Profile /></ErrorBoundary>} />
-                <Route path="/analytics" element={<ErrorBoundary fallback="analytics"><Analytics /></ErrorBoundary>} />
-                <Route path="/guide" element={<ErrorBoundary fallback="guide"><Guide /></ErrorBoundary>} />
-              </Routes>
+              <PageTransition key={location.pathname} routeKey={location.pathname}>
+                <Routes location={location}>
+                  <Route path="/" element={<ErrorBoundary fallback="landing"><Landing /></ErrorBoundary>} />
+                  <Route path="/dashboard" element={<ErrorBoundary fallback="dashboard"><Dashboard /></ErrorBoundary>} />
+                  <Route path="/profile" element={<ErrorBoundary fallback="profile"><Profile /></ErrorBoundary>} />
+                  <Route path="/analytics" element={<ErrorBoundary fallback="analytics"><Analytics /></ErrorBoundary>} />
+                  <Route path="/guide" element={<ErrorBoundary fallback="guide"><Guide /></ErrorBoundary>} />
+                </Routes>
+              </PageTransition>
             </AnimatePresence>
           </main>
           

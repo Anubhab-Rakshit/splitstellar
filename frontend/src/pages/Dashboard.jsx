@@ -7,6 +7,7 @@ import { simulateCall, buildAndSubmit, fetchEvents, convertEventTopics } from '.
 import { triggerToast } from '../services/toast';
 import { track } from '../services/analytics';
 import StaggeredText from '../components/StaggeredText';
+import KineticText from '../components/KineticText';
 import { db, getPoolIdByInviteCode, ensurePoolInviteCode } from '../services/db';
 import { Loader2, ArrowRight, Copy, Check, UserPlus, CheckCircle, XCircle, Share2 } from 'lucide-react';
 import { sanitizeInput } from '../utils/sanitize';
@@ -499,6 +500,8 @@ export default function Dashboard() {
                 poolId={selectedPool.id}
                 poolName={selectedPool.name}
                 poolCreator={selectedPool.creator}
+                draftAmount={searchParams.get('draftAmount')}
+                draftDesc={searchParams.get('draftDesc')}
                 members={poolMembers}
               />
             </div>
