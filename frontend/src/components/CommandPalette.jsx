@@ -47,10 +47,9 @@ export default function CommandPalette() {
     fuse.setCollection(COMMANDS);
   }, []);
 
-  const nlpRegex = /^(?:split|log|add|pay)\s+(?:(?:\$|xlm)?\s*)?(\d+(?:\.\d+)?)(?:\s*(?:xlm|usd))?\s+for\s+(.*?)(?:\s+with\s+(.*))?$/i;
-
   const filteredCommands = useMemo(() => {
-    let results = [];
+    const nlpRegex = /^(?:split|log|add|pay)\s+(?:(?:\$|xlm)?\s*)?(\d+(?:\.\d+)?)(?:\s*(?:xlm|usd))?\s+for\s+(.*?)(?:\s+with\s+(.*))?$/i;
+    let results;
     if (!search) {
       results = COMMANDS;
     } else {

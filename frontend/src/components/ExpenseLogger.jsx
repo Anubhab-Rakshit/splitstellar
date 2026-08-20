@@ -28,11 +28,6 @@ export default function ExpenseLogger({ poolId, poolCreator, members = [], draft
   const [splitType, setSplitType] = useState('equal');
   const [currency, setCurrency] = useState('XLM');
   const [customSplitData, setCustomSplitData] = useState({});
-
-  useEffect(() => {
-    if (draftAmount) setAmount(draftAmount);
-    if (draftDesc) setDescription(draftDesc);
-  }, [draftAmount, draftDesc]);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [showSplitDropdown, setShowSplitDropdown] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
