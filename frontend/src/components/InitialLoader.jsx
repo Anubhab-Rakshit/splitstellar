@@ -5,10 +5,12 @@ export default function InitialLoader({ onComplete }) {
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    // Elegant quick loader
     const timer = setTimeout(() => {
       setIsVisible(false);
-      setTimeout(onComplete, 800); // Wait for exit animation to finish before unmounting
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        onComplete();
+      }, 600);
     }, 2200);
     return () => clearTimeout(timer);
   }, [onComplete]);
@@ -19,7 +21,7 @@ export default function InitialLoader({ onComplete }) {
         <motion.div
           key="loader"
           initial={{ opacity: 1 }}
-          exit={{ y: "-100%", opacity: 0, transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1] } }} 
+          exit={{ opacity: 0, transition: { duration: 0.6, ease: 'easeInOut' } }}
           className="fixed inset-0 z-[100] bg-[#F7F7F7] dark:bg-black flex flex-col items-center justify-center overflow-hidden"
         >
           <div className="overflow-hidden">

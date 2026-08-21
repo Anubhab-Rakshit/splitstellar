@@ -39,6 +39,16 @@ export default function Analytics() {
     if (address) syncAnalytics().then(() => setEvents(getAll()));
   }, [address]);
 
+  const anyModalOpen = showGraph || showConfirmClear;
+  useEffect(() => {
+    if (anyModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [anyModalOpen]);
+
   const stats = getStats();
 
   const confirmClear = () => {
