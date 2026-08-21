@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getAll, getStats, clearAnalytics, syncAnalytics } from '../services/analytics';
 import { Activity, Users, BarChart3, Trash2, TrendingUp, X, AlertTriangle } from 'lucide-react';
@@ -225,116 +226,122 @@ export default function Analytics() {
       </motion.div>
 
       {/* Confirmation Modal before clearing */}
-      <AnimatePresence>
-        {showConfirmClear && (
-          <div 
-            role="dialog" 
-            aria-modal="true" 
-            aria-labelledby="confirm-clear-title"
-            className="fixed inset-0 z-[70] flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/80 backdrop-blur-md"
-              onClick={() => setShowConfirmClear(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="relative w-full max-w-md bg-white dark:bg-black border border-[#E5E5E5] dark:border-[#222] p-6 sm:p-8"
+      {createPortal(
+        <AnimatePresence>
+          {showConfirmClear && (
+            <div 
+              role="dialog" 
+              aria-modal="true" 
+              aria-labelledby="confirm-clear-title"
+              className="fixed inset-0 z-[70] flex items-center justify-center p-4"
             >
-              <div className="w-12 h-12 bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4">
-                <AlertTriangle className="w-6 h-6 text-red-500" />
-              </div>
-              <h2 id="confirm-clear-title" className="text-2xl font-serif italic mb-2">Clear Analytics Logs?</h2>
-              <p className="font-mono text-xs text-[#666] dark:text-[#888] mb-6">
-                This action will wipe all stored event entries locally and remotely. This action cannot be undone.
-              </p>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setShowConfirmClear(false)}
-                  className="btn-secondary flex-1 py-3"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmClear}
-                  className="bg-red-600 hover:bg-red-700 text-white font-mono text-xs uppercase tracking-widest flex-1 py-3 transition-colors"
-                >
-                  Clear All
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-black/80 backdrop-blur-md"
+                onClick={() => setShowConfirmClear(false)}
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                className="relative w-full max-w-md bg-white dark:bg-black border border-[#E5E5E5] dark:border-[#222] p-6 sm:p-8"
+              >
+                <div className="w-12 h-12 bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4">
+                  <AlertTriangle className="w-6 h-6 text-red-500" />
+                </div>
+                <h2 id="confirm-clear-title" className="text-2xl font-serif italic mb-2">Clear Analytics Logs?</h2>
+                <p className="font-mono text-xs text-[#666] dark:text-[#888] mb-6">
+                  This action will wipe all stored event entries locally and remotely. This action cannot be undone.
+                </p>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setShowConfirmClear(false)}
+                    className="btn-secondary flex-1 py-3"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmClear}
+                    className="bg-red-600 hover:bg-red-700 text-white font-mono text-xs uppercase tracking-widest flex-1 py-3 transition-colors"
+                  >
+                    Clear All
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
 
       {/* Interaction Graph Modal */}
-      <AnimatePresence>
-        {showGraph && (
-          <div 
-            role="dialog" 
-            aria-modal="true" 
-            aria-labelledby="graph-modal-title"
-            className="fixed inset-0 z-[60] flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/80 backdrop-blur-md"
-              onClick={() => setShowGraph(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="relative w-full max-w-3xl bg-white dark:bg-black border border-[#E5E5E5] dark:border-[#222] p-6 sm:p-8"
+      {createPortal(
+        <AnimatePresence>
+          {showGraph && (
+            <div 
+              role="dialog" 
+              aria-modal="true" 
+              aria-labelledby="graph-modal-title"
+              className="fixed inset-0 z-[60] flex items-center justify-center p-4"
             >
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 id="graph-modal-title" className="text-2xl sm:text-3xl font-serif italic tracking-tight">User Interaction</h2>
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-[#666] dark:text-[#888] mt-1">Last 14 days</p>
-                </div>
-                <button
-                  onClick={() => setShowGraph(false)}
-                  aria-label="Close interaction graph"
-                  className="p-2 hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              <InteractionGraph />
-
-              <div className="mt-6 flex flex-wrap gap-4">
-                {[
-                  { color: '#22c55e', label: 'Wallet Connect' },
-                  { color: '#3b82f6', label: 'Create Pool' },
-                  { color: '#a855f7', label: 'Join Request' },
-                  { color: '#f59e0b', label: 'Log Expense' },
-                  { color: '#ef4444', label: 'Settle Payment' },
-                  { color: '#06b6d4', label: 'Update Profile' },
-                ].map((item) => (
-                  <div key={item.label} className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-none" style={{ backgroundColor: item.color }} />
-                    <span className="font-mono text-[10px] uppercase tracking-wider text-[#666] dark:text-[#888]">{item.label}</span>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-black/80 backdrop-blur-md"
+                onClick={() => setShowGraph(false)}
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                className="relative w-full max-w-3xl bg-white dark:bg-black border border-[#E5E5E5] dark:border-[#222] p-6 sm:p-8 max-h-[80vh] overflow-y-auto custom-scrollbar"
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 id="graph-modal-title" className="text-2xl sm:text-3xl font-serif italic tracking-tight">User Interaction</h2>
+                    <p className="font-mono text-[10px] uppercase tracking-widest text-[#666] dark:text-[#888] mt-1">Last 14 days</p>
                   </div>
-                ))}
-                <div className="flex items-center gap-2">
-                  <span className="w-4 border-t-2 border-dashed border-[#06b6d4]" />
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-[#666] dark:text-[#888]">Unique Wallets</span>
+                  <button
+                    onClick={() => setShowGraph(false)}
+                    aria-label="Close interaction graph"
+                    className="p-2 hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+
+                <InteractionGraph />
+
+                <div className="mt-6 flex flex-wrap gap-4">
+                  {[
+                    { color: '#22c55e', label: 'Wallet Connect' },
+                    { color: '#3b82f6', label: 'Create Pool' },
+                    { color: '#a855f7', label: 'Join Request' },
+                    { color: '#f59e0b', label: 'Log Expense' },
+                    { color: '#ef4444', label: 'Settle Payment' },
+                    { color: '#06b6d4', label: 'Update Profile' },
+                  ].map((item) => (
+                    <div key={item.label} className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-none" style={{ backgroundColor: item.color }} />
+                      <span className="font-mono text-[10px] uppercase tracking-wider text-[#666] dark:text-[#888]">{item.label}</span>
+                    </div>
+                  ))}
+                  <div className="flex items-center gap-2">
+                    <span className="w-4 border-t-2 border-dashed border-[#06b6d4]" />
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-[#666] dark:text-[#888]">Unique Wallets</span>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }
